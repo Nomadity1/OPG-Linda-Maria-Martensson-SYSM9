@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using CookMaster.Views;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +20,12 @@ namespace CookMaster
         public MainWindow()
         {
             InitializeComponent();
+            // Gömmer Main-fönstret medan LogIn-fönstret visats
+            this.Hide();
+            // Instansierar login-fönstret genom objektet loginWindow
+            LogInWindow loginWindow = new LogInWindow();
+            // ...och visar det
+            loginWindow.Show();
         }
     }
 }

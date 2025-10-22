@@ -10,18 +10,33 @@
     <Grid>
         <!--Definierar layout-->
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.2*"/>
+            <RowDefinition Height="0.25*"/>
             <RowDefinition Height="0.1*"/>
-            <RowDefinition Height="0.6*"/>
+            <RowDefinition Height="0.55*"/>
             <RowDefinition Height="0.1*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.1*"/>
-            <ColumnDefinition Width="0.4*"/>
-            <ColumnDefinition Width="0.4*"/>
-            <ColumnDefinition Width="0.1*"/>
+            <ColumnDefinition Width="0.05*"/>
+            <ColumnDefinition Width="0.5*"/>
+            <ColumnDefinition Width="0.15*"/>
+            <ColumnDefinition Width="0.3*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Column="1" Content="Cook Master" FontSize="48" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
-        <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Content="Welcome to your next great meal!" HorizontalContentAlignment="Center"/>
+        <Label Grid.Row="0" Grid.Column="1" Content="Cook Master" FontSize="48" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
+        <Label Grid.Row="1" Grid.Column="1" Content="Welcome to your next great meal!" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
+        <!--ANVÄNDARVISARE -->
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical">
+            <Label Content="Användare:" Margin="0,5,0,0" />
+            <TextBlock Text="{Binding UserManager.CurrentUser.DisplayName}" Margin="0,5,0,0" />
+            <Label Content="Roll:" Margin="0" />
+            <TextBlock Text="{Binding UserManager.CurrentUser.Role}" Margin="0,5,0,0" />
+            <!--Knappen är kopplad till Command i ViewModel  -->
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Vertical">
+            <Label Content="Status:" Margin="0,5,0,0" />
+            <TextBlock Text="{Binding UserManager.IsAuthenticated}" Margin="0,5,0,0" />
+            <Button Content="Log out" Command="{Binding LogoutCommand}" Width="100" Height="40" Margin="0,10,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Vertical">
+        </StackPanel>
     </Grid>
 </Window>

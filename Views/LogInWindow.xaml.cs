@@ -23,5 +23,11 @@ namespace CookMaster.Views
         {
             InitializeComponent();
         }
+        // Metod för att hantera lösenord 
+        private void PassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UserManagerViewModel vm)
+                vm.Password = Password.Password;
+        }
     }
 }

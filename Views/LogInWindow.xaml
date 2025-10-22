@@ -24,15 +24,14 @@
         <Label Grid.Column="1" Grid.ColumnSpan="2" Content="Cook Master" FontSize="48" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
         <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Content="Find your way to the kitchen:" HorizontalContentAlignment="Center"/>
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" >
-            <Label Content="Username" />
             <!--LOG IN OCH LOG UT - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
-            <!-- Remove StaticResource and bind directly to DataContext -->
+            <Label Content="Username" />
             <TextBox Text="{Binding CurrentUser.UserName}" Width="240" Height="36" Margin="0" />
             <Label Content="Password" />
             <PasswordBox x:Name="PassWord" PasswordChanged="PassWord_PasswordChanged"  Width="240" Height="36" Margin="0" />
-            <Button Content="Log in" Command="{Binding LogInCommand}" Width="100" Height="40" Margin="0, 10, 30, 0" />
-            <TextBlock Text="{Binding ErrorCommand}" />
-            <Button Content="Log out" Command="{Binding LogOutCommand}" Width="100" Height="40" Margin="0, 10, 30, 0" />
+            <Button Content="Log in" Command="{Binding LogInCommand}" Width="100" Height="40" Margin="0, 10, 0, 10" />
+            <TextBlock Text="{Binding ErrorCommand}" Foreground="Red"  />
+            <!--<Button Content="Log out" Command="{Binding LogOutCommand}" Width="100" Height="40" Margin="0, 10, 0, 10" />-->
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" >
             <!--REGISTRERING OCH ÅTERSTÄLLA LÖSENORD - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
