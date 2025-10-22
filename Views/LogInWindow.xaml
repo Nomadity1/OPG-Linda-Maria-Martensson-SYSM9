@@ -5,8 +5,41 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CookMaster.Views"
         mc:Ignorable="d"
-        Title="LogInWindow" Height="450" Width="800">
+        Title="LogInWindow" Height="450" Width="800"  FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
+    <!--Fönster för inloggning, registrering och för att återställa glömt lösenord-->
     <Grid>
-        
+        <!--Definierar layout-->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.2*"/>
+            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="0.6*"/>
+            <RowDefinition Height="0.1*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.1*"/>
+            <ColumnDefinition Width="0.4*"/>
+            <ColumnDefinition Width="0.4*"/>
+            <ColumnDefinition Width="0.1*"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Column="1" Grid.ColumnSpan="2" Content="Cook Master" FontSize="48" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
+        <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Content="Find your way to the kitchen:" HorizontalContentAlignment="Center"/>
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" >
+            <Label Content="Username" />
+            <!--LOG IN OCH LOG UT - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
+            <!-- Remove StaticResource and bind directly to DataContext -->
+            <TextBox Text="{Binding CurrentUser.UserName}" Width="240" Height="36" Margin="0" />
+            <Label Content="Password" />
+            <PasswordBox x:Name="PassWord" PasswordChanged="PassWord_PasswordChanged"  Width="240" Height="36" Margin="0" />
+            <Button Content="Log in" Command="{Binding LogInCommand}" Width="100" Height="40" Margin="0, 10, 30, 0" />
+            <TextBlock Text="{Binding ErrorCommand}" />
+            <Button Content="Log out" Command="{Binding LogOutCommand}" Width="100" Height="40" Margin="0, 10, 30, 0" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" >
+            <!--REGISTRERING OCH ÅTERSTÄLLA LÖSENORD - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
+            <Label Content="Are you new here? " HorizontalAlignment="Center"/>
+            <Button Content="Sign up" Command="{Binding Register}" Width="100" Height="40" Grid.Column="2" Grid.Row="3" VerticalAlignment="Top" Margin="0,0,0,20"  />
+            <Label Content="Forgot your password?" Grid.Column="2" Grid.Row="3" />
+            <Button Content="Reset" Command="{Binding ResetCommand}" Width="100" Height="40" Margin="0, 0, 0, 20" />
+        </StackPanel>
     </Grid>
 </Window>
