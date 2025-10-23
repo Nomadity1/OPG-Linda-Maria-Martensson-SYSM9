@@ -10,8 +10,9 @@ namespace CookMaster.MVVM
     internal class RelayCommand : ICommand
     {
         // KLASS FÖR ATT HANTERA KOMMANDON - KOD KOMMER FRÅN HASSANS FIL PÅ GITHUB 
-        // Klassen RelayCommand tar emot en parameter "execute" som är en metod (Action) som skickas som parameter
-        // canExecute är en funktion som returnerar en bool (true el false)
+        // Klassen RelayCommand tar emot en parameter
+        // Parametern execute är en metod (Action) 
+        // Parametern canExecute är en funktion (Func) som returnerar en bool (true el false)
 
         //PRIVAT FÄLT för referenser till metoder som definierar kommandon och vad som ska göras (=Execute)
         private Action<object> execute;
@@ -36,7 +37,7 @@ namespace CookMaster.MVVM
         {
             return canExecute == null || canExecute(parameter);
         }
-        //METOD som kör den logik som tilldelats via execute-metoden [LMM FRÅGA: Ska det vara canExecute-metoden? Hänvisar detta till metoden ovanför?]
+        //METOD som kör den logik som tilldelats via execute-metoden
         public void Execute(object? parameter)
         {
             execute(parameter);

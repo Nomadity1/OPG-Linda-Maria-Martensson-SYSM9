@@ -29,20 +29,31 @@ namespace CookMaster.Views
             InitializeComponent();
 
             // 1. Ta emot inloggningsuppgifter 
-            // Instansierar UserManager igen, från global variabel i app-resurser
+            // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            // Instansiera login-viewmodellen 
-            // Skapa en ny instans av LoginViewModel och sätt den som DataContext
-            var = new UserManagerViewModel(userManager);
-            DataContext = vm;
-            // 2. Om inloggning genomförs - Stäng Log in (och säkerställ att Main visas igen)
-
+            // Instansierar User Manager ViewModel med objektet userManager
+            var userManagerVW = new UserManagerViewModel(userManager); 
+            // ...och anger userManagerViewModel-objektet som datakontext
+            DataContext = userManagerVW;
+            // Anropar LogInSuccess-eventet i UserManagerViewModel
+            // som tilldelar objektet det utfall som aktiveras 
+            // s = sender (i det här fallet objektet userManagerVM)
+            // e = eventets data (det som händer i klassen)
+            // += betyder att vi prenumererar på ett event (t ex kopplar en metod till ett event,
+            // som körs varje gång eventet triggas)
+            userManagerVW.LogInSuccess += (s, e) =>
+            {
+                DialogResult = true; // meddelar framgång 
+                Close(); // Stänger login-fönster
+            };
+            // Påminner programmet om vilken datakontexten är
+            DataContext = userManagerVW;
         }
-        // Metod för att hantera lösenord 
-        private void PassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        // METOD för att ta emot lösenord från passwordbox i login-vyn
+        private void Pwd_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (DataContext is UserManagerViewModel vm)
-                vm.Password = Password.Password;
+            if (DataContext is UserManagerViewModel userManagerVW)
+                userManagerVW.Password = PassWord.Password;
         }
     }
 }
