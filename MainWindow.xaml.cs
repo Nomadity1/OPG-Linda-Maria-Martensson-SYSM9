@@ -1,4 +1,6 @@
-﻿using CookMaster.Views;
+﻿using CookMaster.Managers;
+using CookMaster.ViewModels;
+using CookMaster.Views;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,11 +22,19 @@ namespace CookMaster
         public MainWindow()
         {
             InitializeComponent();
-            // Gömmer Main-fönstret medan LogIn-fönstret visats
+
+            // 1. Vill visa inloggad användare i hela projektet
+            // Instansierar UserManager genom global UserManager i app-resurser 
+            UserManager userManager = (UserManager)Application.Current.Resources["UserManager"];
+            // Instansierar Main-viewmodel med objektet userManager som parameter 
+            MainWindowViewModel mainViewModel = new MainWindowViewModel(userManager);
+            // Anger datakontexten för Main viewmodel 
+            DataContext = mainViewModel; 
+
+            // 2. Vill gömma Main-fönstret medan LogIn-fönstret visas
             this.Hide();
-            // Instansierar login-fönstret genom objektet loginWindow
+            // Instansierar och visar login-fönstret genom objektet loginWindow
             LogInWindow loginWindow = new LogInWindow();
-            // ...och visar det
             loginWindow.Show();
         }
     }

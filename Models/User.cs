@@ -8,20 +8,20 @@ namespace CookMaster.Models
 {
     internal class User
     {
-        // PUBLIKA EGENSKAPER som definierar en enskild användare 
-        // Auto-implementerade 
+        // Auto-implementerade PUBLIKA EGENSKAPER som definierar en enskild användare 
         public string Username { get; set; }
         public string DisplayName { get; set; }
         public string Role { get; set; }
         public string Password { get; set; }
-        // KONSTRUKTOR
-        //public User(string UserName, string DisplayName, string Role, string PassWord)
-        //{
-        //    this.Username = UserName;
-        //    this.DisplayName = DisplayName;
-        //    this.Role = Role;
-        //    this.Password = PassWord;
-        //}
-        // METOD - ingen metod? 
+        // KONSTRUKTOR - måste ha konstruktor för att kunna implementera barnklassen AdminUser? 
+        public User(string UserName, string DisplayName, string Role, string PassWord)
+        {
+            this.Username = UserName;
+            this.DisplayName = DisplayName;
+            this.Role = Role;
+            this.Password = PassWord;
+        }
+        // METOD för att validera lösenord vid skapande av användare 
+
     }
 }
