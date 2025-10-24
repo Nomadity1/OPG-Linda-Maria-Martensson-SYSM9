@@ -14,15 +14,15 @@ namespace CookMaster.Models
     {
         // FÅR ATTRIBUT FRÅN FÖRÄLDRAKLASS (User) 
         // KONSTRUKTOR anropar föräldraklassens konstruktor (vilket då kräver att User har en konstruktor!) 
-        public AdminUser(string UserName, string DisplayName, string EmailAddress, string Role, string PassWord) 
-            : base(UserName, DisplayName, EmailAddress, Role, PassWord)
-        {
-            this.Username = UserName;
-            this.DisplayName = DisplayName;
-            this.EmailAddress = EmailAddress;
-            this.Role = Role;
-            this.Password = PassWord;
-        }
+        //public AdminUser(string UserName, string DisplayName, string EmailAddress, string Role, string PassWord) 
+        //    : base(UserName, DisplayName, EmailAddress, Role, PassWord)
+        //{
+        //    this.Username = UserName;
+        //    this.DisplayName = DisplayName;
+        //    this.EmailAddress = EmailAddress;
+        //    this.Role = Role;
+        //    this.Password = PassWord;
+        //}
         // METODER 
         public void DisplayAllRecipes()
         {
