@@ -9,7 +9,7 @@ namespace CookMaster.MVVM
 {
     internal class RelayCommand : ICommand
     {
-        // KLASS FÖR ATT HANTERA KOMMANDON - KOD KOMMER FRÅN HASSANS FIL PÅ GITHUB 
+        // BASKLASS FÖR ATT DEFINIERA KOMMANDON - KOD KOMMER FRÅN HASSANS FIL PÅ GITHUB 
         // Klassen RelayCommand tar emot en parameter
         // Parametern execute är en metod (Action) 
         // Parametern canExecute är en funktion (Func) som returnerar en bool (true el false)

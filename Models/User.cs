@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CookMaster.Models
 {
-    internal class User
+    public class User
     {
         // Auto-implementerade PUBLIKA EGENSKAPER som definierar en enskild användare 
         public string Username { get; set; }

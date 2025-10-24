@@ -19,7 +19,7 @@ namespace CookMaster.ViewModels
     // Ska signalera till appen när användare är inloggad (via event) 
 
     // INSTRUKTIONER: SKA HANTERA INLOGGAD ANVÄNDARE, DEFINIERA CURRENT USER, samt METODER OCH KOMMANDON
-    // FÖR INLOGGNING och UTLOGGNING
+    // FÖR INLOGGNING och UTLOGGNING, REGISTRERING 
 
     // OBS: VIEW MODELS ska inte känna till VIEWS => ingen kod för att t ex öppna eller stänga fönster här 
     // KOMMANDON OCH METODER - Samarbetar med UserManagerklassen i Managersmappen ("Frågar UserManager om mallar")
@@ -28,21 +28,32 @@ namespace CookMaster.ViewModels
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _username;
+        private string _email;
         private string _password;
         private string _error;
 
-        // PUBLIKA EGENSKAPER 
-        public UserManagerViewModel(UserManager userManager)
+        // PUBLIKA EGENSKAPER - inkl egenskaper för kommandon 
+        public UserManagerViewModel(UserManager userManager) // Upprättar samarbete med UserManager
         {
             _userManager = userManager;
             // Definierar kommando för inloggning
             LoginCommand = new RelayCommand(execute => Login(), canExecute => CanLogin());
+            //    // Definierar kommando för registrering
+            //    RegisterCommand = new RelayCommand(execute => Register(), canExecute => IsRegistered());
+            //    // Definierar kommando för lösenordsbyte
+            //    ResetPasswordCommand = new RelayCommand(execute => ResetPassword(), canExecute => CanResetPassword());
         }
+
         // fort Publ Egensk med mera effektiv deklaration 
         public string Username
         {
             get => _username;
             set { _username = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+        }
+        public string Email
+        {
+            get => _email;
+            set { _email = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
         }
         public string Password
         {
@@ -56,57 +67,52 @@ namespace CookMaster.ViewModels
         }
 
         // DEFINIERAR KOMMANDON 
-        // SKRIVA COMMANDS: 1. Definiera metoden/funktionen, 2. Definiera kommando mha RelayCommand (addCommand), 3. Koppla metoden till kommandot
-        // PUBLIK EGENSKAP för kommando via ICommand i RelayCommandManager
+            // SKRIVA COMMANDS: 1. Definiera metoden/funktionen, 2. Definiera kommando mha RelayCommand (addCommand), 3. Koppla metoden till kommandot
+        // LOG IN-KOMMANDO via ICommand i RelayCommandManager
         public ICommand LoginCommand { get; }
-        // PUBLIK EGENSKAP med villkor (tomma fält = inaktiverad knapp) 
+
+        // METOD för att kunna visa inloggningsstatus
         private bool CanLogin() =>
             !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
+  
         // METOD för inloggning 
         private void Login()
         {
-            if (_userManager.Login(Username, Password))
-                //    Om inloggningen lyckas:
-                //    → "OnLoginSuccess" är ett event
-                //    → Invoke "talar" till alla som lyssnar på det eventet (i det här fallet: LoginWindow)
-                //    → (this, EventArgs.Empty) skickar med en referens till vem som skickade eventet + tomma eventdata
+            if (_userManager.Login(Username, Password)) // Kollar matchning genom att anropa metod i UserManager
+                // Om inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
+                // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
+                // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
+                // this = Referens till den aktuella instandsen av klass som gör anropet
+                // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med evenetet 
                 LogInSuccess?.Invoke(this, System.EventArgs.Empty);
             else
                 Error = "Fel användarnamn eller lösenord.";
         }
-        //public event Action<User>? LogInSuccess;
-        //// Metod
-        //private void LogInUser()
+        // REGISTER-KOMMANDO via ICommand i RelayCommandManager
+        public ICommand RegisterCommand { get; }
+        //// METOD för att kunna visa om registering lyckats - BEHÖVS VÄL INTE? 
+        //private bool IsRegistered() =>
+        //    ValidateEmailAddress()
+        // METOD för registrering 
+        //private void Register()
         //{
-        //    //UserList.Add(new User { UserName = "...", Password = "...", });
+        //    if (_user.ValidateEmailAddress)
         //}
-        // CONSTRUCTOR 
+        // REGISTER-KOMMANDO via ICommand i RelayCommandManager
+        public ICommand ResetPasswordCommand { get; }
+        // METOD för registrering 
+        // METOD för att kunna visa om lösenord ändrats
+        private bool CanResetPassword() =>
+            !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
+        private void ResetPassword()
+        {
 
+        }
+        // EVENT som Login-fönstret "prenumererar" på
+        // När login lyckas, körs alla metoder som är kopplade till detta event.
+        public event System.EventHandler LogInSuccess;
 
-        //        •	Kommandon:
-        //o RelayCommand LogInCommand
-        //o   RelayCommand RegisterCommand
-        //o RelayCommand ForgotPasswordCommand
-        //•	Event:
-
-        //// METOD för att kunna visa inloggningsstatus
-        //public bool IsAuthenticated => CurrentUser != null;
-
-        //// Metod för att lägga till användare i lista 
-        //private void CreateDefaultUsers()
-        //{
-        //    _userlist.Add(new User { Username = "LindaMaria", DisplayName = "Administratör", Role = "admin", Password = "0000" });
-        //    //_userlist.Add(new User{Username = "Elsa", DisplayName = "Elsa", Role = "member", Password = "0001" });
-        //    //_userlist.Add(new User{Username = "Elvis", DisplayName = "Elvis", Role = "member", Password = "0002" });
-        //}
-
-        //// METOD för att logga ut 
-        //public void Logout()
-        //{
-        //    CurrentUser = null;
-        //}
-        public event System.EventHandler LogInSuccess; 
-
+        // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null)
         {

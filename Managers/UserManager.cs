@@ -39,7 +39,6 @@ namespace CookMaster.Managers
                 OnPropertyChanged(nameof(IsAuthenticated)); // för att visa status 
             }
         }
-
         // Metod för att lägga till en enda användare i lista, kan sen användas för att lägga till fler användare 
         private void CreateDefaultUser()
         {
@@ -78,8 +77,22 @@ namespace CookMaster.Managers
             // Tilldelar currentuserr värdet null 
             CurrentUser = null;
         }
+        // METOD för att spara ny användare
+        //private void AddUser(User newUser)
+        //{
 
-        // Generellt event och generell metod för att möjliggöra binding 
+        //    User newUser = new User({ Username }, 
+        //    newUser.EmailAddress; 
+        //        string UserName, string DisplayName, string EmailAddress, string Role, string PassWord)
+
+        //    User user = new User("LindaMaria", "Administratör", "lima@live.se", "admin", "0000");
+        //    _userlist.Add(user);
+        //    // Lägger till ytterligare två användare
+        //    _userlist.Add(new User("Elsa", "Elsa", "elsa@live.se", "member", "0001"));
+        //    _userlist.Add(new User("Elvis", "Elvis", "elvis@live.se", "member", "0002"));
+        //}
+
+        // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null)
         {
