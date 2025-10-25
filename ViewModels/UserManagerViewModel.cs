@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Mail;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,15 +29,22 @@ namespace CookMaster.ViewModels
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _username;
-        //private string _email;
         private string _password;
         private string _error;
+
+        // EVENT som Login-fönstret "prenumererar" på
+        // När login lyckas, körs alla metoder som är kopplade till detta event.
+        public event System.EventHandler? LogInSuccess; // Make event nullable
 
         // PUBLIKA EGENSKAPER - inkl egenskaper för kommandon 
         public UserManagerViewModel(UserManager userManager) // Upprättar samarbete med UserManager
         {
             // Tilldelar värde/parameter
             _userManager = userManager;
+            _username = string.Empty; // Initialize to empty string
+            _password = string.Empty; // Initialize to empty string
+            _error = string.Empty;    // Initialize to empty string
+
             // Definierar kommando för inloggning
             LogInCommand = new RelayCommand(execute => Login(), canExecute => CanLogin());
             //    // Definierar kommando för registrering
@@ -72,7 +80,7 @@ namespace CookMaster.ViewModels
         // LOG IN-KOMMANDO via ICommand i RelayCommandManager
         public ICommand LogInCommand { get; }
 
-        // METOD för att kunna visa inloggningsstatus
+        // METOD för att aktivera inloggningsknapp
         private bool CanLogin() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password);
   
@@ -89,34 +97,42 @@ namespace CookMaster.ViewModels
             else
                 Error = "Fel användarnamn eller lösenord";
         }
-        // REGISTER-KOMMANDO via ICommand i RelayCommandManager
-        //public ICommand RegisterCommand { get; }
-        //// METOD för att kunna visa om registering lyckats - BEHÖVS VÄL INTE? 
-        //private bool IsRegistered() =>
-        //    ValidateEmailAddress()
-        // METOD för registrering 
-        //private void Register()
-        //{
-        //    if (_user.ValidateEmailAddress)
-        //}
-        // REGISTER-KOMMANDO via ICommand i RelayCommandManager
-        //public ICommand ResetPasswordCommand { get; }
-        // METOD för registrering 
-        // METOD för att kunna visa om lösenord ändrats
-        //private bool CanResetPassword() =>
-        //    !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
-        //private void ResetPassword()
-        //{
+        // REGISTER-KOMMANDO via ICommand in RelayCommandManager
+        public ICommand RegisterCommand { get; }
+        // METOD för registering 
+        private void Register()
+        {
 
-        //}
-        
-        // EVENT som Login-fönstret "prenumererar" på
-        // När login lyckas, körs alla metoder som är kopplade till detta event.
-        public event System.EventHandler LogInSuccess;
+            if (_userManager.ValidateUsername(UserName) && 
+                _userManager.ValidatePassword(Password) && 
+                _userManager.ValidateEmailAddress(EmailAddress) && 
+                -userManager.ValidateRepeatedPassWord(PasswordRepeat)) 
+
+            if ()
+        }
+
+        // REGISTER-KOMMANDO via ICommand i RelayCommandManager
+        public ICommand ResetPasswordCommand { get; }
+
+        // METOD för att ändra lösenord 
+        private void ResetPassword()
+        {
+
+        }
+
+        // TESTPIN-KOMMANDO via ICommand in RelayCommandManager
+        public ICommand TestPinCommand { get; }
+
+        // METOD för att uppdatera glömt lösenord med hjälp av pinkod
+        public void TestPin()
+        {
+
+        }
+
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null)
+        private void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

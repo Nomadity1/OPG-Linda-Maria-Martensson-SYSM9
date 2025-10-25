@@ -5,38 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CookMaster.Views" xmlns:managers="clr-namespace:CookMaster.Managers" xmlns:viewmodels="clr-namespace:CookMaster.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:UserManagerViewModel}"
         mc:Ignorable="d"
-        Title="LogInWindow" Height="260" Width="500"  FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
-    <!--Fönster för inloggning, registrering och för att återställa glömt lösenord-->
+        Title="LogInWindow" Height="260" Width="500" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
+    <!--Fönster för inloggning samt knapp till registrering och återställning av lösenord-->
     <Grid>
         <!--Definierar layout-->
         <Grid.RowDefinitions>
             <RowDefinition Height="0.17*"/>
             <RowDefinition Height="0.12*"/>
-            <RowDefinition Height="0.65*"/>
-            <RowDefinition Height="0.02*"/>
+            <RowDefinition Height="0.7*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.02*"/>
             <ColumnDefinition Width="0.4*"/>
             <ColumnDefinition Width="0.4*"/>
-            <ColumnDefinition Width="0.02*"/>
+            <ColumnDefinition Width="0.4*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Column="1" Grid.ColumnSpan="2" Content="Cook Master" FontSize="34" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
-        <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Content="Find your way to the kitchen:" HorizontalContentAlignment="Center"/>
-        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" >
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Content="Cook Master" FontSize="34" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
+        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="Find your way to the kitchen:" HorizontalContentAlignment="Center"/>
+        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center" >
             <!--LOG IN OCH LOG UT - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
-            <Label Content="Username" />
+            <TextBlock Text="Username" />
             <TextBox Text="{Binding UserName, Mode=TwoWay}" Width="240" Height="26" Margin="0" />
-            <Label Content="Password" />
+            <TextBlock Text="Password" />
             <PasswordBox x:Name="PassWord" PasswordChanged="PassWord_PasswordChanged"  Width="240" Height="26" Margin="0" />
             <Button Content="Log in" Command="{Binding LogInCommand}" Width="60" Height="26" Margin="0, 5, 0, 0" />
             <TextBlock Text="{Binding Error}" Foreground="Red"  />
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" >
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
             <!--REGISTRERING OCH ÅTERSTÄLLA LÖSENORD - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
-            <Label Content="Are you new here? " HorizontalAlignment="Center"/>
+            <TextBlock Text="Are you new here? " HorizontalAlignment="Center"  VerticalAlignment="Center"/>
             <Button Content="Sign up" Command="{Binding RegisterCommand}" Width="60" Height="26" Grid.Column="2" Grid.Row="3" VerticalAlignment="Top" Margin="0,0,0,20"  />
-            <Label Content="Forgot your password?" Grid.Column="2" Grid.Row="3" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" >
+            <TextBlock Text="Forgot your password?" Grid.Column="2" Grid.Row="3" />
             <Button Content="Reset" Command="{Binding ResetPasswordCommand}" Width="60" Height="26" Margin="0, 0, 0, 20" />
         </StackPanel>
     </Grid>
