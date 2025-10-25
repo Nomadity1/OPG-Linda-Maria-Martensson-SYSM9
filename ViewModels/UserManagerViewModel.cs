@@ -28,16 +28,17 @@ namespace CookMaster.ViewModels
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _username;
-        private string _email;
+        //private string _email;
         private string _password;
         private string _error;
 
         // PUBLIKA EGENSKAPER - inkl egenskaper för kommandon 
         public UserManagerViewModel(UserManager userManager) // Upprättar samarbete med UserManager
         {
+            // Tilldelar värde/parameter
             _userManager = userManager;
             // Definierar kommando för inloggning
-            LoginCommand = new RelayCommand(execute => Login(), canExecute => CanLogin());
+            LogInCommand = new RelayCommand(execute => Login(), canExecute => CanLogin());
             //    // Definierar kommando för registrering
             //    RegisterCommand = new RelayCommand(execute => Register(), canExecute => IsRegistered());
             //    // Definierar kommando för lösenordsbyte
@@ -45,16 +46,16 @@ namespace CookMaster.ViewModels
         }
 
         // fort Publ Egensk med mera effektiv deklaration 
-        public string Username
+        public string UserName
         {
             get => _username;
             set { _username = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
         }
-        public string Email
-        {
-            get => _email;
-            set { _email = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-        }
+        //public string Email
+        //{
+        //    get => _email;
+        //    set { _email = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+        //}
         public string Password
         {
             get => _password;
@@ -69,16 +70,16 @@ namespace CookMaster.ViewModels
         // DEFINIERAR KOMMANDON 
             // SKRIVA COMMANDS: 1. Definiera metoden/funktionen, 2. Definiera kommando mha RelayCommand (addCommand), 3. Koppla metoden till kommandot
         // LOG IN-KOMMANDO via ICommand i RelayCommandManager
-        public ICommand LoginCommand { get; }
+        public ICommand LogInCommand { get; }
 
         // METOD för att kunna visa inloggningsstatus
         private bool CanLogin() =>
-            !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
+            !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password);
   
         // METOD för inloggning 
         private void Login()
         {
-            if (_userManager.Login(Username, Password)) // Kollar matchning genom att anropa metod i UserManager
+            if (_userManager.Login(UserName, Password)) // Kollar matchning genom att anropa metod i UserManager
                 // Om inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
                 // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
                 // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
@@ -86,10 +87,10 @@ namespace CookMaster.ViewModels
                 // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med evenetet 
                 LogInSuccess?.Invoke(this, System.EventArgs.Empty);
             else
-                Error = "Fel användarnamn eller lösenord.";
+                Error = "Fel användarnamn eller lösenord";
         }
         // REGISTER-KOMMANDO via ICommand i RelayCommandManager
-        public ICommand RegisterCommand { get; }
+        //public ICommand RegisterCommand { get; }
         //// METOD för att kunna visa om registering lyckats - BEHÖVS VÄL INTE? 
         //private bool IsRegistered() =>
         //    ValidateEmailAddress()
@@ -99,21 +100,22 @@ namespace CookMaster.ViewModels
         //    if (_user.ValidateEmailAddress)
         //}
         // REGISTER-KOMMANDO via ICommand i RelayCommandManager
-        public ICommand ResetPasswordCommand { get; }
+        //public ICommand ResetPasswordCommand { get; }
         // METOD för registrering 
         // METOD för att kunna visa om lösenord ändrats
-        private bool CanResetPassword() =>
-            !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
-        private void ResetPassword()
-        {
+        //private bool CanResetPassword() =>
+        //    !string.IsNullOrWhiteSpace(Username) && !string.IsNullOrWhiteSpace(Password);
+        //private void ResetPassword()
+        //{
 
-        }
+        //}
+        
         // EVENT som Login-fönstret "prenumererar" på
         // När login lyckas, körs alla metoder som är kopplade till detta event.
         public event System.EventHandler LogInSuccess;
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
