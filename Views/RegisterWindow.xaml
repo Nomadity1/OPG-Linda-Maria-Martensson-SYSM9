@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CookMaster.Views"
         mc:Ignorable="d"
-        Title="RegistrationWindow" Height="260" Width="500" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
+        Title="RegistrationWindow" Height="260" Width="500" FontFamily="Maiandra GD" FontSize="12" Background="PaleTurquoise">
     <!--Fönster för registrering-->
     <Grid>
         <!--Definierar layout-->
@@ -15,46 +15,45 @@
                 <RowDefinition Height="0.12*"/>
                 <RowDefinition Height="0.65*"/>
                 <RowDefinition Height="0.02*"/>-->
-                <RowDefinition Height="0.17*"/>
-            <RowDefinition Height="0.12*"/>
-            <RowDefinition Height="0.5*"/>
-            <RowDefinition Height="0.2*"/>
+            <RowDefinition Height="0.17*"/>
+            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.18*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.3*"/>
-            <ColumnDefinition Width="0.4*"/>
-            <ColumnDefinition Width="0.3*"/>
+            <ColumnDefinition Width="0.33*"/>
+            <ColumnDefinition Width="0.33*"/>
+            <ColumnDefinition Width="0.33*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="34" HorizontalAlignment="Center" 
+        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="30" HorizontalAlignment="Center" 
                VerticalContentAlignment="Center" />
         <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Content="Please enter your information:" 
                HorizontalContentAlignment="Center"/>
-        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical" >
             <!--REGISTRERING OCH ÅTERSTÄLLA LÖSENORD - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
-            <TextBlock Text="Username*" FontSize="12" Width="100" Margin="5"/>
-            <TextBlock Text="New password*" FontSize="12" Width="100" Margin="5" />
-            <TextBlock Text="Repeat password*" FontSize="12" Width="100" Margin="5" />
-            <!--Utveckla listbox för val av land-->
-            <!--<ListBox ItemsSource="" />-->
-        </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" >
-            <TextBox Text="{Binding UserName, Mode=TwoWay}" Width="100" Height="20" Margin="5" FontSize="12" HorizontalAlignment="Left" />
-            <PasswordBox x:Name="NewPassWord" PasswordChanged="NewPassWord_PasswordChanged" Margin="5" FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
-            <PasswordBox x:Name="RepeatPassWord" PasswordChanged="RepeatPassWord_PasswordChanged" Margin="5" FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
-            <TextBlock Text="{Binding Error}" Foreground="Red" FontSize="12" Margin="10" />
-            <TextBlock Text="*) Your username and password should have 4-8 characters. The password require 1 special character, 1 digit, 1 upper and 1 lowercase letter.)" FontSize="10" TextWrapping="Wrap" Width="160" />
-        </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
-            <Button Content="Register" Command="{Binding RegisterCommand}" FontSize="12" Width="60" Height="22" Margin="10" />
-        </StackPanel>
-        <StackPanel Grid.Row="3" Grid.Column="0" >
-        </StackPanel>
-        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" >
-            <TextBlock Text="To reset password, insert pin sent to your e-mail." FontSize="12" TextWrapping="Wrap" Width="140" Margin="0,20,0,0" />
-        </StackPanel>
-        <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" >
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Username*" FontSize="12" Width="100" />
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="E-mail address*" FontSize="12" Width="100" />
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="New password*" FontSize="12" Width="100" />
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Repeat password*" FontSize="12" Width="100" />
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Select your country" FontSize="12" Width="100" />
+            
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding UserName, Mode=TwoWay}" Width="100" Height="20" FontSize="12" HorizontalAlignment="Left" />
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Email, Mode=TwoWay}" Width="100" Height="20" FontSize="12" HorizontalAlignment="Left" />
+        <PasswordBox Grid.Row="4" Grid.Column="1" x:Name="NewPassWord" PasswordChanged="NewPassWord_PasswordChanged" FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
+        <PasswordBox Grid.Row="5" Grid.Column="1" x:Name="RepeatPassWord" PasswordChanged="RepeatPassWord_PasswordChanged" FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
+        <ListBox Grid.Row="6" Grid.Column="1" ItemsSource="{Binding CountryList}" DisplayMemberPath="Country" FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
+
+        <Button Grid.Row="2" Grid.Column="2"  Content="Register" Command="{Binding RegisterCommand}" FontSize="12" Width="60" Height="22" />
+        <TextBlock Grid.Row="3" Grid.RowSpan="3" Grid.Column="2" Text="*) Your username and password should have 4-8 characters. The password require 1 special character, 1 digit, 1 upper and 1 lowercase letter.)" FontSize="10" TextWrapping="Wrap" Width="150" />
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="To reset password, insert pin sent to your e-mail. =>" FontSize="12" TextWrapping="Wrap" Width="150" Margin="5" />
+        
+        <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" >
             <TextBox Text="{Binding TestPinCommand}" Width="60" Height="22" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" />
             <Button Content="Reset" Command="{Binding ResetPasswordCommand}" FontSize="12" Width="60" Height="22" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" />
         </StackPanel>
+        <TextBlock Grid.Row="5" Grid.Column="2" Grid.RowSpan="2"  Text="{Binding Error}" Foreground="Red" FontSize="12" Margin="10" />
     </Grid>
 </Window>

@@ -29,28 +29,41 @@ namespace CookMaster.ViewModels
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _username;
+        private string _email;
         private string _password;
+        private string _passwordRepeat;
         private string _error;
+        private int _pin; // Hittepå-pinkod för att återställa glömt lösenord 
 
         // EVENT som Login-fönstret "prenumererar" på
         // När login lyckas, körs alla metoder som är kopplade till detta event.
         public event System.EventHandler? LogInSuccess; // Make event nullable
+
+        // EVENT som Registrerings-fönstret "prenumererar" på
+        // När registrering lyckas, körs de metoder som är kopplade till detta event.
+        public event System.EventHandler? RegistrationSuccess; // Make event nullable
+
+        // EVENT som Reset Password-fönstret "prenumererar" på
+        // När lösenordsåterställning lyckas, körs de metoder som är kopplade till detta event.
+        public event System.EventHandler? ResetPasswordSuccess; // Make event nullable
 
         // PUBLIKA EGENSKAPER - inkl egenskaper för kommandon 
         public UserManagerViewModel(UserManager userManager) // Upprättar samarbete med UserManager
         {
             // Tilldelar värde/parameter
             _userManager = userManager;
-            _username = string.Empty; // Initialize to empty string
-            _password = string.Empty; // Initialize to empty string
-            _error = string.Empty;    // Initialize to empty string
-
+            _username = string.Empty; // Initierar med tom string
+            _email = string.Empty; // Initierar med tom string
+            _password = string.Empty; // Initierar med tom string
+            _passwordRepeat = string.Empty; // Initierar med tom string
+            _error = string.Empty; // Initierar med tom string
+            _pin = 0123; // Initierar med låtsaspin
             // Definierar kommando för inloggning
             LogInCommand = new RelayCommand(execute => Login(), canExecute => CanLogin());
-            //    // Definierar kommando för registrering
-            //    RegisterCommand = new RelayCommand(execute => Register(), canExecute => IsRegistered());
-            //    // Definierar kommando för lösenordsbyte
-            //    ResetPasswordCommand = new RelayCommand(execute => ResetPassword(), canExecute => CanResetPassword());
+            // Definierar kommando för registrering
+            RegisterCommand = new RelayCommand(execute => Register(), canExecute => CanRegister());
+            // Definierar kommando för lösenordsåterställning
+            ResetPasswordCommand = new RelayCommand(execute => ResetPassword(), canExecute => CanResetPassword());
         }
 
         // fort Publ Egensk med mera effektiv deklaration 
@@ -59,20 +72,30 @@ namespace CookMaster.ViewModels
             get => _username;
             set { _username = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
         }
-        //public string Email
-        //{
-        //    get => _email;
-        //    set { _email = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-        //}
+        public string Email
+        {
+            get => _email;
+            set { _email = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+        }
         public string Password
         {
             get => _password;
             set { _password = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
         }
+        public string PasswordRepeat
+        {
+            get => _passwordRepeat;
+            set { _passwordRepeat = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+        }
         public string Error
         {
             get => _error;
             set { _error = value; OnPropertyChanged(); }
+        }
+        public int Pin
+        {
+            get => _pin;
+            set { _pin = value; OnPropertyChanged(); }
         }
 
         // DEFINIERAR KOMMANDON 
@@ -84,7 +107,7 @@ namespace CookMaster.ViewModels
         private bool CanLogin() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password);
   
-        // METOD för inloggning 
+        // METOD för inloggningskommando
         private void Login()
         {
             if (_userManager.Login(UserName, Password)) // Kollar matchning genom att anropa metod i UserManager
@@ -99,36 +122,125 @@ namespace CookMaster.ViewModels
         }
         // REGISTER-KOMMANDO via ICommand in RelayCommandManager
         public ICommand RegisterCommand { get; }
-        // METOD för registering 
+
+        // METOD för att aktivera registreringssknapp
+        private bool CanRegister() =>
+            !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(PasswordRepeat);
+
+        // METOD för registeringskommando 
         private void Register()
         {
-
-            if (_userManager.ValidateUsername(UserName) && 
-                _userManager.ValidatePassword(Password) && 
-                _userManager.ValidateEmailAddress(EmailAddress) && 
-                -userManager.ValidateRepeatedPassWord(PasswordRepeat)) 
-
-            if ()
+            // .... code to come... 
+            if (Password != PasswordRepeat)
+            {
+                Error = "Lösenorden matchar inte";
+                return; // Avsluta
+            }
+            // Instansiera nytt användarobjekt 
+            var newUser = new User
+            {
+                UserName = UserName,
+                EmailAddress = Email,
+                Password = Password,
+                DisplayName = UserName, // Du kan senare låta användaren välja eget visningsnamn
+                Role = "Member",
+                PinCode = "0000" // Lägga till randomisering ör i ett senare projekt  
+            };
+            // Anropa Register-metoden i UserManager
+            bool success = _userManager.Register(newUser);
+            if (success)
+            {
+                // OM lyckad registering => Trigga event! 
+                RegistrationSuccess?.Invoke(this, System.EventArgs.Empty);
+            }
+            else
+            {
+                // ANNARS visa felmeddelande
+                Error = "Användarnamn eller epost finns redan registrerad";
+            }
         }
 
-        // REGISTER-KOMMANDO via ICommand i RelayCommandManager
+        // RESET PASSWORD-KOMMANDO via ICommand i RelayCommandManager
         public ICommand ResetPasswordCommand { get; }
+        // METOD för att aktivera registreringssknapp - UPPDATERA
+        private bool CanResetPassword() =>
+            !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(PasswordRepeat);
 
         // METOD för att ändra lösenord 
         private void ResetPassword()
         {
-
+            // .... code to come... 
         }
 
         // TESTPIN-KOMMANDO via ICommand in RelayCommandManager
         public ICommand TestPinCommand { get; }
 
-        // METOD för att uppdatera glömt lösenord med hjälp av pinkod
+        // METOD för att uppdatera glömt lösenord med hjälp av pinkod  - UPPDATERA
         public void TestPin()
         {
-
+            // .... code to come... 
         }
 
+        // METOD för att validera användarnamn vid skapande av användare 
+        public (bool success, string message) ValidateUsername(string username)
+        {
+            bool IsValidUsername = (username.Length > 3 && username.Length < 9) ? true : false; // Ternary sats istället för IF-sats för att kontrollera om e-postadressen är giltig
+            string message = IsValidUsername ? "Användarnamnet har sparats" : "Användarnamnet ska vara mellan 4 och 8 bokstäver eller tecken långt";
+            if (IsValidUsername)
+            {
+                string UserName = username;
+                return (true, message);
+            }
+            else
+            {
+                return (false, message);
+            }
+        }
+
+        // METOD för att validera e-postadress vid skapande av användare 
+        public (bool success, string message) ValidateEmailAddress(string email)
+        {
+            bool IsValidEmailAddress = (email.Contains("@") && email.IndexOf('.') > email.IndexOf('@')) ? true : false; // Ternary sats istället för IF-sats för att kontrollera om e-postadressen är giltig
+            string message = IsValidEmailAddress ? "E-postadressen har sparats" : "E-postadressen är ogiltig. Försök igen.";
+            if (IsValidEmailAddress)
+            {
+                string EmailAddress = email;
+                return (true, message);
+            }
+            else
+            {
+                return (false, message);
+            }
+        }
+
+        // METOD för att validera lösenord vid skapande av användare eller vid byte av lösenord
+        public (bool success, string message) ValidatePassword(string password, string passwordRepeat)
+        {
+            // villkor för att validera nytt lösenord
+            string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
+            bool IsValidPassword = (password.Length > 3 && password.Length < 9 && password.Any(char.IsUpper) && password.Any(char.IsLower)
+                    && password.Any(char.IsDigit) && password.Contains(specialCharacters)) ? true : false; // Ternary sats istället för IF-sats
+            string message = IsValidPassword ? "Lösenordet har sparats" : "Lösenordet ska innehålla minst 4 och max 8 bokstäver inklusive ett specialtecken och en siffra";
+            if (IsValidPassword)
+            {
+
+                bool IsPasswordMatch = (password == passwordRepeat) ? true : false; // Ternary sats istället för IF-sats
+                message = IsPasswordMatch ? "Lösenordet har sparats" : "Lösenorden matchar inte varandra";
+                if (IsPasswordMatch)
+                {
+                    string Password = passwordRepeat;
+                    return (true, message);
+                }
+                else
+                {
+                    return (false, message);
+                }
+            }
+            else
+            {
+                return (false, message);
+            }
+        }
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
