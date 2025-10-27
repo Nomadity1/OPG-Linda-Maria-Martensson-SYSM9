@@ -63,7 +63,9 @@ namespace CookMaster.ViewModels
             // Definierar kommando för registrering
             RegisterCommand = new RelayCommand(execute => Register(), canExecute => CanRegister());
             // Definierar kommando för lösenordsåterställning
-            ResetPasswordCommand = new RelayCommand(execute => ResetPassword(), canExecute => CanResetPassword());
+            RequestPinCommand = new RelayCommand(execute => RequestPin(), canExecute => CanRequestPin());
+            // Definierar kommando för att ändra lösenord
+            ChangePasswordCommand = new RelayCommand(execute => ChangePassword(), canExecute => CanChangePassword());
         }
 
         // fort Publ Egensk med mera effektiv deklaration 
@@ -110,6 +112,7 @@ namespace CookMaster.ViewModels
         // METOD för inloggningskommando
         private void Login()
         {
+            // Anropar Login-metod i UserManager
             if (_userManager.Login(UserName, Password)) // Kollar matchning genom att anropa metod i UserManager
                 // Om inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
                 // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
@@ -142,15 +145,15 @@ namespace CookMaster.ViewModels
                 UserName = UserName,
                 EmailAddress = Email,
                 Password = Password,
-                DisplayName = UserName, // Du kan senare låta användaren välja eget visningsnamn
+                DisplayName = UserName, // Kan senare eventuellt låta användaren välja eget visningsnamn
                 Role = "Member",
-                PinCode = "0000" // Lägga till randomisering ör i ett senare projekt  
+                PinCode = "0000" // Lägga till randomisering i ett senare projekt? 
             };
             // Anropa Register-metoden i UserManager
             bool success = _userManager.Register(newUser);
             if (success)
             {
-                // OM lyckad registering => Trigga event! 
+                // OM lyckad registering => Trigga event (öppna inloggnings-vyn) 
                 RegistrationSuccess?.Invoke(this, System.EventArgs.Empty);
             }
             else
@@ -160,23 +163,26 @@ namespace CookMaster.ViewModels
             }
         }
 
-        // RESET PASSWORD-KOMMANDO via ICommand i RelayCommandManager
-        public ICommand ResetPasswordCommand { get; }
+        // CHANGE PASSWORD-KOMMANDO via ICommand i RelayCommandManager
+        public ICommand ChangePasswordCommand { get; }
         // METOD för att aktivera registreringssknapp - UPPDATERA
-        private bool CanResetPassword() =>
+        private bool CanChangePassword() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(PasswordRepeat);
 
         // METOD för att ändra lösenord 
-        private void ResetPassword()
+        private void ChangePassword()
         {
             // .... code to come... 
         }
 
         // TESTPIN-KOMMANDO via ICommand in RelayCommandManager
-        public ICommand TestPinCommand { get; }
+        public ICommand RequestPinCommand { get; }
 
+        // METOD för att aktivera återställningssknapp - UPPDATERA
+        private bool CanRequestPin() =>
+            !string.IsNullOrWhiteSpace(Email);
         // METOD för att uppdatera glömt lösenord med hjälp av pinkod  - UPPDATERA
-        public void TestPin()
+        public void RequestPin()
         {
             // .... code to come... 
         }

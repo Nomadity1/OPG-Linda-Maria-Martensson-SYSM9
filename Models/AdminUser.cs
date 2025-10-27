@@ -8,8 +8,8 @@ namespace CookMaster.Models
 {
     // INSTRUKTIONER: En Admin-User ska kunna se/ta bort alla recept tillagda av alla användare
     // När programmet startar ska en Admin-User med användarnamn “admin” (små bokstäver!) och
-    // lösenord “password” (små bokstäver!) finnas.
-    // VAD MENAS MED FINNAS? = VARA INLOGGAD ELLER REGISTRERAD? 
+    // lösenord “password” (små bokstäver!) finnas. FINNAS = REGISTRERAD
+
     internal class AdminUser : User // Barnklass till Föräldraklassen User 
     {
         // FÅR ATTRIBUT FRÅN FÖRÄLDRAKLASS (User) 

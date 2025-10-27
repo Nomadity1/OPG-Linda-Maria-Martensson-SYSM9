@@ -50,6 +50,7 @@ namespace CookMaster.Views
             DataContext = userManagerVW;
         }
         // METOD för att ta emot lösenord från passwordbox i login-fönstret
+        // UserName är bundet direkt via DataContext och behöver inte en inläsningsmetod här
         private void PassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
             if (DataContext is UserManagerViewModel userManagerVW)

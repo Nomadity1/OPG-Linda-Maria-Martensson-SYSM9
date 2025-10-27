@@ -43,7 +43,7 @@
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding UserName, Mode=TwoWay}" Width="100" Height="20" FontSize="12" HorizontalAlignment="Left" />
         <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Email, Mode=TwoWay}" Width="100" Height="20" FontSize="12" HorizontalAlignment="Left" />
         <PasswordBox Grid.Row="4" Grid.Column="1" x:Name="NewPassWord" PasswordChanged="NewPassWord_PasswordChanged" FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
-        <PasswordBox Grid.Row="5" Grid.Column="1" x:Name="RepeatPassWord" PasswordChanged="RepeatPassWord_PasswordChanged" FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
+        <PasswordBox Grid.Row="5" Grid.Column="1" x:Name="RepeatPassWord" PasswordChanged="RepeatPassWord_PasswordChanged"  FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
         <ListBox Grid.Row="6" Grid.Column="1" ItemsSource="{Binding CountryList}" DisplayMemberPath="Country" FontSize="12" Width="100" Height="20"  HorizontalAlignment="Left" />
 
         <Button Grid.Row="2" Grid.Column="2"  Content="Register" Command="{Binding RegisterCommand}" FontSize="12" Width="60" Height="22" />

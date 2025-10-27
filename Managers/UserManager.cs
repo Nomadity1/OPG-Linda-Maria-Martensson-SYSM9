@@ -46,11 +46,13 @@ namespace CookMaster.Managers
         // METOD för att lägga till/spara användare i lista
         private void CreateDefaultUsers()
         {
-            // Lägger till en administratör
-            _userlist.Add(new User { UserName ="LindaMaria", Password = "Ab1!", DisplayName="Administratör", EmailAddress="lima@live.se", Role="admin", PinCode="0001" } );
+            // Lägger till administratör
+            //_userlist.Add(new User { UserName ="LindaMaria", Password = "Ab1!", DisplayName="Administratör", EmailAddress="lima@live.se", Role="admin", PinCode="0001" } );
+            _userlist.Add(new User { UserName = "adminuser", Password = "password", DisplayName = "Administratör", EmailAddress = "adminuser@live.se", Role = "admin", PinCode = "0000" });
             // Lägger till ytterligare två användare
-            _userlist.Add(new User { UserName = "Elsa", Password = "Ab2!", DisplayName = "Elsa", EmailAddress = "elsa@live.se", Role = "Member", PinCode = "0002" });
-            _userlist.Add(new User { UserName = "Elvis", Password = "Ab3!", DisplayName = "Elvis", EmailAddress = "elvis@live.se", Role = "Member", PinCode = "0003" });
+            _userlist.Add(new User { UserName = "user", Password = "password", DisplayName = "Administratör", EmailAddress = "user@live.se", Role = "admin", PinCode = "0000" });
+            //_userlist.Add(new User { UserName = "Elsa", Password = "Ab2!", DisplayName = "Elsa", EmailAddress = "elsa@live.se", Role = "Member", PinCode = "0002" });
+            //_userlist.Add(new User { UserName = "Elvis", Password = "Ab3!", DisplayName = "Elvis", EmailAddress = "elvis@live.se", Role = "Member", PinCode = "0003" });
             }
 
         // METOD för att logga in (autentisering)
@@ -96,32 +98,46 @@ namespace CookMaster.Managers
                 _userlist.Add(newUser);
                 // Ge standardtilldelning av roll (kommer ju alltid att vara tom så som jag riggat inmatning)
                 if (string.IsNullOrEmpty(newUser.Role))
-                    newUser.Role = "Member"; 
+                    newUser.Role = "Member";
                 // Och meddela att registrering lyckats
                 return true;
             }
+        }
 
-        // METOD för att återställa lösenord
-        public bool ResetPassword(User newuser)
+        // METOD för att ta emot begäran om att återställa glömt lösenord
+        // Egentligen: Ta emot request, hitta epost i lista, skapa pin, skicka pin med epost och spara tillfälligt i användaren
+        // Här nöjer jag mig med att kolla av om pin matchar med användare och skicka tillåtelse att komma åt UserDetails, där password kan ändras
+        public bool RequestPincode(string email)
         {
             // Går genom lista
             foreach (var user in _userlist)
             {
-                if (UserName == newuser.UserName || EmailAddress == newuser.EmailAddress) // villkor
+                // Kollar  matchningar
+                if (string.Equals(user.EmailAddress, email, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Kolla  om användarnman eller epost redan finns i lista över användare 
-                    // OM SANT skickas felmeddelande
-                    return false;
-                }
-                else
-                {
-                    // ANNARS
-                    // Kalla valideringsmetoder?
-                    // Tilldela värden?
-                    // Lägg till i lista över användare 
+                    // OM SANT: meddelade/tillstånd att ändra lösenord i UserDetails
                     return true;
                 }
             }
+            // ANNARS: felmeddelande
+            return false;
+        }
+        // METOD för att ÄNDRA lösenord (oavsett om det är pga glömt lösen eller annan anledning)
+        public bool ChangePassword(string pin)
+        {
+            // Går genom lista över registrerade användare
+            foreach (var user in _userlist)
+            {
+                // Kollar  matchningar
+                if (user.PinCode == pin) // villkor
+                {
+                    // OM SANT: skickar meddelade/tillåter ändra lösenord i UserDetails
+                    return true;
+                }
+            }
+            // ANNARS: Felmeddelande
+            return false;
+        }
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
