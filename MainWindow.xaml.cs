@@ -30,11 +30,11 @@ namespace CookMaster
             // och anger detta som datakontext 
             DataContext = new MainWindowViewModel(userManager);
 
-            // 2. Vill gömma Main-fönstret medan LogIn-fönstret visas - Gör vi detta någon annan stans? 
-            //this.Hide();
-            // Instansierar och visar login-fönstret genom objektet loginWindow
-            //LogInWindow loginWindow = new LogInWindow();
-            //loginWindow.Show();
+            // Vid utloggning stängs Main 
+            Closing += (s, e) =>
+            {
+                userManager.Logout();
+            };
         }
     }
 }

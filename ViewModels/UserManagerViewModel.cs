@@ -33,11 +33,16 @@ namespace CookMaster.ViewModels
         private string _password;
         private string _passwordRepeat;
         private string _error;
-        private int _pin; // Hittepå-pinkod för att återställa glömt lösenord 
+        private string _pin; // Hittepå-pinkod för att återställa glömt lösenord 
+        private string _selectedCountry; 
 
         // EVENT som Login-fönstret "prenumererar" på
         // När login lyckas, körs alla metoder som är kopplade till detta event.
         public event System.EventHandler? LogInSuccess; // Make event nullable
+
+        // EVENT som Login-fönstret "prenumererar" på
+        // När knappen trycks, körs de metoder som är kopplade till detta event.
+        public event System.EventHandler? SignUpSelected; // Make event nullable
 
         // EVENT som Registrerings-fönstret "prenumererar" på
         // När registrering lyckas, körs de metoder som är kopplade till detta event.
@@ -57,9 +62,12 @@ namespace CookMaster.ViewModels
             _password = string.Empty; // Initierar med tom string
             _passwordRepeat = string.Empty; // Initierar med tom string
             _error = string.Empty; // Initierar med tom string
-            _pin = 0123; // Initierar med låtsaspin
+            _pin = string.Empty; // Initierar med tom string
+            _selectedCountry = string.Empty; // Initierar med tom string
             // Definierar kommando för inloggning
             LogInCommand = new RelayCommand(execute => Login(), canExecute => CanLogin());
+            // Definierar kommando för att komma till registrering
+            SignUpCommand = new RelayCommand(SignUpSelected);
             // Definierar kommando för registrering
             RegisterCommand = new RelayCommand(execute => Register(), canExecute => CanRegister());
             // Definierar kommando för lösenordsåterställning
@@ -67,6 +75,7 @@ namespace CookMaster.ViewModels
             // Definierar kommando för att ändra lösenord
             ChangePasswordCommand = new RelayCommand(execute => ChangePassword(), canExecute => CanChangePassword());
         }
+        // execute => SignUp(), canExecute => CanSignUp()
 
         // fort Publ Egensk med mera effektiv deklaration 
         public string UserName
@@ -94,14 +103,19 @@ namespace CookMaster.ViewModels
             get => _error;
             set { _error = value; OnPropertyChanged(); }
         }
-        public int Pin
+        public string Pin
         {
             get => _pin;
             set { _pin = value; OnPropertyChanged(); }
         }
+        public string SelectedCountry
+        {
+            get => _selectedCountry;
+            set { _selectedCountry = value; OnPropertyChanged(); }
+        }
 
         // DEFINIERAR KOMMANDON 
-            // SKRIVA COMMANDS: 1. Definiera metoden/funktionen, 2. Definiera kommando mha RelayCommand (addCommand), 3. Koppla metoden till kommandot
+        // SKRIVA COMMANDS: 1. Definiera metoden/funktionen, 2. Definiera kommando mha RelayCommand (addCommand), 3. Koppla metoden till kommandot
         // LOG IN-KOMMANDO via ICommand i RelayCommandManager
         public ICommand LogInCommand { get; }
 
@@ -123,9 +137,23 @@ namespace CookMaster.ViewModels
             else
                 Error = "Fel användarnamn eller lösenord";
         }
+
+        // SIGNUP-KOMMANDO via ICommand in RelayCommandManager
+        public ICommand SignUpCommand { get; }
+        // METOD för att aktivera registreringssknapp
+        private bool CanSignUp() =>
+            !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(PasswordRepeat);
+
+
+        // METOD för att komma till registreringsfönstret
+        private void SignUp()
+        {
+            if (SignUpSelected == true)
+            // vilken funktion behövs här? 
+        }
+
         // REGISTER-KOMMANDO via ICommand in RelayCommandManager
         public ICommand RegisterCommand { get; }
-
         // METOD för att aktivera registreringssknapp
         private bool CanRegister() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(PasswordRepeat);
@@ -147,7 +175,8 @@ namespace CookMaster.ViewModels
                 Password = Password,
                 DisplayName = UserName, // Kan senare eventuellt låta användaren välja eget visningsnamn
                 Role = "Member",
-                PinCode = "0000" // Lägga till randomisering i ett senare projekt? 
+                PinCode = "0000", // Lägga till randomisering i ett senare projekt? 
+                Country = SelectedCountry
             };
             // Anropa Register-metoden i UserManager
             bool success = _userManager.Register(newUser);

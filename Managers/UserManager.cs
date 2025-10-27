@@ -19,16 +19,16 @@ namespace CookMaster.Managers
     {
         // PRIVATA FÄLT som använder sig av User-klassen
         private User? _currentUser; // Variabel för enskild användare - Frågetecknet anger att variabeln kan ha null-värde 
-        private List<User> _userlist; // Lista över alla användare 
-        private List<User> _selectCountry { get; set; } // Lista över länder
+        private List<User> _userlist; // Lista över alla användare                                       
+        
+        // PUBLIK EGENSKAP i form av Lista med fördefinierade alternativ för land 
+        public List<string> Countries { get; set; } = new List<string> { "Sweden", "Norway", "Denmark", "Finland", "New Zeeland", "Germany", "United Kingdom", "Other" };
 
         // KONSTRUKTOR: Konstruerar klassen genom att skapa objektet _userlist av listan och 
         public UserManager()
         {
             // Initierar listan över användare
             _userlist = new List<User>();
-            // Initierar listan över länder
-            _selectCountry = new List<User>();
             // Anropar metod för att skapa basanvändare
             CreateDefaultUsers();
         }
@@ -53,12 +53,12 @@ namespace CookMaster.Managers
         {
             // Lägger till administratör
             //_userlist.Add(new User { UserName ="LindaMaria", Password = "Ab1!", DisplayName="Administratör", EmailAddress="lima@live.se", Role="admin", PinCode="0001" } );
-            _userlist.Add(new User { UserName = "adminuser", Password = "password", DisplayName = "Administratör", EmailAddress = "adminuser@live.se", Role = "admin", PinCode = "0000" });
+            _userlist.Add(new User { UserName = "adminuser", EmailAddress = "adminuser@live.se", Password = "password", DisplayName = "Administratör", Role = "admin", PinCode = "0000", Country="Sweden" });
             // Lägger till ytterligare två användare
-            _userlist.Add(new User { UserName = "user", Password = "password", DisplayName = "Administratör", EmailAddress = "user@live.se", Role = "admin", PinCode = "0000" });
+            _userlist.Add(new User { UserName = "user", EmailAddress = "user@live.se", Password = "password", DisplayName = "Användare", Role = "user", PinCode = "0000", Country = "Sweden" });
             //_userlist.Add(new User { UserName = "Elsa", Password = "Ab2!", DisplayName = "Elsa", EmailAddress = "elsa@live.se", Role = "Member", PinCode = "0002" });
-            //_userlist.Add(new User { UserName = "Elvis", Password = "Ab3!", DisplayName = "Elvis", EmailAddress = "elvis@live.se", Role = "Member", PinCode = "0003" });
-            }
+            //_userlist.Add(new User { UserName = "Elvis", Password = "Ab3!", DisplayName = "Elvis", EmailAddress = "elvis@live.se", Role = "Member", PinCode = "0003" });    
+        }
 
         // METOD för att logga in (autentisering)
         public bool Login(string username, string password)
@@ -84,6 +84,13 @@ namespace CookMaster.Managers
             // Behöver ingen okontroll, stänger bara huvud-vyn (Recipe List) och öppnar splash-vyn (LogIn)
             // Tilldelar CurrentUser värdet null 
             CurrentUser = null;
+        }
+        // Öppna registreringsfönster
+        public void GoToSignUp()
+        {
+            // Instansierar och visar registrerings-fönstret genom objektet registerWindow
+            //RegisterWindow registerWindow = new RegisterWindow();
+            //registerWindow.Show();
         }
 
         // METOD för att registrera ny användare
@@ -146,7 +153,7 @@ namespace CookMaster.Managers
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null)
+        private void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

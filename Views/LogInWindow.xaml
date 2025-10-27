@@ -5,39 +5,45 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CookMaster.Views" xmlns:managers="clr-namespace:CookMaster.Managers" xmlns:viewmodels="clr-namespace:CookMaster.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:UserManagerViewModel}"
         mc:Ignorable="d"
-        Title="LogInWindow" Height="280" Width="500" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
+        Title="LogInWindow" Height="280" Width="500" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise" >
     <!--Fönster för inloggning samt knapp till registrering och återställning av lösenord-->
     <Grid>
         <!--Definierar layout-->
         <Grid.RowDefinitions>
             <RowDefinition Height="0.17*"/>
-            <RowDefinition Height="0.1*"/>
-            <RowDefinition Height="0.73*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.18*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.4*"/>
-            <ColumnDefinition Width="0.4*"/>
-            <ColumnDefinition Width="0.4*"/>
+            <ColumnDefinition Width="0.3*"/>
+            <ColumnDefinition Width="0.3*"/>
+            <ColumnDefinition Width="0.3*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Column="0" Grid.ColumnSpan="2" Content="Cook Master" FontSize="34" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
-        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="Find your way to the kitchen:" HorizontalContentAlignment="Center"/>
-        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center" >
-            <!--LOG IN OCH LOG UT - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
-            <TextBlock Text="Username" />
-            <TextBox Text="{Binding UserName, Mode=TwoWay}" Width="160" Height="26" Margin="0" />
-            <TextBlock Text="Password" />
-            <PasswordBox x:Name="PassWord" PasswordChanged="PassWord_PasswordChanged"  Width="160" Height="26" Margin="0" />
-            <Button Content="Log in" Command="{Binding LogInCommand}" Width="60" Height="26" Margin="0, 5, 0, 0" />
-            <TextBlock Text="{Binding Error}" Foreground="Red" Width="60" TextWrapping="Wrap"  />
-        </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <!--REGISTRERING OCH ÅTERSTÄLLA LÖSENORD - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
-            <TextBlock Text="Are you new here? " HorizontalAlignment="Center"  VerticalAlignment="Center"/>
-            <Button Content="Sign up" Command="{Binding RegisterCommand}" Width="60" Height="26" Grid.Column="2" Grid.Row="3" VerticalAlignment="Top" Margin="0,0,0,20"  />
-        </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" >
-            <TextBlock Text="Forgot your password?" Grid.Column="2" Grid.Row="3" />
-            <Button Content="Reset" Command="{Binding ResetPasswordCommand}" Width="60" Height="26" Margin="0, 0, 0, 20" />
-        </StackPanel>
+        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="34" />
+        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Content="Find your way to the kitchen:" />
+        <!--LOG IN OCH LOG UT - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Username" Margin="5"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Password" Margin="5" />
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding UserName}" Width="140" Height="26" />
+        <PasswordBox Grid.Row="3" Grid.Column="1" x:Name="PassWord" PasswordChanged="PassWord_PasswordChanged"  Width="140" Height="26" />
+        <Button Grid.Row="2" Grid.Column="2" Content="Log in" Command="{Binding LogInCommand}" Width="60" Height="26" />
+        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Error}" Foreground="Red" Width="160" TextWrapping="Wrap" />
+        <!--TILL REGISTRERING - BUNDEN TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Are you new here?" HorizontalAlignment="Center" />
+        <TextBlock Grid.Row="4" Grid.Column="1" Text="Sign up =>" HorizontalAlignment="Center" />
+        <Button Grid.Row="4" Grid.Column="2" Content="Sign up" Command="{Binding SignUpCommand}" Width="60" Height="26" />
+        <!--ÅTERSTÄLLA LÖSENORD GENOM EMAIL - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Forgot your password?" Width="160" HorizontalAlignment="Center" Margin="0" />
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Enter e-mail address:" TextWrapping="Wrap" Width="160" />
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Email}" Width="140" Height="26" />
+        <Button Grid.Row="6" Grid.Column="2" Content="Request pin" Command="{Binding RequestPinCommand}" Width="70" Height="26" />
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="Insert pin:" Width="160" />
+        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding PinCode}" Width="140" Height="26" />
+        <Button Grid.Row="7" Grid.Column="2" Content="Submit" Command="{Binding ResetPasswordCommand}" Width="70" Height="26" />
     </Grid>
 </Window>

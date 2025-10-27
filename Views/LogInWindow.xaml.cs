@@ -46,17 +46,22 @@ namespace CookMaster.Views
                 DialogResult = true; // meddelar framgång 
                 Close(); // Stänger login-fönstret
             };
+            // Anropar SignUp-eventet i UserManagerViewModel 
+            userManagerVW.SignUpSelected += (s, e) =>
+            {
+                var register = new RegisterWindow();
+                register.ShowDialog();
+            };
             // Påminner programmet om vilken datakontexten är
             DataContext = userManagerVW;
         }
         // METOD för att ta emot lösenord från passwordbox i login-fönstret
-        // UserName är bundet direkt via DataContext och behöver inte en inläsningsmetod här
+        // UserName är bundet direkt via DataContext (UserManagerViewModel) och behöver inte en inläsningsmetod här
         private void PassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
             if (DataContext is UserManagerViewModel userManagerVW)
                 // Egenskapen Password i UserManagerViewModel nås genom objektet userManagerVM
                 // ...och tilldelas inmatat värde från LogIn-fönstrets password-box "PassWord"
-                // ... 
                 userManagerVW.Password = PassWord.Password;
         }
     }

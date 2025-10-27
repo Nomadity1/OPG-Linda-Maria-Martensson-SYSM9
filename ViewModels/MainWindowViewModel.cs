@@ -23,7 +23,7 @@ namespace CookMaster.ViewModels
         public UserManager UserManager { get;  }
         
         // PUBLIK EGENSKAP i form av kommando för utloggning (indikerar på användning av basklass RelayCommand)
-        public ICommand LogOutCommand { get; } // Bunden med knapp i MainWindow-vyn
+        public ICommand? LogOutCommand { get; } // Bunden med knapp i MainWindow-vyn, gör null-able med ? 
 
         // KONSTRUKTOR med villkorssats för att visa login-fönster och användare 
         public MainWindowViewModel(UserManager userManager) // Upprättar samarbete mln Main och UserManager
@@ -34,12 +34,8 @@ namespace CookMaster.ViewModels
             {
                 // HASSANS KOD: Anropar metod för att visa LogIn-vyn
                 ShowLogin(); 
-                //LogInWindow loginWindow = new LogInWindow();
-                //loginWindow.Show();
                 // Logout-kommandot kan endast och när som helst köras när någon är inloggad
-                LogOutCommand = new RelayCommand(
-                execute => UserManager.Logout(),
-                canExecute => UserManager.IsAuthenticated);
+                LogOutCommand = new RelayCommand(execute => UserManager.Logout(),canExecute => UserManager.IsAuthenticated);
             }
         }
         private void Logout()

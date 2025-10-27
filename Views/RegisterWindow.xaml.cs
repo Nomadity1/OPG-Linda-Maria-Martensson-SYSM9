@@ -47,9 +47,9 @@ namespace CookMaster.Views
             // Påminner programmet om vilken datakontexten är
             DataContext = userManagerVW;
         }
+
         // METODER för att ta emot lösenord från passwordboxar i registrerings-fönstret
         // Övriga inmatningar är bundna direkt via DataContext och behöver inte inläsningsmetoder här
-
         private void NewPassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
             if (DataContext is UserManagerViewModel userManagerVW)
@@ -59,7 +59,6 @@ namespace CookMaster.Views
                 userManagerVW.Password = NewPassWord.Password;
             }
         }
-
         private void RepeatPassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
             if (DataContext is UserManagerViewModel userManagerVW)
