@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CookMaster.Views" xmlns:managers="clr-namespace:CookMaster.Managers" xmlns:viewmodels="clr-namespace:CookMaster.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:UserManagerViewModel}"
         mc:Ignorable="d"
-        Title="LogInWindow" Height="260" Width="500" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
+        Title="LogInWindow" Height="280" Width="500" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
     <!--Fönster för inloggning samt knapp till registrering och återställning av lösenord-->
     <Grid>
         <!--Definierar layout-->
         <Grid.RowDefinitions>
             <RowDefinition Height="0.17*"/>
-            <RowDefinition Height="0.12*"/>
-            <RowDefinition Height="0.7*"/>
+            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="0.73*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.4*"/>
@@ -24,11 +24,11 @@
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center" >
             <!--LOG IN OCH LOG UT - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
             <TextBlock Text="Username" />
-            <TextBox Text="{Binding UserName, Mode=TwoWay}" Width="240" Height="26" Margin="0" />
+            <TextBox Text="{Binding UserName, Mode=TwoWay}" Width="160" Height="26" Margin="0" />
             <TextBlock Text="Password" />
-            <PasswordBox x:Name="PassWord" PasswordChanged="PassWord_PasswordChanged"  Width="240" Height="26" Margin="0" />
+            <PasswordBox x:Name="PassWord" PasswordChanged="PassWord_PasswordChanged"  Width="160" Height="26" Margin="0" />
             <Button Content="Log in" Command="{Binding LogInCommand}" Width="60" Height="26" Margin="0, 5, 0, 0" />
-            <TextBlock Text="{Binding Error}" Foreground="Red"  />
+            <TextBlock Text="{Binding Error}" Foreground="Red" Width="60" TextWrapping="Wrap"  />
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
             <!--REGISTRERING OCH ÅTERSTÄLLA LÖSENORD - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->

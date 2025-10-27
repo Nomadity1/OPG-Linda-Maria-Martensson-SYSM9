@@ -47,11 +47,11 @@ namespace CookMaster.Managers
         private void CreateDefaultUsers()
         {
             // Lägger till en administratör
-            _userlist.Add(new User { UserName ="LindaMaria", Password = "Ab1!", DisplayName="Administratör", EmailAddress="lima@live.se", Role="admin", Pin=0001 } );
+            _userlist.Add(new User { UserName ="LindaMaria", Password = "Ab1!", DisplayName="Administratör", EmailAddress="lima@live.se", Role="admin", PinCode="0001" } );
             // Lägger till ytterligare två användare
-            _userlist.Add(new User { UserName = "Elsa", Password = "Ab2!", DisplayName = "Elsa", EmailAddress = "elsa@live.se", Role = "Member", Pin = 0002 });
-            _userlist.Add(new User { UserName = "Elvis", Password = "Ab3!", DisplayName = "Elvis", EmailAddress = "elvis@live.se", Role = "Member", Pin = 0003 });
-        }
+            _userlist.Add(new User { UserName = "Elsa", Password = "Ab2!", DisplayName = "Elsa", EmailAddress = "elsa@live.se", Role = "Member", PinCode = "0002" });
+            _userlist.Add(new User { UserName = "Elvis", Password = "Ab3!", DisplayName = "Elvis", EmailAddress = "elvis@live.se", Role = "Member", PinCode = "0003" });
+            }
 
         // METOD för att logga in (autentisering)
         public bool Login(string username, string password)
@@ -100,7 +100,6 @@ namespace CookMaster.Managers
                 // Och meddela att registrering lyckats
                 return true;
             }
-        }
 
         // METOD för att återställa lösenord
         public bool ResetPassword(User newuser)
