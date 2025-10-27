@@ -20,11 +20,16 @@ namespace CookMaster.Managers
         // PRIVATA FÄLT som använder sig av User-klassen
         private User? _currentUser; // Variabel för enskild användare - Frågetecknet anger att variabeln kan ha null-värde 
         private List<User> _userlist; // Lista över alla användare 
+        private List<User> _selectCountry { get; set; } // Lista över länder
 
-        // KONSTRUKTOR: Konstruerar klassen genom att skapa objektet _userlist av listan
+        // KONSTRUKTOR: Konstruerar klassen genom att skapa objektet _userlist av listan och 
         public UserManager()
         {
+            // Initierar listan över användare
             _userlist = new List<User>();
+            // Initierar listan över länder
+            _selectCountry = new List<User>();
+            // Anropar metod för att skapa basanvändare
             CreateDefaultUsers();
         }
 
