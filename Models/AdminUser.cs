@@ -12,7 +12,19 @@ namespace CookMaster.Models
 
     internal class AdminUser : User // Barnklass till Föräldraklassen User 
     {
-        // FÅR ATTRIBUT FRÅN FÖRÄLDRAKLASS (User) 
+        // FÅR ATTRIBUT FRÅN FÖRÄLDRAKLASS (User)
+        
+        // ÄRVER EGENSKAPER FRÅN USER
+        public AdminUser() : base() { }
+
+        // KONSTRUKTOR
+        public AdminUser(string username, string password, string email, string country) : base(username, password, email, country)
+        {
+            UserName = username;
+            Password = password;
+            EmailAddress = email;
+            Country = country; 
+        }
 
         // METODER 
         public void DisplayAllRecipes()

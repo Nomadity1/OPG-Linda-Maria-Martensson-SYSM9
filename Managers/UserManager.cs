@@ -2,31 +2,35 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net.Mail;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.Managers
 {
-    // GENERELLT OM MANAGERS: Hanterar HUR DATA ANVÄNDS (snarare än definitioner av data (fält, egenskaper,
-    // validering av inmatning (= MODELS) eller hur data visas (=VIEW MODELS)).
-    // MANAGERS är LÄNKEN mellan MODELS och VIEW MODELS. 
-    // INSTRUKTIONER: SKA HANTERA INLOGGAD ANVÄNDARE, DEFINIERA CURRENT USER, samt
-    // METODER OCH KOMMANDON FÖR INLOGGNING, UTLOGGNING, REGISTRERING, CHANGEPASSWORD, CURRENTUSER
+    // GENERELLT OM MANAGERS: Hanterar HUR DATA ANVÄNDS (snarare än definitioner av data (fält, egenskaper, (= MODELS) eller hur data visas (=VIEW MODELS)).
+    // MANAGERS är LÄNKEN mellan MODELS och VIEW MODELS.   
+    // METODER OCH KOMMANDON FÖR INLOGGNING (inkl. validering av inmatning), CURRENTUSER, UTLOGGNING, REGISTRERING (inkl. validering av inmatning), CHANGEPASSWORD
     public class UserManager : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT som använder sig av User-klassen
         private User? _currentUser; // Variabel för enskild användare - Frågetecknet anger att variabeln kan ha null-värde 
+        private List<AdminUser> _adminlist; // Lista över alla admin-användare                                       
         private List<User> _userlist; // Lista över alla användare                                       
-        
+
         // PUBLIK EGENSKAP i form av Lista med fördefinierade alternativ för land 
         public List<string> Countries { get; set; } = new List<string> { "Sweden", "Norway", "Denmark", "Finland", "New Zeeland", "Germany", "United Kingdom", "Other" };
 
         // KONSTRUKTOR: Konstruerar klassen genom att skapa objektet _userlist av listan och 
         public UserManager()
         {
+            _adminlist = new List<AdminUser>();
             // Initierar listan över användare
             _userlist = new List<User>();
             // Anropar metod för att skapa basanvändare
@@ -48,18 +52,6 @@ namespace CookMaster.Managers
         //PUBLIK BOOL för att kunna visa inloggningsstatus
         public bool IsAuthenticated => CurrentUser != null;
 
-        // METOD för att lägga till/spara användare i lista
-        private void CreateDefaultUsers()
-        {
-            // Lägger till administratör
-            //_userlist.Add(new User { UserName ="LindaMaria", Password = "Ab1!", DisplayName="Administratör", EmailAddress="lima@live.se", Role="admin", PinCode="0001" } );
-            _userlist.Add(new User { UserName = "adminuser", EmailAddress = "adminuser@live.se", Password = "password", DisplayName = "Administratör", Role = "admin", PinCode = "0000", Country="Sweden" });
-            // Lägger till ytterligare två användare
-            _userlist.Add(new User { UserName = "user", EmailAddress = "user@live.se", Password = "password", DisplayName = "Användare", Role = "user", PinCode = "0000", Country = "Sweden" });
-            //_userlist.Add(new User { UserName = "Elsa", Password = "Ab2!", DisplayName = "Elsa", EmailAddress = "elsa@live.se", Role = "Member", PinCode = "0002" });
-            //_userlist.Add(new User { UserName = "Elvis", Password = "Ab3!", DisplayName = "Elvis", EmailAddress = "elvis@live.se", Role = "Member", PinCode = "0003" });    
-        }
-
         // METOD för att logga in (autentisering)
         public bool Login(string username, string password)
         {
@@ -67,16 +59,17 @@ namespace CookMaster.Managers
             foreach (var user in _userlist)
             {
                 // Kollar  matchningar
-                if (string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase)
-                    && user.Password == password)
+                if (!string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase)
+                    || user.Password != password)
                 {
-                    // OM SANT: tilldelar user till CurrentUser
-                    CurrentUser = user;
-                    return true;
+                    // OM SANT: felmeddelande
+                    return false;
                 }
+                // ANNARS: tilldelar user till CurrentUser
+                CurrentUser = user;
             }
-            // Annars: felmeddelande
-            return false;
+            // och hälsar viewmodel att login är successful!
+            return true;
         }
         // METOD för att logga ut 
         public void Logout()
@@ -85,35 +78,67 @@ namespace CookMaster.Managers
             // Tilldelar CurrentUser värdet null 
             CurrentUser = null;
         }
-        // Öppna registreringsfönster
-        public void GoToSignUp()
+
+        // METOD för att skapa standardanvändare för testning och utvärdering
+        private void CreateDefaultUsers()
         {
-            // Instansierar och visar registrerings-fönstret genom objektet registerWindow
-            //RegisterWindow registerWindow = new RegisterWindow();
-            //registerWindow.Show();
+            // Lägger till administratör genom att anropa konstruktorn med argument (konstruktorn kräver parametrar)
+            _adminlist.Add(new AdminUser { UserName = "admin", Password = "password", EmailAddress = "adminuser@live.se", Country = "Sweden" });
+            //_adminlist.Add(new User { UserName = "admin", Password = "password", EmailAddress = "adminuser@live.se", Country = "Sweden" });
+            // Lägger till användare genom konstruktorn 
+            _userlist.Add(new User { UserName = "user", Password = "password", EmailAddress = "user@live.se", Country = "Sweden" });
         }
 
         // METOD för att registrera ny användare
-        public bool Register(User newUser)
+        public (bool success, string message) Register(string username, string email, string newPassword, string repeatPassword, string country)
         {
-            bool userAlreadyListed = _userlist.Any(user => user.UserName.Equals(newUser.UserName, StringComparison.OrdinalIgnoreCase) ||
-            user.EmailAddress.Equals(newUser.EmailAddress, StringComparison.OrdinalIgnoreCase));
-            // Kolla  om användarnman eller epost redan finns i lista över användare
-            if (userAlreadyListed) // villkor
-            {
-                // OM SANT: felmeddelande
-                return false;
-            }
+            bool registrationSuccess = false;
+            string messageRegistration = registrationSuccess ? "Registrering lyckades. Dina uppgifter är sparade." : "";
+
+            // Implementerar korta IF-satser för kontroll
+
+            // Kontrollera att alla fält är ifyllda 
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(repeatPassword))
+                return (false, "Alla fält måste fyllas i.");
+
+            // Kontroll om användare (användaruppgifter) redan finns i lista över användare
+            if (_userlist.Any(user => user.UserName.Equals(username, StringComparison.OrdinalIgnoreCase) ||
+            user.EmailAddress.Equals(email, StringComparison.OrdinalIgnoreCase)))
+                return (false, "Användarnamnet eller epostadressen är redan registrerad");
+
+            // Validera användarnamn 
+            if (username.Length > 3 && username.Length < 9) 
+                return (false, "Användarnamnet är ogiltigt");
+
+            // Validera lösenord
+            string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
+            if (newPassword.Length > 4 && newPassword.Length < 9 && newPassword.Any(char.IsUpper) && newPassword.Any(char.IsLower)
+                    && newPassword.Any(char.IsDigit) && newPassword.Contains(specialCharacters))
+                return (false, "Lösenordet är ogiltig");
+
+            // Validera upprepat lösenord
+            if (newPassword != repeatPassword)
+                return (false, "Lösenorden matchar inte varandra.");
+
+            // Validera e-postadress 
+            if (email.Contains("@") && email.IndexOf('.') > email.IndexOf('@'))
+                return (false, "E-postadressen är ogiltig");
+
+            // Kontrollera att land valts
+            if (string.IsNullOrWhiteSpace(country))
+                return (false, "Välj det land du bor i.");
             else
             {
-                // ANNARS: Lägg till i lista över användare
-                _userlist.Add(newUser);
-                // Ge standardtilldelning av roll (kommer ju alltid att vara tom så som jag riggat inmatning)
-                if (string.IsNullOrEmpty(newUser.Role))
-                    newUser.Role = "Member";
-                // Och meddela att registrering lyckats
-                return true;
+                // Skapar ett användarobjekt
+                var user = new User { UserName = username, Password = newPassword, EmailAddress = email, Country = country };
+                // Skapar en egenskap för land
+                var setCountry = user.GetType();
+                var CountryProperty = setCountry.GetProperty("Countries", BindingFlags.Public | BindingFlags.Instance);
+                // Lägg till i lista över användare
+                _userlist.Add(user); 
             }
+            // Meddela framgång
+            return (true, messageRegistration);
         }
 
         // METOD för att ta emot begäran om att återställa glömt lösenord
@@ -127,7 +152,13 @@ namespace CookMaster.Managers
                 // Kollar  matchningar
                 if (string.Equals(user.EmailAddress, email, StringComparison.OrdinalIgnoreCase))
                 {
-                    // OM SANT: meddelade/tillstånd att ändra lösenord i UserDetails
+                    // Skapa en låtsas-pinkod
+                    var random = new Random();
+                    string pin = random.Next(000001, 999999).ToString(); // t.ex. "4723"
+                    user.PinCode = pin;
+                    // Ska egenltigen skicka pinkoden till t.ex. epost
+                    // ...fast här gör jag det som ett popup-fönster istället! 
+                    MessageBox.Show($"Pinkod skickad till {email}: {pin}"); 
                     return true;
                 }
             }
@@ -135,7 +166,7 @@ namespace CookMaster.Managers
             return false;
         }
         // METOD för att ÄNDRA lösenord (oavsett om det är pga glömt lösen eller annan anledning)
-        public bool ChangePassword(string pin)
+        public bool ResetPassword(string pin)
         {
             // Går genom lista över registrerade användare
             foreach (var user in _userlist)
@@ -149,6 +180,11 @@ namespace CookMaster.Managers
             }
             // ANNARS: Felmeddelande
             return false;
+        }
+        public bool ChangePassword(string newPassword, string repeatPassword)
+        {
+            // code to come... 
+            return false; 
         }
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 

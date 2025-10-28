@@ -32,19 +32,19 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Password" Margin="5" />
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding UserName}" Width="140" Height="26" />
         <PasswordBox Grid.Row="3" Grid.Column="1" x:Name="PassWord" PasswordChanged="PassWord_PasswordChanged"  Width="140" Height="26" />
-        <Button Grid.Row="2" Grid.Column="2" Content="Log in" Command="{Binding LogInCommand}" Width="60" Height="26" />
+        <Button Grid.Row="2" Grid.Column="2" Content="Log in" Command="{Binding LogInCommand}" FontSize="12" Width="60" Height="26" />
         <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Error}" Foreground="Red" Width="160" TextWrapping="Wrap" />
         <!--TILL REGISTRERING - BUNDEN TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Are you new here?" HorizontalAlignment="Center" />
         <TextBlock Grid.Row="4" Grid.Column="1" Text="Sign up =>" HorizontalAlignment="Center" />
-        <Button Grid.Row="4" Grid.Column="2" Content="Sign up" Command="{Binding SignUpCommand}" Width="60" Height="26" />
+        <Button Grid.Row="4" Grid.Column="2" Content="Sign up" Command="{Binding SignUpCommand}" FontSize="12" Width="60" Height="26" />
         <!--ÅTERSTÄLLA LÖSENORD GENOM EMAIL - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
         <TextBlock Grid.Row="5" Grid.Column="0" Text="Forgot your password?" Width="160" HorizontalAlignment="Center" Margin="0" />
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Enter e-mail address:" TextWrapping="Wrap" Width="160" />
         <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Email}" Width="140" Height="26" />
-        <Button Grid.Row="6" Grid.Column="2" Content="Request Pin" Command="{Binding RequestPinCommand}" Width="90" Height="26" />
+        <Button Grid.Row="6" Grid.Column="2" Content="Request Pin" Command="{Binding RequestPinCommand}" FontSize="12" Width="70" Height="26" />
         <TextBlock Grid.Row="7" Grid.Column="0" Text="Insert pin:" Width="160" />
         <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding PinCode}" Width="140" Height="26" />
-        <Button Grid.Row="7" Grid.Column="2" Content="Submit" Command="{Binding ResetPasswordCommand}" Width="70" Height="26" />
+        <Button Grid.Row="7" Grid.Column="2" Content="Submit" Command="{Binding ResetPasswordCommand}" FontSize="12" Width="70" Height="26" />
     </Grid>
 </Window>
