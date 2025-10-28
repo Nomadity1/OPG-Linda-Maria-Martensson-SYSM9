@@ -63,9 +63,9 @@ namespace CookMaster.Views
         {
             if (DataContext is UserManagerViewModel userManagerVW)
             {
-                // Egenskapen Password i UserManagerViewModel nås genom objektet userManagerVM
+                // Egenskapen NewPassword i UserManagerViewModel nås genom objektet userManagerVM
                 // ...och tilldelas inmatat värde från LogIn-fönstrets password-box "PassWord"
-                userManagerVW.Password = RepeatPassWord.Password;
+                userManagerVW.Password = NewPassWord.Password;
             }
         }
     }

@@ -17,7 +17,8 @@
             <RowDefinition Height="0.11*"/>
             <RowDefinition Height="0.11*"/>
             <RowDefinition Height="0.11*"/>
-            <RowDefinition Height="0.18*"/>
+            <RowDefinition Height="0.11*"/>
+            <RowDefinition Height="0.06*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.3*"/>
@@ -41,7 +42,7 @@
         <TextBlock Grid.Row="5" Grid.Column="0" Text="Forgot your password?" Width="160" HorizontalAlignment="Center" Margin="0" />
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Enter e-mail address:" TextWrapping="Wrap" Width="160" />
         <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Email}" Width="140" Height="26" />
-        <Button Grid.Row="6" Grid.Column="2" Content="Request pin" Command="{Binding RequestPinCommand}" Width="70" Height="26" />
+        <Button Grid.Row="6" Grid.Column="2" Content="Request Pin" Command="{Binding RequestPinCommand}" Width="90" Height="26" />
         <TextBlock Grid.Row="7" Grid.Column="0" Text="Insert pin:" Width="160" />
         <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding PinCode}" Width="140" Height="26" />
         <Button Grid.Row="7" Grid.Column="2" Content="Submit" Command="{Binding ResetPasswordCommand}" Width="70" Height="26" />

@@ -144,11 +144,11 @@ namespace CookMaster.ViewModels
         private bool CanSignUp() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(PasswordRepeat);
 
-
         // METOD för att komma till registreringsfönstret
         private void SignUp()
         {
-            if (SignUpSelected == true)
+            //SignUpSelected 
+            //if ()
             // vilken funktion behövs här? 
         }
 
