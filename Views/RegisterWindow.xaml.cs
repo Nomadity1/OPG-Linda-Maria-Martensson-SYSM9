@@ -21,10 +21,11 @@ namespace CookMaster.Views
     /// </summary>
     public partial class RegisterWindow : Window
     {
+        // UPPGIFTER: Ta emot registreringsuppgifter 
         public RegisterWindow()
         {
             InitializeComponent();
-            // Ta emot registreringsuppgifter 
+
             // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
             // Instansierar register-ViewModel med objektet registerVM
@@ -39,10 +40,10 @@ namespace CookMaster.Views
             // som körs varje gång eventet triggas)
             registerVW.RegisterSuccess += (s, e) =>
             {
-                DialogResult = true; // meddelar framgång 
+                this.Close(); // Stänger registreringsfönstret
                 var mainWindow = new MainWindow(); // Instansierar loginfönster
                 mainWindow.Show(); // Visar loginfönster
-                this.Close(); // Stänger registreringsfönstret
+                DialogResult = true; // Meddelar framgång 
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = registerVW;

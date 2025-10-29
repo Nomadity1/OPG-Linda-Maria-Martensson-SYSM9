@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace CookMaster.MVVM
 {
-    internal class RelayCommand : ICommand
+    public class RelayCommand : ICommand
     {
         // BASKLASS FÖR ATT DEFINIERA KOMMANDON - KOD KOMMER FRÅN HASSANS FIL PÅ GITHUB 
         // Klassen RelayCommand tar emot en parameter

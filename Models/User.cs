@@ -14,8 +14,6 @@ namespace CookMaster.Models
         public required string Password { get; set; } 
         public required string EmailAddress { get; set; } 
         public required string Country { get; set; }
-        public string SecurityQuestion = "Vilka är alfabetets tre första bokstäver?"; //{ get; set; } // textfråga på låtsas
-        public string SecurityAnswer = "abc"; //{ get; set; } 
 
         // En enklare flagga som visar om användaren är admin eller ej.
         public bool IsAdmin { get; set; } = false;

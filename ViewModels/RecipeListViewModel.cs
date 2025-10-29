@@ -71,6 +71,7 @@ namespace CookMaster.ViewModels
             //// Logout-kommandot kan endast och när som helst köras när någon är inloggad
             //LogOutCommand = new RelayCommand(execute => UserManager.Logout(), canExecute => UserManager.IsAuthenticated);
         }
+
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? name = null)

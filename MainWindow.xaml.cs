@@ -1,6 +1,7 @@
 ﻿using CookMaster.Managers;
 using CookMaster.ViewModels;
 using CookMaster.Views;
+using System.Diagnostics.Metrics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,7 +23,7 @@ namespace CookMaster
         // UPPGIFTER: Ta emot inloggningsuppgifter, ta emot knapptryckningar (log in, register, forgot password) 
 
         // PRIVAT FÄLT för instansiering längre ner 
-        private MainViewModel _mainViewModel;
+        private MainViewModel? _mainViewModel;
         public MainWindow()
         {
             InitializeComponent();
@@ -42,7 +43,9 @@ namespace CookMaster
             mainVW.LogInSuccess += (s, e) =>
             {
                 DialogResult = true; // Meddelar framgång 
-                Close(); // ...och stänger detta fönster
+                this.Close(); // ...och stänger detta fönster
+                var recipeListWindow = new RecipeListWindow();
+                recipeListWindow.Show();
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = mainVW;

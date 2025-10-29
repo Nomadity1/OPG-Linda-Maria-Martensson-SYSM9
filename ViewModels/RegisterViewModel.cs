@@ -1,7 +1,9 @@
 ﻿using CookMaster.Managers;
 using CookMaster.Models;
 using CookMaster.MVVM;
+using Microsoft.Win32;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -34,10 +36,6 @@ namespace CookMaster.ViewModels
             _repeatPassword = string.Empty; // Initierar med tom string
             _selectedCountry = string.Empty; // Initierar med tom string
             _error = string.Empty; // Initierar med tom string
-
-            // Anropar RelayCommand för inloggningskommando
-            RegisterCommand = new RelayCommand(execute => Register(), 
-                canExecute => CanRegister());
         }
 
         // PUBLIKA EGENSKAPER med mera effektiv deklaration 
@@ -65,8 +63,9 @@ namespace CookMaster.ViewModels
             set { _email = value; OnPropertyChanged(); 
                 CommandManager.InvalidateRequerySuggested(); }
         }
+
         // Koppla till listan över länder i UserManager så att den
-        // kan fugnera som "ItemsSource" i View 
+        // kan fungera som "ItemsSource" i View 
         public List<string> Countries => _userManager.Countries;
 
         public string SelectedCountry
@@ -82,7 +81,7 @@ namespace CookMaster.ViewModels
         }
 
         // REGISTER-KOMMANDO via ICommand in RelayCommandManager
-        public ICommand RegisterCommand { get; }
+        public RelayCommand RegisterCommand => new RelayCommand(execute => Register(), canExecute => CanRegister());
 
         // METOD för att aktivera registreringssknapp
         private bool CanRegister() =>
