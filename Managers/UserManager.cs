@@ -53,8 +53,8 @@ namespace CookMaster.Managers
         public bool IsAuthenticated => CurrentUser != null;
 
         // METOD för att logga in (autentisering)
-        public bool Login(string username, string password)
-        {
+        public bool ValidateLogin(string username, string password)
+        { 
             // Går genom lista
             foreach (var user in _userlist)
             {
@@ -62,7 +62,7 @@ namespace CookMaster.Managers
                 if (!string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase)
                     || user.Password != password)
                 {
-                    // OM SANT: felmeddelande
+                    // OM SANT (användaruppgifter finns inte i listan)
                     return false;
                 }
                 // ANNARS: tilldelar user till CurrentUser
@@ -71,11 +71,9 @@ namespace CookMaster.Managers
             // och hälsar viewmodel att login är successful!
             return true;
         }
-        // METOD för att logga ut 
+        // Metod för utloggning
         public void Logout()
         {
-            // Behöver ingen okontroll, stänger bara huvud-vyn (Recipe List) och öppnar splash-vyn (LogIn)
-            // Tilldelar CurrentUser värdet null 
             CurrentUser = null;
         }
 
@@ -83,7 +81,7 @@ namespace CookMaster.Managers
         private void CreateDefaultUsers()
         {
             // Lägger till administratör genom att anropa konstruktorn med argument (konstruktorn kräver parametrar)
-            _adminlist.Add(new AdminUser { UserName = "admin", Password = "password", EmailAddress = "adminuser@live.se", Country = "Sweden" });
+            _userlist.Add(new AdminUser { UserName = "admin", Password = "password", EmailAddress = "adminuser@live.se", Country = "Sweden" });
             //_adminlist.Add(new User { UserName = "admin", Password = "password", EmailAddress = "adminuser@live.se", Country = "Sweden" });
             // Lägger till användare genom konstruktorn 
             _userlist.Add(new User { UserName = "user", Password = "password", EmailAddress = "user@live.se", Country = "Sweden" });
@@ -144,43 +142,43 @@ namespace CookMaster.Managers
         // METOD för att ta emot begäran om att återställa glömt lösenord
         // Egentligen: Ta emot request, hitta epost i lista, skapa pin, skicka pin med epost och spara tillfälligt i användaren
         // Här nöjer jag mig med att kolla av om pin matchar med användare och skicka tillåtelse att komma åt UserDetails, där password kan ändras
-        public bool RequestPincode(string email)
-        {
-            // Går genom lista
-            foreach (var user in _userlist)
-            {
-                // Kollar  matchningar
-                if (string.Equals(user.EmailAddress, email, StringComparison.OrdinalIgnoreCase))
-                {
-                    // Skapa en låtsas-pinkod
-                    var random = new Random();
-                    string pin = random.Next(000001, 999999).ToString(); // t.ex. "4723"
-                    user.PinCode = pin;
-                    // Ska egenltigen skicka pinkoden till t.ex. epost
-                    // ...fast här gör jag det som ett popup-fönster istället! 
-                    MessageBox.Show($"Pinkod skickad till {email}: {pin}"); 
-                    return true;
-                }
-            }
-            // ANNARS: felmeddelande
-            return false;
-        }
+        //public bool RequestPincode(string email)
+        //{
+        //    // Går genom lista
+        //    foreach (var user in _userlist)
+        //    {
+        //        // Kollar  matchningar
+        //        if (string.Equals(user.EmailAddress, email, StringComparison.OrdinalIgnoreCase))
+        //        {
+        //            // Skapa en låtsas-pinkod
+        //            var random = new Random();
+        //            string pin = random.Next(000001, 999999).ToString(); // t.ex. "4723"
+        //            user.PinCode = pin;
+        //            // Ska egenltigen skicka pinkoden till t.ex. epost
+        //            // ...fast här gör jag det som ett popup-fönster istället! 
+        //            MessageBox.Show($"Pinkod skickad till {email}: {pin}"); 
+        //            return true;
+        //        }
+        //    }
+        //    // ANNARS: felmeddelande
+        //    return false;
+        //}
         // METOD för att ÄNDRA lösenord (oavsett om det är pga glömt lösen eller annan anledning)
-        public bool ResetPassword(string pin)
-        {
-            // Går genom lista över registrerade användare
-            foreach (var user in _userlist)
-            {
-                // Kollar  matchningar
-                if (user.PinCode == pin) // villkor
-                {
-                    // OM SANT: skickar meddelade/tillåter ändra lösenord i UserDetails
-                    return true;
-                }
-            }
-            // ANNARS: Felmeddelande
-            return false;
-        }
+        //public bool ResetPassword(string pin)
+        //{
+            //// Går genom lista över registrerade användare
+            //foreach (var user in _userlist)
+            //{
+            //    // Kollar  matchningar
+            //    if (user.PinCode == pin) // villkor
+            //    {
+            //        // OM SANT: skickar meddelade/tillåter ändra lösenord i UserDetails
+            //        return true;
+            //    }
+            //}
+            //// ANNARS: Felmeddelande
+            //return false;
+        //}
         public bool ChangePassword(string newPassword, string repeatPassword)
         {
             // code to come... 

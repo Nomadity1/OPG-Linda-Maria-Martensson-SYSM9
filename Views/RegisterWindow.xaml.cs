@@ -27,45 +27,45 @@ namespace CookMaster.Views
             // Ta emot registreringsuppgifter 
             // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            // Instansierar User Manager ViewModel med objektet userManager
-            var userManagerVW = new UserManagerViewModel(userManager);
-            // ...och anger userManagerViewModel-objektet som datakontext
-            DataContext = userManagerVW;
+            // Instansierar register-ViewModel med objektet registerVM
+            var registerVW = new RegisterViewModel(userManager);
+            // ...och anger objektet som datakontext
+            DataContext = registerVW;
             // Anropar RegistrationSuccess-eventet i UserManagerViewModel
             // ...som tilldelar objektet det utfall som aktiveras 
             // s = sender (i det här fallet objektet userManagerVM)
             // e = eventets data (det som händer i klassen)
             // += betyder att vi prenumererar på ett event (t ex kopplar en metod till ett event,
             // som körs varje gång eventet triggas)
-            userManagerVW.RegistrationSuccess += (s, e) =>
+            registerVW.RegisterSuccess += (s, e) =>
             {
                 DialogResult = true; // meddelar framgång 
-                var loginWindow = new LogInWindow(); // Instansierar loginfönster
-                loginWindow.Show(); // Visar loginfönster
+                var mainWindow = new MainWindow(); // Instansierar loginfönster
+                mainWindow.Show(); // Visar loginfönster
                 this.Close(); // Stänger registreringsfönstret
             };
             // Påminner programmet om vilken datakontexten är
-            DataContext = userManagerVW;
+            DataContext = registerVW;
         }
 
         // METODER för att ta emot lösenord från passwordboxar i registrerings-fönstret
         // Övriga inmatningar är bundna direkt via DataContext och behöver inte inläsningsmetoder här
         private void NewPassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (DataContext is UserManagerViewModel userManagerVW)
+            if (DataContext is RegisterViewModel registerVW)
             {
-                // Egenskapen Password i UserManagerViewModel nås genom objektet userManagerVM
-                // ...och tilldelas inmatat värde från LogIn-fönstrets password-box "PassWord"
-                userManagerVW.Password = NewPassWord.Password;
+                // Egenskapen NewPassword i Register View Model tilldelas
+                // inmatat värde från registreringsfönstrets password-box "NewPassWord"
+                registerVW.NewPassword = NewPassWord.Password;
             }
         }
         private void RepeatPassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (DataContext is UserManagerViewModel userManagerVW)
+            if (DataContext is RegisterViewModel registerVW)
             {
-                // Egenskapen NewPassword i UserManagerViewModel nås genom objektet userManagerVM
-                // ...och tilldelas inmatat värde från LogIn-fönstrets password-box "PassWord"
-                userManagerVW.Password = NewPassWord.Password;
+                // Egenskapen RepeatPassword i Register View Model tilldelas
+                // inmatat värde från registreringsfönstrets password-box "RepeatPassWord"
+                registerVW.RepeatPassword = RepeatPassWord.Password;
             }
         }
     }

@@ -19,22 +19,42 @@ namespace CookMaster
     /// </summary>
     public partial class MainWindow : Window
     {
+        // UPPGIFTER: Ta emot inloggningsuppgifter, ta emot knapptryckningar (log in, register, forgot password) 
+
+        // PRIVAT FÄLT för instansiering längre ner 
+        private MainViewModel _mainViewModel;
         public MainWindow()
         {
             InitializeComponent();
 
-            // 1. Vill visa inloggad användare i hela projektet
-            // Instansierar UserManager genom global UserManager i app-resurser 
+            // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            // Instansierar Main-viewmodel med objektet userManager som parameter 
-            // och anger detta som datakontext 
-            DataContext = new MainWindowViewModel(userManager);
-
-            // Vid utloggning stängs Main 
-            Closing += (s, e) =>
+            // Instansierar register-ViewModel med objektet registerVM
+            var mainVW = new MainViewModel();
+            // ...och anger objektet som datakontext
+            DataContext = mainVW;
+            // Anropar LogInSuccess-eventet i MainViewModel
+            // ...som tilldelar objektet det utfall som aktiveras 
+            // s = sender (i det här fallet objektet mainVM)
+            // e = eventets data (det som händer i klassen)
+            // += betyder att vi prenumererar på ett event (t ex kopplar en metod till ett event,
+            // som körs varje gång eventet triggas)
+            mainVW.LogInSuccess += (s, e) =>
             {
-                userManager.Logout();
+                DialogResult = true; // Meddelar framgång 
+                Close(); // ...och stänger detta fönster
             };
+            // Påminner programmet om vilken datakontexten är
+            DataContext = mainVW;
+        }
+        // METOD för att ta emot lösenord från passwordbox (för att undvika bindning som hör hemma i en senare del av utbildningen) 
+        // UserName är bundet direkt via DataContext (UserManagerViewModel) och behöver inte en inläsningsmetod här
+        private void PassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            // Egenskapen Password i UserManagerViewModel nås genom objektet userManagerVM
+            if (DataContext is MainViewModel mainVW)
+                // ...och tilldelas inmatat värde från LogIn-fönstrets password-box "PassWord"
+                mainVW.Password = PassWord.Password;
         }
     }
 }

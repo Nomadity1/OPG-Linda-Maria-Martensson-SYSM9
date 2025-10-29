@@ -20,6 +20,7 @@ namespace CookMaster.Models
         // KONSTRUKTOR
         public AdminUser(string username, string password, string email, string country) : base(username, password, email, country)
         {
+            IsAdmin = true;
             UserName = username;
             Password = password;
             EmailAddress = email;

@@ -108,6 +108,7 @@ namespace CookMaster.ViewModels
             else
                 Error = message; // Tar meddelanden från UserManager 
         }
+
         // EVENT som Registrerings-fönstret "prenumererar" på
         // När registrering lyckas, körs alla metoder som är kopplade till detta event.
         public event System.EventHandler? RegisterSuccess; // Make event nullable

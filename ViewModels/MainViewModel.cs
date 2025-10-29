@@ -1,41 +1,34 @@
 ﻿using CookMaster.Managers;
+using CookMaster.Models;
 using CookMaster.MVVM;
+using CookMaster.ViewModels;
+using CookMaster.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.ViewModels
 {
-    class LogInViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
+    //HUVUDSAKLIG VIEWMODEL för HUVUDFÖNSTRET (MainWindow)
+    //UPPGIFTER: visa inloggad användare, visa receptlista, sök- och filtreringsfunktion
+    public class MainViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _username;
         private string _password;
-        private string _email;
-        private string _pin; // Hittepå-pinkod för att återställa glömt lösenord 
         private string _error;
+        //private readonly RecipeManager _recipeManager; SÅ SMÅNINGOM!! 
 
-        // KONSTRUKTOR 
-        public LogInViewModel(UserManager userManager)
-        {
-            // Tilldelar värde/parameter
-            _userManager = userManager;
-            _username = string.Empty; // Initierar med tom string
-            _email = string.Empty; // Initierar med tom string
-            _password = string.Empty; // Initierar med tom string
-            _error = string.Empty; // Initierar med tom string
-            _pin = string.Empty; // Initierar med tom string
-
-            // Anropar RelayCommand för inloggningskommando
-            LogInCommand = new RelayCommand(execute => Login(), canExecute => CanLogin());
-        }
+        // PUBLIK EGENSKAP som använder sig av UserManager-klassen (skapar förutsättning för samarbete med UserManager)
+        public UserManager UserManager { get; }
 
         // PUBLIKA EGENSKAPER med mera effektiv deklaration 
         public string UserName
@@ -48,25 +41,26 @@ namespace CookMaster.ViewModels
             get => _password;
             set { _password = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
         }
-        public string Email
-        {
-            get => _email;
-            set { _email = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-        }
-        public string Pin
-        {
-            get => _pin;
-            set { _pin = value; OnPropertyChanged(); }
-        }
         public string Error
         {
             get => _error;
             set { _error = value; OnPropertyChanged(); }
         }
 
-        // DEFINIERAR KOMMANDON 
-        // LOG IN-KOMMANDO via ICommand i RelayCommandManager
+        // PUBLIKA KOMMANDO-EGENSKAPER (använder basklass RelayCommand)
+        // FÖR INLOGGNINGSKNAPP
         public ICommand LogInCommand { get; }
+        // FÖR REGISTRERINGSKNAPP
+        public ICommand OpenRegisterCommand { get; }
+        // FÖR LÖSENORDSÅTERSTÄLLNINGSKNAPP 
+        public ICommand ResetPasswordCommand { get; }
+
+        // KONSTRUKTOR med villkorssats för att visa login-fönster och användare 
+        public MainViewModel() // Upprättar samarbete mln Main och UserManager
+        {
+            _userManager = new UserManager();
+            //_recipeManager = new RecipeManager(); SENARE!
+        }
 
         // METOD för att aktivera inloggningsknapp
         private bool CanLogin() =>
@@ -75,8 +69,10 @@ namespace CookMaster.ViewModels
         // METOD för inloggningskommando
         private void Login()
         {
-            // Anropar Login-metod i UserManager
-            if (_userManager.Login(UserName, Password)) // Kollar matchning genom att anropa metod i UserManager
+            // Anropar ValidateLogInmetod i UserManager,
+            // Har bytt namn på metod för att förtydliga att metoden i UserManager
+            // är en annan metod än denna vi är i nu
+            if (_userManager.ValidateLogin(UserName, Password)) // Kollar matchning genom att anropa metod i UserManager
                 // Om inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
                 // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
                 // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
@@ -87,13 +83,29 @@ namespace CookMaster.ViewModels
                 Error = "Fel användarnamn eller lösenord";
         }
 
-        // EVENT som Login-fönstret "prenumererar" på
+        // METOD för att aktivera registreringssknapp
+        private bool CanRegister() =>
+            !string.IsNullOrWhiteSpace(UserName);
+
+        // METOD för kommando att öppna registrering
+        public void OpenRegister()
+        {
+            // Instansierar registreringsvyn
+            var registerWindow = new RegisterWindow();
+            // ...och visar den 
+            registerWindow.Show(); 
+            // Instansierar den bakomliggande viewmodellen
+            var registerVM = new RegisterViewModel(_userManager);
+            // ...och anropar dess register-metoden 
+            registerVM.Register();
+        }
+        public void ResetPassword()
+        {
+
+        }
+        // EVENT att "prenumerera" på för relevanta fönster 
         // När login lyckas, körs alla metoder som är kopplade till detta event.
         public event System.EventHandler? LogInSuccess; // Make event nullable
-
-        // EVENT som Login-fönstret "prenumererar" på
-        // När knappen trycks, körs de metoder som är kopplade till detta event.
-        public event System.EventHandler? SignUpSelected; // Make event nullable
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
