@@ -21,14 +21,14 @@ namespace CookMaster.Views
     /// </summary>
     public partial class UserDetailsWindow : Window
     {
-        // UPPGIFTER: Ta emot, spara och uppdatera användaruppgifter
+        // UPPGIFTER: Visa befintliga uppgifter, ta emot eventuella ändringar, spara (=uppdatera) användaruppgifter
         public UserDetailsWindow()
         {
             InitializeComponent();
             // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
             // Instansierar userdetails-ViewModel med objektet userDetailsVW 
-            var userDetailsVW = new RegisterViewModel(userManager);
+            var userDetailsVW = new UserDetailsWindow(userManager);
             // ...och anger objektet som datakontext
             DataContext = userDetailsVW;
             // Anropar UpdateSuccess-eventet i userDetailsViewModel
@@ -47,7 +47,25 @@ namespace CookMaster.Views
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = userDetailsVW;
-
+        }
+        // Metod för att ta emot nytt lösenord
+        private void PassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UserDetailsWindow userDetailsVW)
+            {
+                // Egenskapen NewPassword i User Details View Model tilldelas
+                // inmatat värde från registreringsfönstrets password-box "NewPassWord"
+                userDetailsVW.UpdatedPassword = PassWord.Password;
+            }
+        }
+        // Metod för att ta emot upprepatlösenord
+        private void RepeatedPassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UserDetailsWindow userDetailsVW)
+            {
+                // Egenskapen RepeatedPassword i User Details View Model tilldelas
+                // inmatat värde från registreringsfönstrets password-box "RepeatPassWord"
+                userDetailsVW.RepeatedPassWord = RepeatedPassWord.Password;
         }
     }
 }

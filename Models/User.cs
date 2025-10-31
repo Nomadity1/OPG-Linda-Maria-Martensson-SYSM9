@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
@@ -11,7 +12,8 @@ namespace CookMaster.Models
     {
         // PUBLIKA AUTO-IMPLEMENTERADE EGENSKAPER
         public required string UserName { get; set; } 
-        public required string Password { get; set; } 
+        public required string Password { get; set; }
+        public required string PasswordRepeat { get; set; }
         public required string EmailAddress { get; set; } 
         public required string Country { get; set; }
 

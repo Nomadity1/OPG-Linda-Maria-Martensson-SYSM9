@@ -55,9 +55,9 @@ namespace CookMaster.Managers
         private void CreateDefaultUsers()
         {
             // Lägger till administratör genom att anropa konstruktorn med argument (konstruktorn kräver parametrar)
-            _userlist.Add(new AdminUser { UserName = "admin", Password = "password", EmailAddress = "adminuser@live.se", Country = "Sweden" });
+            _userlist.Add(new AdminUser { UserName = "admin", Password = "password", PasswordRepeat = "password", EmailAddress = "adminuser@live.se", Country = "Sweden" });
             // Lägger till användare genom konstruktorn 
-            _userlist.Add(new User { UserName = "user", Password = "password", EmailAddress = "user@live.se", Country = "Sweden" });
+            _userlist.Add(new User { UserName = "user", Password = "password", PasswordRepeat = "password", EmailAddress = "user@live.se", Country = "Sweden" });
         }
 
         // METOD för att logga in (autentisering)
@@ -126,7 +126,7 @@ namespace CookMaster.Managers
             else
             {
                 // Skapar ett användarobjekt
-                var user = new User { UserName = username, Password = newPassword, EmailAddress = email, Country = country };
+                var user = new User { UserName = username, Password = newPassword, PasswordRepeat = "", EmailAddress = email, Country = country };
                 // Skapar en egenskap för land
                 var setCountry = user.GetType();
                 var CountryProperty = setCountry.GetProperty("Countries", BindingFlags.Public | BindingFlags.Instance);
@@ -162,27 +162,109 @@ namespace CookMaster.Managers
             // ANNARS: felmeddelande
             return false;
         }
-        // METOD för att ÄNDRA lösenord (oavsett om det är pga glömt lösen eller annan anledning)
-        //public bool ResetPassword(string pin)
-        //{
-        //// Går genom lista över registrerade användare
-        //foreach (var user in _userlist)
-        //{
-        //    // Kollar  matchningar
-        //    if (user.PinCode == pin) // villkor
-        //    {
-        //        // OM SANT: skickar meddelade/tillåter ändra lösenord i UserDetails
-        //        return true;
-        //    }
-        //}
-        //// ANNARS: Felmeddelande
-        //return false;
-        //}
+        public (bool success, string message) UserNameUpdate(User updated)
+        {
+            bool updateSuccess = false; 
+            string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
 
-        public (bool success, string message) UpdateDetails(User updated)
+            // Grundantagande: updated user != user
+            // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
+            var userIndex = _userlist.FindIndex(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
+            if (userIndex >= 0)
+            {
+                _userlist[userIndex] = updated;
+            }
+            // Korta IF-satser för kontroll
+            // Alla fält är ifyllda? 
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(repeatPassword))
+                return (false, "Alla fält måste fyllas i.");
+
+            // Användarnamn ledigt?
+            if (_userlist.Any(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase))
+                return (false, "Användarnamnet är upptaget");
+
+            // Uppfyller kraven? 
+            if (updated.UserName.Length > 3 && updated.UserName.Length < 9)
+                return (false, "Användarnamnet är ogiltigt");
+            else
+            {
+                // Tilldelar nytt värde? 
+
+            }
+            // Meddela framgång
+            return (true, messageUpdate);
+        }
+        public (bool success, string message) UpdateEmail(User updated)
         {
             bool updateSuccess = false;
             string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
+            var email = updated.EmailAddress;
+
+            // Grundantagande: updated user != user
+            // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
+            var userIndex = _userlist.FindIndex(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
+            if (userIndex >= 0)
+            {
+                _userlist[userIndex] = updated;
+            }
+
+            // Korta IF-satser för kontroll
+            // Fält ifyllda? 
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(repeatPassword))
+                return (false, "Alla fält måste fyllas i.");
+
+            // Kontroll om användare (användaruppgifter) redan finns i lista över användare
+            if (_userlist.Any(user => user.EmailAddress.Equals(updated.EmailAddress, StringComparison.OrdinalIgnoreCase)))
+                return (false, "Epostadressen är redan registrerad");
+
+            // Validera användarnamn 
+            if (updated.UserName.Length > 3 && updated.UserName.Length < 9)
+                return (false, "Användarnamnet är ogiltigt");
+
+            // Validera lösenord
+            string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
+            if (updated.Password.Length > 4 && updated.Password.Length < 9 && updated.Password.Any(char.IsUpper) && updated.Password.Any(char.IsLower)
+                    && updated.Password.Any(char.IsDigit) && updated.Password.Contains(specialCharacters))
+                return (false, "Lösenordet är ogiltig");
+
+            // Validera upprepat lösenord
+            if (updated.Password != updated.PasswordRepeat)
+                return (false, "Lösenorden matchar inte varandra.");
+
+            // Validera upprepat lösenord
+            if (updated.Password != updated.PasswordRepeat)
+                return (false, "Lösenorden matchar inte varandra.");
+
+            // Validera e-postadress 
+            if (updated.EmailAddress.Contains("@") && updated.EmailAddress.IndexOf('.') > updated.EmailAddress.IndexOf('@'))
+                return (false, "E-postadressen är ogiltig");
+
+            // Kontrollera att land valts
+            if (!string.IsNullOrWhiteSpace(updated.Country))
+                return (false, "Välj det land du bor i.");
+            else
+            {
+                // Skapar ett användarobjekt
+                var user = new User { UserName = username, Password = newPassword, PasswordRepeat = "", EmailAddress = email, Country = country };
+                // Skapar en egenskap för land
+                var setCountry = user.GetType();
+                var CountryProperty = setCountry.GetProperty("Countries", BindingFlags.Public | BindingFlags.Instance);
+                // Lägg till i lista över användare
+                _userlist.Add(user);
+            }
+            // Meddela framgång
+            return (true, messageUpdate);
+        }
+        public (bool success, string message) UpdateDetails()
+        {
+            bool updateSuccess = false;
+            string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
+            var username = _
+                UpdatedUserName;
+            var email = updated.EmailAddress;
+            var newPassword = Password;
+            var repeatPassword = updated.PasswordRepeat;
+            var country = updated.Country;
 
             // Grundantagande: updated user != user
             // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
@@ -193,42 +275,184 @@ namespace CookMaster.Managers
                 _userlist[userIndex] = updated;
             }
 
-
+            //string username, string email, string newPassword, string repeatPassword, string country
             // Implementerar korta IF-satser för kontroll
             // Kontrollera att alla fält är ifyllda 
-            if (!string.IsNullOrWhiteSpace(username) || !string.IsNullOrWhiteSpace(email) || !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(repeatPassword))
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(repeatPassword))
                 return (false, "Alla fält måste fyllas i.");
 
             // Kontroll om användare (användaruppgifter) redan finns i lista över användare
-            if (_userlist.Any(user => user.UserName.Equals(username, StringComparison.OrdinalIgnoreCase) ||
-            user.EmailAddress.Equals(email, StringComparison.OrdinalIgnoreCase)))
+            if (_userlist.Any(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase) ||
+            user.EmailAddress.Equals(updated.EmailAddress, StringComparison.OrdinalIgnoreCase)))
                 return (false, "Användarnamnet eller epostadressen är redan registrerad");
 
             // Validera användarnamn 
-            if (username.Length > 3 && username.Length < 9)
+            if (updated.UserName.Length > 3 && updated.UserName.Length < 9)
                 return (false, "Användarnamnet är ogiltigt");
 
             // Validera lösenord
             string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
-            if (newPassword.Length > 4 && newPassword.Length < 9 && newPassword.Any(char.IsUpper) && newPassword.Any(char.IsLower)
-                    && newPassword.Any(char.IsDigit) && newPassword.Contains(specialCharacters))
+            if (updated.Password.Length > 4 && updated.Password.Length < 9 && updated.Password.Any(char.IsUpper) && updated.Password.Any(char.IsLower)
+                    && updated.Password.Any(char.IsDigit) && updated.Password.Contains(specialCharacters))
                 return (false, "Lösenordet är ogiltig");
 
             // Validera upprepat lösenord
-            if (newPassword != repeatPassword)
+            if (updated.Password != updated.PasswordRepeat)
+                return (false, "Lösenorden matchar inte varandra.");
+
+            // Validera upprepat lösenord
+            if (updated.Password != updated.PasswordRepeat)
                 return (false, "Lösenorden matchar inte varandra.");
 
             // Validera e-postadress 
-            if (email.Contains("@") && email.IndexOf('.') > email.IndexOf('@'))
+            if (updated.EmailAddress.Contains("@") && updated.EmailAddress.IndexOf('.') > updated.EmailAddress.IndexOf('@'))
                 return (false, "E-postadressen är ogiltig");
 
             // Kontrollera att land valts
-            if (!string.IsNullOrWhiteSpace(country))
+            if (!string.IsNullOrWhiteSpace(updated.Country))
                 return (false, "Välj det land du bor i.");
             else
             {
                 // Skapar ett användarobjekt
-                var user = new User { UserName = username, Password = newPassword, EmailAddress = email, Country = country };
+                var user = new User { UserName = username, Password = newPassword, PasswordRepeat = "", EmailAddress = email, Country = country };
+                // Skapar en egenskap för land
+                var setCountry = user.GetType();
+                var CountryProperty = setCountry.GetProperty("Countries", BindingFlags.Public | BindingFlags.Instance);
+                // Lägg till i lista över användare
+                _userlist.Add(user);
+            }
+            // Meddela framgång
+            return (true, messageUpdate);
+        }
+        public (bool success, string message) UpdateDetails()
+        {
+            bool updateSuccess = false;
+            string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
+            var username = _
+                UpdatedUserName;
+            var email = updated.EmailAddress;
+            var newPassword = Password;
+            var repeatPassword = updated.PasswordRepeat;
+            var country = updated.Country;
+
+            // Grundantagande: updated user != user
+            // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
+            //var user = _userlist.FirstOrDefault(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
+            var userIndex = _userlist.FindIndex(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
+            if (userIndex >= 0)
+            {
+                _userlist[userIndex] = updated;
+            }
+
+            //string username, string email, string newPassword, string repeatPassword, string country
+            // Implementerar korta IF-satser för kontroll
+            // Kontrollera att alla fält är ifyllda 
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(repeatPassword))
+                return (false, "Alla fält måste fyllas i.");
+
+            // Kontroll om användare (användaruppgifter) redan finns i lista över användare
+            if (_userlist.Any(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase) ||
+            user.EmailAddress.Equals(updated.EmailAddress, StringComparison.OrdinalIgnoreCase)))
+                return (false, "Användarnamnet eller epostadressen är redan registrerad");
+
+            // Validera användarnamn 
+            if (updated.UserName.Length > 3 && updated.UserName.Length < 9)
+                return (false, "Användarnamnet är ogiltigt");
+
+            // Validera lösenord
+            string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
+            if (updated.Password.Length > 4 && updated.Password.Length < 9 && updated.Password.Any(char.IsUpper) && updated.Password.Any(char.IsLower)
+                    && updated.Password.Any(char.IsDigit) && updated.Password.Contains(specialCharacters))
+                return (false, "Lösenordet är ogiltig");
+
+            // Validera upprepat lösenord
+            if (updated.Password != updated.PasswordRepeat)
+                return (false, "Lösenorden matchar inte varandra.");
+
+            // Validera upprepat lösenord
+            if (updated.Password != updated.PasswordRepeat)
+                return (false, "Lösenorden matchar inte varandra.");
+
+            // Validera e-postadress 
+            if (updated.EmailAddress.Contains("@") && updated.EmailAddress.IndexOf('.') > updated.EmailAddress.IndexOf('@'))
+                return (false, "E-postadressen är ogiltig");
+
+            // Kontrollera att land valts
+            if (!string.IsNullOrWhiteSpace(updated.Country))
+                return (false, "Välj det land du bor i.");
+            else
+            {
+                // Skapar ett användarobjekt
+                var user = new User { UserName = username, Password = newPassword, PasswordRepeat = "", EmailAddress = email, Country = country };
+                // Skapar en egenskap för land
+                var setCountry = user.GetType();
+                var CountryProperty = setCountry.GetProperty("Countries", BindingFlags.Public | BindingFlags.Instance);
+                // Lägg till i lista över användare
+                _userlist.Add(user);
+            }
+            // Meddela framgång
+            return (true, messageUpdate);
+        }
+        public (bool success, string message) UpdateDetails()
+        {
+            bool updateSuccess = false;
+            string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
+            var username = _
+                UpdatedUserName;
+            var email = updated.EmailAddress;
+            var newPassword = Password;
+            var repeatPassword = updated.PasswordRepeat;
+            var country = updated.Country;
+
+            // Grundantagande: updated user != user
+            // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
+            //var user = _userlist.FirstOrDefault(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
+            var userIndex = _userlist.FindIndex(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
+            if (userIndex >= 0)
+            {
+                _userlist[userIndex] = updated;
+            }
+
+            //string username, string email, string newPassword, string repeatPassword, string country
+            // Implementerar korta IF-satser för kontroll
+            // Kontrollera att alla fält är ifyllda 
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(repeatPassword))
+                return (false, "Alla fält måste fyllas i.");
+
+            // Kontroll om användare (användaruppgifter) redan finns i lista över användare
+            if (_userlist.Any(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase) ||
+            user.EmailAddress.Equals(updated.EmailAddress, StringComparison.OrdinalIgnoreCase)))
+                return (false, "Användarnamnet eller epostadressen är redan registrerad");
+
+            // Validera användarnamn 
+            if (updated.UserName.Length > 3 && updated.UserName.Length < 9)
+                return (false, "Användarnamnet är ogiltigt");
+
+            // Validera lösenord
+            string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
+            if (updated.Password.Length > 4 && updated.Password.Length < 9 && updated.Password.Any(char.IsUpper) && updated.Password.Any(char.IsLower)
+                    && updated.Password.Any(char.IsDigit) && updated.Password.Contains(specialCharacters))
+                return (false, "Lösenordet är ogiltig");
+
+            // Validera upprepat lösenord
+            if (updated.Password != updated.PasswordRepeat)
+                return (false, "Lösenorden matchar inte varandra.");
+
+            // Validera upprepat lösenord
+            if (updated.Password != updated.PasswordRepeat)
+                return (false, "Lösenorden matchar inte varandra.");
+
+            // Validera e-postadress 
+            if (updated.EmailAddress.Contains("@") && updated.EmailAddress.IndexOf('.') > updated.EmailAddress.IndexOf('@'))
+                return (false, "E-postadressen är ogiltig");
+
+            // Kontrollera att land valts
+            if (!string.IsNullOrWhiteSpace(updated.Country))
+                return (false, "Välj det land du bor i.");
+            else
+            {
+                // Skapar ett användarobjekt
+                var user = new User { UserName = username, Password = newPassword, PasswordRepeat = "", EmailAddress = email, Country = country };
                 // Skapar en egenskap för land
                 var setCountry = user.GetType();
                 var CountryProperty = setCountry.GetProperty("Countries", BindingFlags.Public | BindingFlags.Instance);
