@@ -65,20 +65,29 @@ namespace CookMaster.Managers
 
         // METOD för att logga in (autentisering)
         public bool ValidateLogin(string username, string password)
-        { 
+        {
             // Går genom lista
             foreach (var user in _userlist)
             {
                 // Kollar  matchningar
-                if (!string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase)
-                    || user.Password != password)
+                if (!string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase))
                 {
-                    // OM SANT (användaruppgifter finns inte i listan)
+                    // OM SANT (användaruppgifter INTE finns i listan)
+                    MessageBox.Show("Användarnamnet finns inte");
                     return false;
                 }
-                else
+                else if (string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase)
+                    && user.Password != password)
                 {
-                    // ANNARS: tilldelar user till CurrentUser
+                    // ANNARS OM SANT (användaruppgifter finns i listan men lösenordet matchar INTE)
+                    MessageBox.Show("Fel lösenord");
+                    return false;
+                }
+                else if (string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase)
+                    && user.Password == password)
+                {
+                    // ANNARS OM SANT (användaruppgifter finns i listan OCH lösenordet matchar)
+                    // tilldelar user till CurrentUser
                     CurrentUser = user;
                     // Instansierar receptvyn
                     var recipeList = new RecipeListWindow();
@@ -90,15 +99,15 @@ namespace CookMaster.Managers
                             window.Close();
                             break;
                         }
-                        // ...och visar den
-                        recipeList.Show();
+                        // ...och visar receptvyn
+                        recipeList.ShowDialog();
                     }
                 }
             }
             // och hälsar viewmodel att login är successful!
             return true;
         }
-        // Metod för utloggning
+        // METOD för utloggning
         public void Logout()
         {
             CurrentUser = null;
@@ -113,7 +122,7 @@ namespace CookMaster.Managers
                     break;
                 }
                 // ...och visar den
-                mainWindow.Show();
+                mainWindow.ShowDialog();
             }
         }
 
@@ -123,7 +132,7 @@ namespace CookMaster.Managers
             // Instansierar registreringsfönster
             var registerWindow = new RegisterWindow();
             // Visar registreringsfönster
-            registerWindow.Show();
+            registerWindow.ShowDialog();
         }
 
         // METOD för att registrera ny användare
@@ -184,7 +193,7 @@ namespace CookMaster.Managers
                         break;
                     }
                     // ...och visar den
-                    mainWindow.Show();
+                    mainWindow.ShowDialog();
                 }
                 // Meddela framgång
                 return (true, messageRegistration);
@@ -216,7 +225,7 @@ namespace CookMaster.Managers
                 // Instansierar userdetails-fönster
                 UserDetailsWindow userDetailsWindow = new UserDetailsWindow();
                 // Visar userdetails-fönster
-                userDetailsWindow.Show();
+                userDetailsWindow.ShowDialog();
                 // stäng Main (denna window är troligen MainWindow)
                 foreach (Window window in Application.Current.Windows)
                 {
@@ -227,7 +236,7 @@ namespace CookMaster.Managers
                     }
                 }
                 // ...och visar den
-                userDetailsWindow.Show();
+                userDetailsWindow.ShowDialog();
             }
             return true;
         }

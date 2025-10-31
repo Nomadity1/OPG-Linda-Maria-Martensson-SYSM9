@@ -42,9 +42,8 @@
                      HorizontalAlignment="Left" />
         <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding UpdatedEmail}" Width="100" Height="20" 
                  HorizontalAlignment="Left" />
-        <ComboBox Grid.Row="6" Grid.Column="1" x:Name="CountryComboBox"  
-                  SelectedItem="{Binding UpdatedSelectedCountry, Mode=TwoWay, 
-            UpdateSourceTrigger=PropertyChanged}" 
+        <ComboBox Grid.Row="6" Grid.Column="1" x:Name="CountryComboBox" ItemsSource="{Binding Countries}" 
+                  SelectedItem="{Binding UpdatedSelectedCountry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                   Width="100" Height="20"  HorizontalAlignment="Left" />
         <!--Hjälptexter-->
         <TextBlock Grid.Row="2" Grid.Column="2" 

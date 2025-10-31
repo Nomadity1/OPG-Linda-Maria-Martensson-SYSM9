@@ -16,6 +16,8 @@ namespace CookMaster.Models
         
         // ÄRVER EGENSKAPER FRÅN USER
         public AdminUser() : base() { }
+        private List<User> _userlist; // Lista över alla användare                                       
+
 
         //// KONSTRUKTOR
         //public AdminUser(string username, string password, string email, string country) : base(username, password, email, country)
@@ -35,6 +37,14 @@ namespace CookMaster.Models
         public void DeleteRecipes()
         {
 
+        }
+        public void DisplayAllUsers()
+        {
+            Console.WriteLine("Displaying all users...");
+            foreach (var user in _userlist)
+            {
+                Console.WriteLine($"Username: {user.UserName}, Email: {user.EmailAddress}, Country: {user.Country}");
+            }
         }
         public void ManageUsers()
         {

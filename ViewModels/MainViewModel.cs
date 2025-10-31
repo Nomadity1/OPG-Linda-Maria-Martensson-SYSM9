@@ -70,28 +70,29 @@ namespace CookMaster.ViewModels
         // PUBLIKA METOD-DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
         // FÖR INLOGGNING, REGISTRERING & LÖSENORDSÅTERSTÄLLNING
         public RelayCommand LogInCommand => new RelayCommand(execute => Login(), canExecute => CanLogin());
-
         public RelayCommand OpenRegisterCommand => new RelayCommand(execute => OpenRegister(), canExecute => CanOpenRegister());
-
+        public RelayCommand ForgotPasswordCommand => new RelayCommand(execute => ForgotPassword(), canExecute => CanForgotPassword());
         public RelayCommand ResetPasswordCommand => new RelayCommand(execute => ResetPassword(), canExecute => CanResetPassword());
 
         // METODER för att aktivera knappar
         private bool CanLogin() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password);
         private bool CanOpenRegister() => true; // Alltid aktiv
+        private bool CanForgotPassword() =>
+            !string.IsNullOrWhiteSpace(UsernamePwdReq);
         private bool CanResetPassword() =>
-            !string.IsNullOrWhiteSpace(UsernamePwdReq) && !string.IsNullOrWhiteSpace(Answer);
+            !string.IsNullOrWhiteSpace(Answer);
 
         // METOD - INLOGGNING 
         private void Login()
         {
             // Kontrollera att alla fält är ifyllda 
-            if (!string.IsNullOrWhiteSpace(UserName) || !string.IsNullOrWhiteSpace(Password))
+            if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Password))
             {
                 MessageBox.Show("Alla fält måste fyllas i.");
                 return;
             }
-            // Anropar metod i UserManager för att validera inloggning
+            // Anropar metod i UserManager, skickar input dit för att validera begäran
             else if (_userManager.ValidateLogin(UserName, Password))
             {
                 LogInSuccess?.Invoke(this, System.EventArgs.Empty);
@@ -110,26 +111,28 @@ namespace CookMaster.ViewModels
             var registerWindow = new RegisterWindow();
             registerWindow.ShowDialog();
         }
-        public void ResetPassword() // UsernamePwdReq, Answer || !string.IsNullOrWhiteSpace(Password)
+        public void ForgotPassword() // UsernamePwdReq, Answer || !string.IsNullOrWhiteSpace(Password)
         {
-            // Kontrollera att alla fält är ifyllda 
-            if (!string.IsNullOrWhiteSpace(UsernamePwdReq))
+            // Kontrollera att  fält är ifyllt
+            if (string.IsNullOrWhiteSpace(UsernamePwdReq))
             {
                 MessageBox.Show("Användarnamn måste fyllas i.");
                 return;
             }
-            // Anropar metod i UserManager för att validera inloggning
-            else if (_userManager.ResetPassword(UserName, Answer))
+        }
+        public void ResetPassword() 
+        {
+            // Anropar metod i UserManager, skickar input dit för att validera begäran
+            if (_userManager.ResetPassword(UserName, Answer))
             {
                 ResetPasswordSuccess?.Invoke(this, System.EventArgs.Empty);
             }
         }
 
         // EVENT att "prenumerera" på för relevanta fönster 
-        // När login lyckas, körs alla metoder som är kopplade till detta event
+        // När begäran lyckas, körs alla metoder som är kopplade till eventet
         public event System.EventHandler? LogInSuccess; // Make event nullable
-        // EVENT att "prenumerera" på för relevanta fönster
-        // När reset-request lyckas, körs alla metoder som är kopplade till detta event
+        public event System.EventHandler? ForgotPasswordSuccess; // Make event nullable
         public event System.EventHandler? ResetPasswordSuccess; // Make event nullable
 
 

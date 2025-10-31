@@ -23,7 +23,7 @@ namespace CookMaster
         // UPPGIFTER: Ta emot inloggningsuppgifter, ta emot knapptryckningar (log in, register, forgot password) 
 
         // PRIVAT FÄLT för instansiering längre ner 
-        private MainViewModel? _mainViewModel;
+        //private MainViewModel? _mainViewModel;
         public MainWindow()
         {
             InitializeComponent();
