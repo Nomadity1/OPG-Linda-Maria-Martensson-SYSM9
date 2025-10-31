@@ -14,7 +14,7 @@ namespace CookMaster.MVVM
         // Implementera INotifyPropertyChanged genom generellt EVENT 
         public event PropertyChangedEventHandler? PropertyChanged;
         // ...och och generell METOD 
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

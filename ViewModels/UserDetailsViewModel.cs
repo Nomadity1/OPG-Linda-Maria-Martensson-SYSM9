@@ -1,4 +1,5 @@
 ﻿using CookMaster.Managers;
+using CookMaster.Models;
 using CookMaster.MVVM;
 using CookMaster.Views;
 using System;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -97,10 +99,10 @@ namespace CookMaster.ViewModels
             set { _error = value; OnPropertyChanged(); }
         }
 
-        // REGISTER-KOMMANDO via ICommand in RelayCommandManager
+        // KOMMANDO för att ändra uppgifter via ICommand in RelayCommandManager
         public RelayCommand UpdateUserNameCommand => new RelayCommand(execute => UpdateUserName(), canExecute => CanUpdateUserName());
 
-        // METOD för att aktivera registreringssknapp
+        // METOD för att aktivera knapp
         private bool CanUpdateUserName() =>
             !string.IsNullOrWhiteSpace(UpdatedUserName);
 
@@ -108,10 +110,19 @@ namespace CookMaster.ViewModels
         public void UpdateUserName()
         {
             // Grundantagande: updated user details != user details 
-            // Anropar UpdateDetails-metod i UserManager
-            //UpdatedUserName, UpdatedEmail, UpdatedPassword, RepeatedPassword, UpdatedSelectedCountry
-            //var (success, message) = _userManager.Register(NewUserName, Email, NewPassword, RepeatPassword, SelectedCountry);
-            var (success, message) = _userManager.UserNameUpdate(UpdatedUserName);
+            // Instansierar User och skapar objektet updated
+            var current = _userManager.CurrentUser;
+            var updated = new User
+            {
+                UserName = UpdatedUserName,
+                Password = current?.Password ?? string.Empty,
+                PasswordRepeat = current?.Password ?? string.Empty,
+                EmailAddress = current?.EmailAddress ?? string.Empty,
+                Country = current?.Country ?? string.Empty
+            };
+
+            // Anropar metod i UserManager
+            var (success, message) = _userManager.UserNameUpdate(updated);
             // Kollar matchning genom att anropa metod i UserManager
             // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
             // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
@@ -134,11 +145,19 @@ namespace CookMaster.ViewModels
         // METODER för att ändra användaruppgifter - Kopplat till uppdateringskommando 
         public void UpdatePassword()
         {
-            // Grundantagande: updated user details != user details 
-            // Anropar UpdateDetails-metod i UserManager
-            //UpdatedUserName, UpdatedEmail, UpdatedPassword, RepeatedPassword, UpdatedSelectedCountry
-            //var (success, message) = _userManager.Register(NewUserName, Email, NewPassword, RepeatPassword, SelectedCountry);
-            var (success, message) = _userManager.UpdateDetails(UpdatedPassword, UpdatedRepeatedPassword);
+            // Instansierar User och skapar objektet updated
+            var current = _userManager.CurrentUser;
+            var updated = new User
+            {
+                UserName = UpdatedUserName,
+                Password = current?.Password ?? string.Empty,
+                PasswordRepeat = current?.Password ?? string.Empty,
+                EmailAddress = current?.EmailAddress ?? string.Empty,
+                Country = current?.Country ?? string.Empty
+            };
+
+            // Anropar metod i UserManager
+            var (success, message) = _userManager.PasswordUpdate(updated);
             // Kollar matchning genom att anropa metod i UserManager
             // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
             // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
@@ -160,11 +179,19 @@ namespace CookMaster.ViewModels
         // METODER för att ändra användaruppgifter - Kopplat till uppdateringskommando 
         public void UpdateEmail()
         {
-            // Grundantagande: updated user details != user details 
-            // Anropar UpdateDetails-metod i UserManager
-            //UpdatedUserName, UpdatedEmail, UpdatedPassword, RepeatedPassword, UpdatedSelectedCountry
-            //var (success, message) = _userManager.Register(NewUserName, Email, NewPassword, RepeatPassword, SelectedCountry);
-            var (success, message) = _userManager.UpdateDetails(UpdatedEmail);
+            // Instansierar User och skapar objektet updated
+            var current = _userManager.CurrentUser;
+            var updated = new User
+            {
+                UserName = UpdatedUserName,
+                Password = current?.Password ?? string.Empty,
+                PasswordRepeat = current?.Password ?? string.Empty,
+                EmailAddress = current?.EmailAddress ?? string.Empty,
+                Country = current?.Country ?? string.Empty
+            };
+
+            // Anropar metod i UserManager
+            var (success, message) = _userManager.EmailUpdate(updated);
             // Kollar matchning genom att anropa metod i UserManager
             // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
             // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
@@ -187,11 +214,19 @@ namespace CookMaster.ViewModels
         // METODER för att ändra användaruppgifter - Kopplat till uppdateringskommando 
         public void UpdateCountry()
         {
-            // Grundantagande: updated user details != user details 
-            // Anropar UpdateDetails-metod i UserManager
-            //UpdatedUserName, UpdatedEmail, UpdatedPassword, RepeatedPassword, UpdatedSelectedCountry
-            //var (success, message) = _userManager.Register(NewUserName, Email, NewPassword, RepeatPassword, SelectedCountry);
-            var (success, message) = _userManager.UpdateDetails(UpdatedSelectedCountry);
+            // Instansierar User och skapar objektet updated
+            var current = _userManager.CurrentUser;
+            var updated = new User
+            {
+                UserName = UpdatedUserName,
+                Password = current?.Password ?? string.Empty,
+                PasswordRepeat = current?.Password ?? string.Empty,
+                EmailAddress = current?.EmailAddress ?? string.Empty,
+                Country = current?.Country ?? string.Empty
+            };
+
+            // Anropar metod i UserManager
+            var (success, message) = _userManager.PasswordUpdate(updated);
             // Kollar matchning genom att anropa metod i UserManager
             // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
             // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
@@ -202,6 +237,49 @@ namespace CookMaster.ViewModels
                 UpdateSuccess?.Invoke(this, System.EventArgs.Empty);
             else
                 Error = message; // Tar meddelanden från UserManager 
+        }
+
+        // SPARA- och AVBRYT-KOMMANDON via ICommand in RelayCommandManager
+        public RelayCommand SaveCommand => new RelayCommand(execute => SaveUserDetails(), canExecute => CanSaveUserDetails());
+
+        public RelayCommand CancelCommand => new RelayCommand(execute => CancelUserDetails(), canExecute => CanCancelUserDetails());
+
+        // METOD för att aktivera knappar
+        private bool CanSaveUserDetails() => true;
+        private bool CanCancelUserDetails() => true;
+
+        public void SaveUserDetails()
+        {
+            // Instansierar receptvyn
+            var recipelistWindow = new RecipeListWindow();
+            // stäng Main (denna window är troligen MainWindow)
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is UserDetailsWindow)
+                {
+                    window.Close();
+                    break;
+                }
+            }
+            // ...och visar den
+            recipelistWindow.Show();
+        }
+
+        public void CancelUserDetails()
+        {
+            // Instansierar receptvynster
+            var recipelistWindow = new RecipeListWindow();
+            // stäng Main (denna window är troligen MainWindow)
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is UserDetailsWindow)
+                {
+                    window.Close();
+                    break;
+                }
+            }
+            // ...och visar den
+            recipelistWindow.Show();
         }
 
         // EVENT som userdetails-fönstret "prenumererar" på

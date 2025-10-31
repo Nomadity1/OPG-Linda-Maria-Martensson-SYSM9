@@ -14,20 +14,8 @@ namespace CookMaster
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            // Fick tips av chatGPT att lägga ShowLogin här! 
-            //ShowLogIn();
             // Låt inte programmet stängas automatiskt när MainWindow stängs
             Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-
-            // METOD för avv visa inloggnignsfönstret
         }
-        //private void ShowLogin()
-        //{
-        //    var login = new LogInWindow();
-        //    var result = login.ShowDialog();
-        //    // Stänger om inloggning avbryts
-        //    if (result != true)
-        //        Application.Current.Shutdown();
-        //}
     }
 }

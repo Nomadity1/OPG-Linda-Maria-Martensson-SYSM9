@@ -23,21 +23,21 @@ namespace CookMaster.Models
         // Egenskap för "hela" användarens info 
         public User() { }
 
-        // KONSTRUKTOR
-        public User(string username, string password, string email, string country)
-        {
-            UserName = username;
-            Password = password;
-            EmailAddress = email;
-            Country = country;
-        }
-        // Konstruktor för ny användare
-        public User(string username, string newPassword, string repeatPassword, string email, string country)
-        {
-            UserName = username;
-            Password = newPassword;
-            EmailAddress = email;
-            Country = country;
-        }
+        //// KONSTRUKTOR
+        //public User(string username, string password, string email, string country)
+        //{
+        //    UserName = username;
+        //    Password = password;
+        //    EmailAddress = email;
+        //    Country = country;
+        //}
+        //// Konstruktor för ny användare
+        //public User(string username, string newPassword, string repeatPassword, string email, string country)
+        //{
+        //    UserName = username;
+        //    Password = newPassword;
+        //    EmailAddress = email;
+        //    Country = country;
+        //}
     }
 }

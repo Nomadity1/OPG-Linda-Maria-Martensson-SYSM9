@@ -41,7 +41,7 @@
         <!--ÅTERSTÄLLA LÖSENORD GENOM EMAIL - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
         <TextBlock Grid.Row="5" Grid.Column="0" Text="Forgot your password?" Width="160" HorizontalAlignment="Center" Margin="0" />
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Enter username:" TextWrapping="Wrap" Width="160" />
-        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Width="140" Height="26" />
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding UsernamePwdReq, UpdateSourceTrigger=PropertyChanged}" Width="140" Height="26" />
         <Button Grid.Row="6" Grid.Column="2" Content="Forgot password" Command="{Binding ForgotPasswordCommand}" FontSize="12" Width="100" Height="26" />
         <TextBlock Grid.Row="7" Grid.Column="0" Text="Answer:" Width="160" />
         <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Answer}" Width="140" Height="26" />

@@ -25,6 +25,7 @@ namespace CookMaster.ViewModels
         private readonly UserManager _userManager;
         private string _username;
         private string _password;
+        private string _usernamePwdReq; // Används för lösenordsåterställning
         private string _answer;
         private string _error;
         //private readonly RecipeManager _recipeManager; SÅ SMÅNINGOM!! 
@@ -43,6 +44,11 @@ namespace CookMaster.ViewModels
             get => _password;
             set { _password = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
         }
+        public string UsernamePwdReq
+        {
+            get => _usernamePwdReq;
+            set { _usernamePwdReq = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+        }
         public string Answer
         {
             get => _answer;
@@ -54,45 +60,46 @@ namespace CookMaster.ViewModels
             set { _error = value; OnPropertyChanged(); }
         }
 
-        // KONSTRUKTOR med villkorssats för att visa login-fönster och användare 
-        public MainViewModel() // Upprättar samarbete mln Main och UserManager
+        // KONSTRUKTOR som upprättar samarbete mln Main och UserManager resp RecipeManager
+        public MainViewModel() 
         {
             _userManager = new UserManager();
             //_recipeManager = new RecipeManager(); SENARE!
         }
 
-        // PUBLIKA METOD-DEFINITIONER I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
-        // FÖR INLOGGNING
+        // PUBLIKA METOD-DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
+        // FÖR INLOGGNING, REGISTRERING & LÖSENORDSÅTERSTÄLLNING
         public RelayCommand LogInCommand => new RelayCommand(execute => Login(), canExecute => CanLogin());
 
-        // FÖR ATT ÖPPNA REGISTRERINGSVYN
         public RelayCommand OpenRegisterCommand => new RelayCommand(execute => OpenRegister(), canExecute => CanOpenRegister());
 
-        // FÖR LÖSENORDSÅTERSTÄLLNINGSKNAPP 
         public RelayCommand ResetPasswordCommand => new RelayCommand(execute => ResetPassword(), canExecute => CanResetPassword());
-
 
         // METODER för att aktivera knappar
         private bool CanLogin() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password);
         private bool CanOpenRegister() => true; // Alltid aktiv
         private bool CanResetPassword() =>
-            !string.IsNullOrWhiteSpace(UserName) 
-            && !string.IsNullOrWhiteSpace(Answer);
+            !string.IsNullOrWhiteSpace(UsernamePwdReq) && !string.IsNullOrWhiteSpace(Answer);
 
-        // METOD för inloggningskommando
+        // METOD - INLOGGNING 
         private void Login()
         {
-            // Anropar ValidateLogInmetod i UserManager,
-            // Har bytt namn på metod för att förtydliga att metoden i UserManager
-            // är en annan metod än denna vi är i nu
-            if (_userManager.ValidateLogin(UserName, Password)) // Kollar matchning genom att anropa metod i UserManager
-                // Om inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
-                // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
-                // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
-                // this = Referens till den aktuella instandsen av klass som gör anropet
-                // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med eventet 
+            // Kontrollera att alla fält är ifyllda 
+            if (!string.IsNullOrWhiteSpace(UserName) || !string.IsNullOrWhiteSpace(Password))
+            {
+                MessageBox.Show("Alla fält måste fyllas i.");
+                return;
+            }
+            // Anropar metod i UserManager för att validera inloggning
+            else if (_userManager.ValidateLogin(UserName, Password))
+            {
                 LogInSuccess?.Invoke(this, System.EventArgs.Empty);
+            }
+            // Om inloggning lyckas anropas (invoke) EVENTET LogInSuccess, som alla "prenumeranter" lyssnar på
+            // ? = OM success inte är null, kalla Invoke(); - annars gör inget 
+            // this = Referens till den aktuella instansen av klass som gör anropet
+            // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med eventet 
             else
                 Error = "Fel användarnamn eller lösenord";
         }
@@ -100,22 +107,31 @@ namespace CookMaster.ViewModels
         // METOD för kommando att öppna registrering
         public void OpenRegister()
         {
-            // Instansierar registreringsvyn
             var registerWindow = new RegisterWindow();
-            // ...och visar den 
-            registerWindow.Show();
+            registerWindow.ShowDialog();
         }
-        public void ResetPassword()
+        public void ResetPassword() // UsernamePwdReq, Answer || !string.IsNullOrWhiteSpace(Password)
         {
-            // Instansierar userdetails-fönster
-            UserDetailsWindow userDetailsWindow = new UserDetailsWindow();
-            // Visar userdetails-fönster
-            userDetailsWindow.Show();
+            // Kontrollera att alla fält är ifyllda 
+            if (!string.IsNullOrWhiteSpace(UsernamePwdReq))
+            {
+                MessageBox.Show("Användarnamn måste fyllas i.");
+                return;
+            }
+            // Anropar metod i UserManager för att validera inloggning
+            else if (_userManager.ResetPassword(UserName, Answer))
+            {
+                ResetPasswordSuccess?.Invoke(this, System.EventArgs.Empty);
+            }
         }
 
         // EVENT att "prenumerera" på för relevanta fönster 
-        // När login lyckas, körs alla metoder som är kopplade till detta event.
+        // När login lyckas, körs alla metoder som är kopplade till detta event
         public event System.EventHandler? LogInSuccess; // Make event nullable
+        // EVENT att "prenumerera" på för relevanta fönster
+        // När reset-request lyckas, körs alla metoder som är kopplade till detta event
+        public event System.EventHandler? ResetPasswordSuccess; // Make event nullable
+
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;

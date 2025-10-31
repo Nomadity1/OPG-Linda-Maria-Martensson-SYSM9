@@ -27,7 +27,6 @@ namespace CookMaster
         public MainWindow()
         {
             InitializeComponent();
-
             // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
             // Instansierar register-ViewModel med objektet registerVM

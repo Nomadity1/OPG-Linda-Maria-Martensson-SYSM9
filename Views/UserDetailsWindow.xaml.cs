@@ -28,7 +28,7 @@ namespace CookMaster.Views
             // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
             // Instansierar userdetails-ViewModel med objektet userDetailsVW 
-            var userDetailsVW = new UserDetailsWindow(userManager);
+            var userDetailsVW = new UserDetailsViewModel(userManager);
             // ...och anger objektet som datakontext
             DataContext = userDetailsVW;
             // Anropar UpdateSuccess-eventet i userDetailsViewModel
@@ -49,23 +49,24 @@ namespace CookMaster.Views
             DataContext = userDetailsVW;
         }
         // Metod för att ta emot nytt lösenord
-        private void PassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        private void UpdatedPassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (DataContext is UserDetailsWindow userDetailsVW)
+            if (DataContext is UserDetailsViewModel userDetailsVW)
             {
                 // Egenskapen NewPassword i User Details View Model tilldelas
-                // inmatat värde från registreringsfönstrets password-box "NewPassWord"
-                userDetailsVW.UpdatedPassword = PassWord.Password;
+                // inmatat värde från userdetails-fönstrets password-box "NewPassWord"
+                userDetailsVW.UpdatedPassword = UpdatedPassWord.Password;
             }
         }
         // Metod för att ta emot upprepatlösenord
-        private void RepeatedPassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        private void UpdatedRepeatedPassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (DataContext is UserDetailsWindow userDetailsVW)
+            if (DataContext is UserDetailsViewModel userDetailsVW)
             {
                 // Egenskapen RepeatedPassword i User Details View Model tilldelas
                 // inmatat värde från registreringsfönstrets password-box "RepeatPassWord"
-                userDetailsVW.RepeatedPassWord = RepeatedPassWord.Password;
+                userDetailsVW.UpdatedRepeatedPassword = UpdatedRepeatedPassWord.Password;
+            }
         }
     }
 }

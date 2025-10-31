@@ -18,7 +18,7 @@ namespace CookMaster.MVVM
         private Action<object> execute;
 
         //FUNKTION som kontrollerar om kommando kan köras (=canExecute) 
-        private Func<object, bool> canExecute;
+        private Func<object, bool>? canExecute;
 
         //EVENT som signalerar när kommandots möjlighet att köras har ändrats
         public event EventHandler? CanExecuteChanged

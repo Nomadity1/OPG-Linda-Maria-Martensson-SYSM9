@@ -17,15 +17,15 @@ namespace CookMaster.Models
         // ÄRVER EGENSKAPER FRÅN USER
         public AdminUser() : base() { }
 
-        // KONSTRUKTOR
-        public AdminUser(string username, string password, string email, string country) : base(username, password, email, country)
-        {
-            IsAdmin = true;
-            UserName = username;
-            Password = password;
-            EmailAddress = email;
-            Country = country; 
-        }
+        //// KONSTRUKTOR
+        //public AdminUser(string username, string password, string email, string country) : base(username, password, email, country)
+        //{
+        //    IsAdmin = true;
+        //    UserName = username;
+        //    Password = password;
+        //    EmailAddress = email;
+        //    Country = country; 
+        //}
 
         // METODER 
         public void DisplayAllRecipes()
