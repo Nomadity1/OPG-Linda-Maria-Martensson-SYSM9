@@ -27,6 +27,7 @@ namespace CookMaster.ViewModels
         private string _updatedEmail;
         private string _updatedSelectedCountry;
         private string _error;
+        private User currentUser;
 
         // KONSTRUKTOR 
         public UserDetailsViewModel(UserManager userManager)
@@ -39,6 +40,15 @@ namespace CookMaster.ViewModels
             _updatedEmail = string.Empty; // Initierar med tom string
             _updatedSelectedCountry = string.Empty; // Initierar med tom string
             _error = string.Empty; // Initierar med tom string
+        }
+
+        public UserDetailsViewModel(User currentUser)
+        {
+            this.currentUser = currentUser;
+        }
+
+        public UserDetailsViewModel()
+        {
         }
 
         // ANVÄNDA REGISTER som förlaga! 
@@ -117,7 +127,7 @@ namespace CookMaster.ViewModels
                 UserName = UpdatedUserName,
                 Password = current?.Password ?? string.Empty,
                 PasswordRepeat = current?.Password ?? string.Empty,
-                EmailAddress = current?.EmailAddress ?? string.Empty,
+                Email = current?.Email ?? string.Empty,
                 Country = current?.Country ?? string.Empty
             };
 
@@ -152,7 +162,7 @@ namespace CookMaster.ViewModels
                 UserName = UpdatedUserName,
                 Password = current?.Password ?? string.Empty,
                 PasswordRepeat = current?.Password ?? string.Empty,
-                EmailAddress = current?.EmailAddress ?? string.Empty,
+                Email = current?.Email ?? string.Empty,
                 Country = current?.Country ?? string.Empty
             };
 
@@ -186,7 +196,7 @@ namespace CookMaster.ViewModels
                 UserName = UpdatedUserName,
                 Password = current?.Password ?? string.Empty,
                 PasswordRepeat = current?.Password ?? string.Empty,
-                EmailAddress = current?.EmailAddress ?? string.Empty,
+                Email = current?.Email ?? string.Empty,
                 Country = current?.Country ?? string.Empty
             };
 
@@ -221,7 +231,7 @@ namespace CookMaster.ViewModels
                 UserName = UpdatedUserName,
                 Password = current?.Password ?? string.Empty,
                 PasswordRepeat = current?.Password ?? string.Empty,
-                EmailAddress = current?.EmailAddress ?? string.Empty,
+                Email = current?.Email ?? string.Empty,
                 Country = current?.Country ?? string.Empty
             };
 
@@ -242,34 +252,43 @@ namespace CookMaster.ViewModels
         // SPARA- och AVBRYT-KOMMANDON via ICommand in RelayCommandManager
         public RelayCommand SaveCommand => new RelayCommand(execute => SaveUserDetails(), canExecute => CanSaveUserDetails());
 
-        public RelayCommand CancelCommand => new RelayCommand(execute => CancelUserDetails(), canExecute => CanCancelUserDetails());
+        public RelayCommand CancelCommand => new RelayCommand(CancelUserDetails);
 
         // METOD för att aktivera knappar
         private bool CanSaveUserDetails() => true;
-        private bool CanCancelUserDetails() => true;
 
+        // METODER för att SPARA, AVBRYTA och STÄNGA FÖNSTER
         public void SaveUserDetails()
         {
-            // Instansierar receptvyn
-            var recipelistWindow = new RecipeListWindow();
-            // stäng Main (denna window är troligen MainWindow)
-            foreach (Window window in Application.Current.Windows)
+            // Alla fält ifyllda?
+            if (string.IsNullOrWhiteSpace(UpdatedUserName) ||
+                string.IsNullOrWhiteSpace(UpdatedPassword) ||
+                string.IsNullOrWhiteSpace(UpdatedRepeatedPassword) ||
+                string.IsNullOrWhiteSpace(UpdatedEmail) ||
+                string.IsNullOrWhiteSpace(UpdatedSelectedCountry))
             {
-                if (window is UserDetailsWindow)
-                {
-                    window.Close();
-                    break;
-                }
+                // Annars:
+                MessageBox.Show("Alla fält måste vara ifyllda!");
+                return;
             }
-            // ...och visar den
+            // Instansierar och visar receptvyn
+            var recipelistWindow = new RecipeListWindow();
             recipelistWindow.Show();
+            // Anropar fönsterstängare
+            CloseCurrentWindow();
+        }
+        public void CancelUserDetails(object parameter) // Ingen inmatning krävs, tar bara emot objekt-parameter från knapp
+        {
+            // Instansierar och visar receptvyn
+            var recipelistWindow = new RecipeListWindow();
+            recipelistWindow.Show();
+            // Anropar fönsterstängare
+            CloseCurrentWindow();
         }
 
-        public void CancelUserDetails()
+        // EN METOD för att stänga fönster
+        private void CloseCurrentWindow()
         {
-            // Instansierar receptvynster
-            var recipelistWindow = new RecipeListWindow();
-            // stäng Main (denna window är troligen MainWindow)
             foreach (Window window in Application.Current.Windows)
             {
                 if (window is UserDetailsWindow)
@@ -278,8 +297,6 @@ namespace CookMaster.ViewModels
                     break;
                 }
             }
-            // ...och visar den
-            recipelistWindow.Show();
         }
 
         // EVENT som userdetails-fönstret "prenumererar" på

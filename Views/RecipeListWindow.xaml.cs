@@ -22,20 +22,27 @@ namespace CookMaster.Views
     /// </summary>
     public partial class RecipeListWindow : Window
     {
+        private RecipeListViewModel recipeListVM;
+
         // UPPGIFTER: Visa receptlista, hantera recept (lägg till, redigera, ta bort), sökfunktion, filtreringsfunktion?
 
-        // PRIVAT FÄLT för instansiering längre ner 
-        private MainViewModel? _mainViewModel;
         public RecipeListWindow()
         {
             InitializeComponent();
-
             //// Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
-            //var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            //// Instansierar register-ViewModel med objektet registerVM
-            //var recipeListVW = new RecipeListViewModel(user, _recipeManager, _userManager);
-            //// ...och anger objektet som datakontext
-            //DataContext = recipeListVW;
+            var userManager = (UserManager)Application.Current.Resources["UserManager"];
+            // Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
+            var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+
+            // Instansierar tillhörande ViewModel med objektet recipeListVM
+            var recipeListVW = new RecipeListViewModel();
+            // ...och anger objektet som datakontext
+            DataContext = recipeListVW;
+        }
+
+        public RecipeListWindow(RecipeListViewModel recipeListVM)
+        {
+            this.recipeListVM = recipeListVM;
         }
     }
 }

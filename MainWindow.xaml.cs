@@ -29,7 +29,10 @@ namespace CookMaster
             InitializeComponent();
             // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            // Instansierar register-ViewModel med objektet registerVM
+            // Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
+            var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+
+            // Instansierar tillhörande ViewModel med objektet mainVM
             var mainVW = new MainViewModel();
             // ...och anger objektet som datakontext
             DataContext = mainVW;

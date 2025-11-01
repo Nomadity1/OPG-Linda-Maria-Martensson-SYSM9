@@ -5,8 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CookMaster.Views"
         mc:Ignorable="d"
-        Title="RecipeListWindow" Height="450" Width="800">
+        Title="RecipeListWindow" Height="450" Width="800" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
     <Grid>
-        
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="34" />
+        <!-- Överdel med användarnamn och knappar -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Right" >
+            <TextBlock Text="Logged in as: " VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding LoggedInUser}" VerticalAlignment="Center" FontSize="12" Width="100" Height="26" />
+            <Button Content="User" Command="{Binding UserDetailsCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
+            <Button Content="Sign Out" Command="{Binding SignOutCommand}" FontSize="12" Width="70" Height="26" />
+        </StackPanel>
+        <!-- Receptlista -->
+        <ListBox ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe}"
+                 DisplayMemberPath="Title" Grid.Row="1" Margin="5" Background="PaleTurquoise" />
+        <!-- Nedre knapprad -->
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+            <Button Content="Add Recipe" Command="{Binding AddRecipeCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
+            <Button Content="Details" Command="{Binding DetailsCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
+            <Button Content="Remove" Command="{Binding RemoveCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
+            <Button Content="Info" Command="{Binding InfoCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
+        </StackPanel>
     </Grid>
 </Window>

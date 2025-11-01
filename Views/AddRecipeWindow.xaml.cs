@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CookMaster.Managers;
+using CookMaster.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,9 +21,18 @@ namespace CookMaster.Views
     /// </summary>
     public partial class AddRecipeWindow : Window
     {
-        public AddRecipeWindow()
+        public AddRecipeWindow(AddRecipeViewModel addRecipeVM) //Anger tillhörande ViewModel med objekt som parameter
         {
             InitializeComponent();
+
+            // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
+            var userManager = (UserManager)Application.Current.Resources["UserManager"];
+            // Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
+            var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+            
+            //var addRecipeVM = new AddRecipeViewModel(); 
+            // ...och anger objektet som datakontext
+            DataContext = addRecipeVM;
         }
     }
 }

@@ -14,30 +14,26 @@ namespace CookMaster.Models
         public required string UserName { get; set; } 
         public required string Password { get; set; }
         public required string PasswordRepeat { get; set; }
-        public required string EmailAddress { get; set; } 
+        public required string Email { get; set; } 
         public required string Country { get; set; }
-
-        // En enklare flagga som visar om användaren är admin eller ej.
-        public bool IsAdmin { get; set; } = false;
-
-        // Egenskap för "hela" användarens info 
-        public User() { }
-
-        //// KONSTRUKTOR
-        //public User(string username, string password, string email, string country)
-        //{
-        //    UserName = username;
-        //    Password = password;
-        //    EmailAddress = email;
-        //    Country = country;
-        //}
-        //// Konstruktor för ny användare
-        //public User(string username, string newPassword, string repeatPassword, string email, string country)
-        //{
-        //    UserName = username;
-        //    Password = newPassword;
-        //    EmailAddress = email;
-        //    Country = country;
-        //}
+        public User()
+        {
+        }
+        public User(string userName, string password, string email, string country)
+        {
+            UserName = userName;
+            Password = password;
+            PasswordRepeat = password; // Ska tilldelas om inget värde
+            Email = email;
+            Country = country;
+        }
+        public User(string userName, string password, string passwordRepeat, string email, string country)
+        {
+            UserName = userName;
+            Password = password;
+            PasswordRepeat = passwordRepeat;
+            Email = email;
+            Country = country;
+        }
     }
 }

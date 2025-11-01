@@ -15,29 +15,21 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.Managers
 {
-    // GENERELLT OM MANAGERS: Hanterar HUR DATA ANVÄNDS (snarare än definitioner av data (fält, egenskaper, (= MODELS) eller hur data visas (=VIEW MODELS)).
+    // MANAGERS Hanterar HUR DATA ANVÄNDS (snarare än definitioner av data (fält, egenskaper, (= MODELS)
+    // eller hur data visas (=VIEW MODELS)).
     // MANAGERS är LÄNKEN mellan MODELS och VIEW MODELS.   
-    // METODER OCH KOMMANDON FÖR INLOGGNING (inkl. validering av inmatning), CURRENTUSER, UTLOGGNING, REGISTRERING (inkl. validering av inmatning), CHANGEPASSWORD
+    // UPPGIFTER: KOMMANDON OCH METODER FÖR INLOGGNING, CURRENTUSER, UTLOGGNING, REGISTRERING,
+    // ÄNDRA UPPGIFTER OCH ÅTERSTÄLLA LÖSENORD 
     public class UserManager : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT som använder sig av User-klassen
-        private User? _currentUser; // Variabel för enskild användare - Frågetecknet anger att variabeln kan ha null-värde 
         private List<User> _userlist; // Lista över alla användare                                       
+        private User? _currentUser; // Variabel för aktuell (inloggad) användare
+                                    // Frågetecknet anger att variabeln kan ha null-värde 
 
         // PUBLIK EGENSKAP i form av Lista med fördefinierade alternativ för land 
-        public List<string> Countries { get; set; } = new List<string> { "Sweden", "Norway", "Denmark", "Finland", "New Zeeland", "Germany", "United Kingdom", "Other" };
-
-        // KONSTRUKTOR: Konstruerar klassen genom att skapa objektet _userlist av listan och 
-        public UserManager()
-        {
-            // Initierar listan över användare
-            _userlist = new List<User>();
-            if (!_userlist.Any())
-            {
-                // Anropar metod för att skapa basanvändare
-                CreateDefaultUsers();
-            }
-        }
+        public List<string> Countries { get; set; } = new List<string> { "Sweden", "Norway", "Denmark", "Finland", 
+            "New Zeeland", "Germany", "United Kingdom", "Other" };
 
         // PUBLIK (EGENSKAP) DEFINITION av inloggad användare
         public User? CurrentUser
@@ -51,59 +43,71 @@ namespace CookMaster.Managers
                 OnPropertyChanged(nameof(IsAuthenticated)); // för att visa status 
             }
         }
+ 
         //PUBLIK BOOL för att kunna visa inloggningsstatus
         public bool IsAuthenticated => CurrentUser != null;
+
+        // KONSTRUKTOR: Konstruerar klassen genom att instansiera listan och skapa objektet _userlist
+        public UserManager()
+        {
+            // Initierar listan över användare
+            _userlist = new List<User>();
+            // Kollar om listan är tom
+            if (!_userlist.Any())
+            {
+                // Anropar i så fall metod för att skapa basanvändare
+                CreateDefaultUsers();
+            }
+        }
 
         // METOD för att skapa standardanvändare för testning och utvärdering
         private void CreateDefaultUsers()
         {
-            // Lägger till administratör genom att anropa konstruktorn med argument (konstruktorn kräver parametrar)
-            _userlist.Add(new AdminUser { UserName = "admin", Password = "password", PasswordRepeat = "password", EmailAddress = "adminuser@live.se", Country = "Sweden" });
+            // Lägger till administratör genom att anropa konstruktorn med argument 
+            _userlist.Add(new AdminUser { UserName = "admin", Password = "password", 
+                PasswordRepeat = "password", Email = "adminuser@live.se", Country = "Sweden" });
             // Lägger till användare genom konstruktorn 
-            _userlist.Add(new User { UserName = "user", Password = "password", PasswordRepeat = "password", EmailAddress = "user@live.se", Country = "Sweden" });
+            _userlist.Add(new User { UserName = "user", Password = "password", 
+                PasswordRepeat = "password", Email = "user@live.se", Country = "Sweden" });
         }
 
         // METOD för att logga in (autentisering)
         public bool ValidateLogin(string username, string password)
         {
-            // Går genom lista
-            foreach (var user in _userlist)
+
+            // Funktion för att undvika att jag får svar (felmeddelande) vid första bästa träff 
+            // ... Vill gå vidare i valideringen
+            var user = _userlist.FirstOrDefault(user => string.Equals(user.UserName, username, 
+                StringComparison.OrdinalIgnoreCase));
+            if (user == null)
             {
-                // Kollar  matchningar
-                if (!string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase))
-                {
-                    // OM SANT (användaruppgifter INTE finns i listan)
-                    MessageBox.Show("Användarnamnet finns inte");
-                    return false;
-                }
-                else if (string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase)
-                    && user.Password != password)
-                {
-                    // ANNARS OM SANT (användaruppgifter finns i listan men lösenordet matchar INTE)
-                    MessageBox.Show("Fel lösenord");
-                    return false;
-                }
-                else if (string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase)
-                    && user.Password == password)
-                {
-                    // ANNARS OM SANT (användaruppgifter finns i listan OCH lösenordet matchar)
-                    // tilldelar user till CurrentUser
-                    CurrentUser = user;
-                    // Instansierar receptvyn
-                    var recipeList = new RecipeListWindow();
-                    // stänger MainWindow
-                    foreach (Window window in Application.Current.Windows)
-                    {
-                        if (window is MainWindow)
-                        {
-                            window.Close();
-                            break;
-                        }
-                        // ...och visar receptvyn
-                        recipeList.ShowDialog();
-                    }
-                }
+                // OM användaruppgifter INTE finns i listan
+                MessageBox.Show("Användarnamnet finns inte");
+                return false;
             }
+            if (user.Password != password)
+            {
+                MessageBox.Show("Fel lösenord");
+                return false;
+            }
+            // ANNARS  - användaruppgifter finns i listan OCH lösenordet matchar
+            // tilldelar user till CurrentUser
+            CurrentUser = user;
+
+            // stänger MainWindow
+            var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+            mainWindow?.Close();
+            //foreach (Window window in Application.Current.Windows)
+            //{
+            //    if (window is MainWindow)
+            //    {
+            //        window.Close();
+            //        break;
+            //    }
+            // ...och visar receptvyn
+            // Instansierar och visar receptvyn
+            var recipeList = new RecipeListWindow();
+            recipeList.ShowDialog();
             // och hälsar viewmodel att login är successful!
             return true;
         }
@@ -149,7 +153,7 @@ namespace CookMaster.Managers
 
             // Kontroll om användare (användaruppgifter) redan finns i lista över användare
             if (_userlist.Any(user => user.UserName.Equals(username, StringComparison.OrdinalIgnoreCase) ||
-            user.EmailAddress.Equals(email, StringComparison.OrdinalIgnoreCase)))
+            user.Email.Equals(email, StringComparison.OrdinalIgnoreCase)))
                 return (false, "Användarnamnet eller epostadressen är redan registrerad");
 
             // Validera användarnamn 
@@ -175,8 +179,8 @@ namespace CookMaster.Managers
                 return (false, "Välj det land du bor i.");
             else
             {
-                // Skapar ett användarobjekt
-                var user = new User { UserName = username, Password = newPassword, PasswordRepeat = "", EmailAddress = email, Country = country };
+                // Skapar ett nytt användarobjekt
+                var user = new User { UserName = username, Password = newPassword, PasswordRepeat = repeatPassword, Email = email, Country = country };
                 // Skapar en egenskap för land
                 var setCountry = user.GetType();
                 var CountryProperty = setCountry.GetProperty("Countries", BindingFlags.Public | BindingFlags.Instance);
@@ -247,7 +251,7 @@ namespace CookMaster.Managers
 
             // Korta IF-satser för kontroll
             // Alla fält är ifyllda? 
-            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.Email) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
                 return (false, "Alla fält måste fyllas i.");
 
             // Användaruppgift ledig?
@@ -274,15 +278,15 @@ namespace CookMaster.Managers
         {
             bool updateSuccess = false;
             string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
-            var email = updated.EmailAddress;
+            var email = updated.Email;
 
             // Korta IF-satser för kontroll
             // Fält ifyllda? 
-            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.Email) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
                 return (false, "Alla fält måste fyllas i.");
 
             // Användaruppgift ledig?
-            if (_userlist.Any(user => user.EmailAddress.Equals(updated.EmailAddress, StringComparison.OrdinalIgnoreCase)))
+            if (_userlist.Any(user => user.Email.Equals(updated.Email, StringComparison.OrdinalIgnoreCase)))
                 return (false, "Epostadressen är redan registrerad");
 
             // Uppfyller kraven? 
@@ -297,7 +301,7 @@ namespace CookMaster.Managers
             {
                 // Grundantagande: updated user != user
                 // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
-                var userIndex = _userlist.FindIndex(user => user.EmailAddress.Equals(updated.EmailAddress, StringComparison.OrdinalIgnoreCase));
+                var userIndex = _userlist.FindIndex(user => user.Email.Equals(updated.Email, StringComparison.OrdinalIgnoreCase));
                 if (userIndex >= 0)
                 {
                     _userlist[userIndex] = updated;
@@ -313,7 +317,7 @@ namespace CookMaster.Managers
 
             // Korta IF-satser för kontroll
             // Fält ifyllda? 
-            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.Email) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
                 return (false, "Alla fält måste fyllas i.");
 
             // Validera lösenord
@@ -349,7 +353,7 @@ namespace CookMaster.Managers
 
             // Implementerar korta IF-satser för kontroll
             // Kontrollera att alla fält är ifyllda 
-            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.EmailAddress) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
+            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.Email) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
                 return (false, "Alla fält måste fyllas i.");
 
             // Kontrollera att land valts

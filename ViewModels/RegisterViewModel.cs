@@ -25,19 +25,6 @@ namespace CookMaster.ViewModels
         private string _selectedCountry;
         private string _error;
 
-        // KONSTRUKTOR 
-        public RegisterViewModel(UserManager userManager)
-        {
-            // Tilldelar värde/parameter
-            _userManager = userManager;
-            _newUsername = string.Empty; // Initierar med tom string
-            _email = string.Empty; // Initierar med tom string
-            _newPassword = string.Empty; // Initierar med tom string
-            _repeatPassword = string.Empty; // Initierar med tom string
-            _selectedCountry = string.Empty; // Initierar med tom string
-            _error = string.Empty; // Initierar med tom string
-        }
-
         // PUBLIKA EGENSKAPER med mera effektiv deklaration 
         public string NewUserName
         {
@@ -64,8 +51,7 @@ namespace CookMaster.ViewModels
                 CommandManager.InvalidateRequerySuggested(); }
         }
 
-        // Koppla till listan över länder i UserManager så att den
-        // kan fungera som "ItemsSource" i View 
+        // Koppla till listan över länder i UserManager så att den ("ItemsSource" i View) 
         public List<string> Countries => _userManager.Countries;
 
         public string SelectedCountry
@@ -91,7 +77,20 @@ namespace CookMaster.ViewModels
             && !string.IsNullOrWhiteSpace(RepeatPassword) 
             && !string.IsNullOrWhiteSpace(SelectedCountry);
 
-        // METOD för registeringskommando 
+        // KONSTRUKTOR som upprättar samarbete med UserManager 
+        public RegisterViewModel(UserManager userManager)
+        {
+            // Tilldelar värde/parameter
+            _userManager = userManager;
+            _newUsername = string.Empty; // Initierar med tom string
+            _email = string.Empty; // Initierar med tom string
+            _newPassword = string.Empty; // Initierar med tom string
+            _repeatPassword = string.Empty; // Initierar med tom string
+            _selectedCountry = string.Empty; // Initierar med tom string
+            _error = string.Empty; // Initierar med tom string
+        }
+
+        // METOD för KOMMANDO
         public void Register()
         {
             // Anropar Registrerings-metod i UserManager

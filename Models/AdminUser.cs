@@ -10,45 +10,20 @@ namespace CookMaster.Models
     // När programmet startar ska en Admin-User med användarnamn “admin” (små bokstäver!) och
     // lösenord “password” (små bokstäver!) finnas. FINNAS = REGISTRERAD
 
-    internal class AdminUser : User // Barnklass till Föräldraklassen User 
+    public class AdminUser : User // Barnklass till Föräldraklassen User 
     {
-        // FÅR ATTRIBUT FRÅN FÖRÄLDRAKLASS (User)
+        // ÄRVER EGENSKAPER FRÅN FÖRÄLDRAKLASS (User)
         
-        // ÄRVER EGENSKAPER FRÅN USER
-        public AdminUser() : base() { }
-        private List<User> _userlist; // Lista över alla användare                                       
-
-
-        //// KONSTRUKTOR
-        //public AdminUser(string username, string password, string email, string country) : base(username, password, email, country)
-        //{
-        //    IsAdmin = true;
-        //    UserName = username;
-        //    Password = password;
-        //    EmailAddress = email;
-        //    Country = country; 
-        //}
-
-        // METODER 
-        public void DisplayAllRecipes()
+        // KONSTRUKTOR 
+        public AdminUser() : base()
         {
-
         }
-        public void DeleteRecipes()
+        public AdminUser(string userName, string password, string email, string country) : base(userName, password, email, country)
         {
-
-        }
-        public void DisplayAllUsers()
-        {
-            Console.WriteLine("Displaying all users...");
-            foreach (var user in _userlist)
-            {
-                Console.WriteLine($"Username: {user.UserName}, Email: {user.EmailAddress}, Country: {user.Country}");
-            }
-        }
-        public void ManageUsers()
-        {
-
+            UserName = userName;
+            Password = password;
+            Email = email;
+            Country = country;
         }
     }
 }

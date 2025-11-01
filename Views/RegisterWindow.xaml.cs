@@ -28,6 +28,9 @@ namespace CookMaster.Views
 
             // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
+            // Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
+            var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+
             // Instansierar register-ViewModel med objektet registerVM
             var registerVW = new RegisterViewModel(userManager);
             // ...och anger objektet som datakontext

@@ -23,17 +23,18 @@ namespace CookMaster.ViewModels
     {
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
+        private readonly RecipeManager _recipeManager;
         private string _username;
         private string _password;
         private string _usernamePwdReq; // Används för lösenordsåterställning
         private string _answer;
         private string _error;
-        //private readonly RecipeManager _recipeManager; SÅ SMÅNINGOM!! 
 
-        // PUBLIK EGENSKAP som använder sig av UserManager-klassen (skapar förutsättning för samarbete med UserManager)
+        // PUBLIKA EGENSKAPER som använder sig av UserManager- och RecipeManagerklassen (skapar förutsättning för samarbete)
         public UserManager UserManager { get; }
+        public RecipeManager RecipeManager { get; }
 
-        // PUBLIKA EGENSKAPER med mera effektiv deklaration 
+        // PUBLIKA EGENSKAPER med  effektiv deklaration 
         public string UserName
         { 
             get => _username;
@@ -60,24 +61,25 @@ namespace CookMaster.ViewModels
             set { _error = value; OnPropertyChanged(); }
         }
 
-        // KONSTRUKTOR som upprättar samarbete mln Main och UserManager resp RecipeManager
+        // KONSTRUKTOR som upprättar samarbete med UserManager resp RecipeManager
         public MainViewModel() 
         {
             _userManager = new UserManager();
-            //_recipeManager = new RecipeManager(); SENARE!
+            _recipeManager = new RecipeManager(); 
         }
 
         // PUBLIKA METOD-DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
         // FÖR INLOGGNING, REGISTRERING & LÖSENORDSÅTERSTÄLLNING
         public RelayCommand LogInCommand => new RelayCommand(execute => Login(), canExecute => CanLogin());
-        public RelayCommand OpenRegisterCommand => new RelayCommand(execute => OpenRegister(), canExecute => CanOpenRegister());
+        public RelayCommand OpenRegisterCommand => new RelayCommand(OpenRegister);
+        // execute => OpenRegister(), canExecute => CanOpenRegister()
         public RelayCommand ForgotPasswordCommand => new RelayCommand(execute => ForgotPassword(), canExecute => CanForgotPassword());
         public RelayCommand ResetPasswordCommand => new RelayCommand(execute => ResetPassword(), canExecute => CanResetPassword());
 
-        // METODER för att aktivera knappar
+        // METODER för att aktivera knappar ( i de fall när jag vill att de är inaktiva tills uppgifter fyllts i )
         private bool CanLogin() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password);
-        private bool CanOpenRegister() => true; // Alltid aktiv
+        //private bool CanOpenRegister() => true; // Alltid aktiv
         private bool CanForgotPassword() =>
             !string.IsNullOrWhiteSpace(UsernamePwdReq);
         private bool CanResetPassword() =>
@@ -106,12 +108,15 @@ namespace CookMaster.ViewModels
         }
 
         // METOD för kommando att öppna registrering
-        public void OpenRegister()
+        public void OpenRegister(object parameter) // Ingen inmatning krävs, tar bara emot objekt-parameter från knapp
         {
+            // Öppnar registreringsvyn
             var registerWindow = new RegisterWindow();
             registerWindow.ShowDialog();
+            // Anropar fönsterstängare
+            CloseCurrentWindow();
         }
-        public void ForgotPassword() // UsernamePwdReq, Answer || !string.IsNullOrWhiteSpace(Password)
+        public void ForgotPassword() 
         {
             // Kontrollera att  fält är ifyllt
             if (string.IsNullOrWhiteSpace(UsernamePwdReq))
@@ -119,13 +124,32 @@ namespace CookMaster.ViewModels
                 MessageBox.Show("Användarnamn måste fyllas i.");
                 return;
             }
+            else
+                // Anropar ResetPassword-metod nedanför 
+                ResetPassword();
         }
         public void ResetPassword() 
         {
             // Anropar metod i UserManager, skickar input dit för att validera begäran
             if (_userManager.ResetPassword(UserName, Answer))
             {
+                // Om inloggning lyckas anropas (invoke) EVENTET ResetPasswordSuccess, som alla "prenumeranter" lyssnar på
                 ResetPasswordSuccess?.Invoke(this, System.EventArgs.Empty);
+            }
+            // Anropar fönsterstängare
+            CloseCurrentWindow();
+        }
+
+        // EN METOD för att stänga fönster
+        private void CloseCurrentWindow()
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is Views.RecipeListWindow)
+                {
+                    window.Close();
+                    break;
+                }
             }
         }
 

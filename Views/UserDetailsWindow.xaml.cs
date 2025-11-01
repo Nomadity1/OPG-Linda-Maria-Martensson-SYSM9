@@ -21,13 +21,18 @@ namespace CookMaster.Views
     /// </summary>
     public partial class UserDetailsWindow : Window
     {
+        private UserDetailsViewModel userDetailsVM;
+
         // UPPGIFTER: Visa befintliga uppgifter, ta emot eventuella ändringar, spara (=uppdatera) användaruppgifter
         public UserDetailsWindow()
         {
             InitializeComponent();
             // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            // Instansierar userdetails-ViewModel med objektet userDetailsVW 
+            // Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
+            var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+
+            // Instansierar och upprättar samarbete med tillhörande ViewModel
             var userDetailsVW = new UserDetailsViewModel(userManager);
             // ...och anger objektet som datakontext
             DataContext = userDetailsVW;
@@ -48,6 +53,7 @@ namespace CookMaster.Views
             // Påminner programmet om vilken datakontexten är
             DataContext = userDetailsVW;
         }
+
         // Metod för att ta emot nytt lösenord
         private void UpdatedPassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
