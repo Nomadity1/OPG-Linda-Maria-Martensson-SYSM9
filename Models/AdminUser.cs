@@ -18,11 +18,15 @@ namespace CookMaster.Models
         public AdminUser() : base()
         {
         }
-        public AdminUser(string userName, string password, string email, string country) : base(userName, password, email, country)
+        public AdminUser(string userName, string password) : base(userName, password)
         {
             UserName = userName;
             Password = password;
-            Email = email;
+        }
+        public AdminUser(string userName, string password, string country) : base(userName, password, country)
+        {
+            UserName = userName;
+            Password = password;
             Country = country;
         }
     }

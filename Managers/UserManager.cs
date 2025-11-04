@@ -15,39 +15,28 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.Managers
 {
-    // MANAGERS Hanterar HUR DATA ANVÄNDS (snarare än definitioner av data (fält, egenskaper, (= MODELS)
-    // eller hur data visas (=VIEW MODELS)).
-    // MANAGERS är LÄNKEN mellan MODELS och VIEW MODELS.   
+    // MANAGERS hanterar HUR DATA ANVÄNDS och är LÄNKEN mellan MODELS och VIEW MODELS   
     // UPPGIFTER: KOMMANDON OCH METODER FÖR INLOGGNING, CURRENTUSER, UTLOGGNING, REGISTRERING,
-    // ÄNDRA UPPGIFTER OCH ÅTERSTÄLLA LÖSENORD 
+    // ÄNDRA UPPGIFTER OCH EVT. ÅTERSTÄLLA LÖSENORD 
     public class UserManager : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT som använder sig av User-klassen
         private List<User> _userlist; // Lista över alla användare                                       
         private User? _currentUser; // Variabel för aktuell (inloggad) användare
                                     // Frågetecknet anger att variabeln kan ha null-värde 
-
-        // PUBLIK EGENSKAP i form av Lista med fördefinierade alternativ för land 
-        public List<string> Countries { get; set; } = new List<string> { "Sweden", "Norway", "Denmark", "Finland", 
-            "New Zeeland", "Germany", "United Kingdom", "Other" };
-
-        // PUBLIK (EGENSKAP) DEFINITION av inloggad användare
-        public User? CurrentUser
-        {
-            get { return _currentUser; }
-            private set
-            {
-                // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
-                _currentUser = value;
+        // PUBLIKA EGENSKAPER 
+        public User? CurrentUser // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
+        { get { return _currentUser; } 
+            set { _currentUser = value;
                 OnPropertyChanged(nameof(CurrentUser)); // för att visa vem
                 OnPropertyChanged(nameof(IsAuthenticated)); // för att visa status 
             }
         }
- 
-        //PUBLIK BOOL för att kunna visa inloggningsstatus
-        public bool IsAuthenticated => CurrentUser != null;
+        public List<string> Countries { get; set; } = new List<string> { "Sweden", "Norway", "Denmark", "Finland", 
+            "New Zeeland", "Germany", "United Kingdom", "Other" }; // Fördefinierade alternativ för land i registrering 
+        public bool IsAuthenticated => CurrentUser != null; // PUBLIK BOOL för att kunna visa inloggningsstatus
 
-        // KONSTRUKTOR: Konstruerar klassen genom att instansiera listan och skapa objektet _userlist
+        // KONSTRUKTOR instansierar användarlistan med objektet _userlist
         public UserManager()
         {
             // Initierar listan över användare
@@ -64,315 +53,159 @@ namespace CookMaster.Managers
         private void CreateDefaultUsers()
         {
             // Lägger till administratör genom att anropa konstruktorn med argument 
-            _userlist.Add(new AdminUser { UserName = "admin", Password = "password", 
-                PasswordRepeat = "password", Email = "adminuser@live.se", Country = "Sweden" });
-            // Lägger till användare genom konstruktorn 
-            _userlist.Add(new User { UserName = "user", Password = "password", 
-                PasswordRepeat = "password", Email = "user@live.se", Country = "Sweden" });
+            _userlist.Add(new AdminUser
+            {
+                UserName = "admin",
+                Password = "password",
+                Country = "Sweden"
+            });
+            // Lägger till vanlig användare genom att anropa basklassens konstruktorn
+            _userlist.Add(new User
+            {
+                UserName = "user",
+                Password = "password",
+                Country = "Sweden"
+            });
+        }
+        // METOD som hjälper till att stänga fönster om typ anges i respektive metod 
+        private void CloseWindow<T>() where T : Window
+        {
+            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
+            win?.Close();
         }
 
         // METOD för att logga in (autentisering)
-        public bool ValidateLogin(string username, string password)
+        public (bool success, string message) LogIn(string username, string password)
         {
-
-            // Funktion för att undvika att jag får svar (felmeddelande) vid första bästa träff 
-            // ... Vill gå vidare i valideringen
-            var user = _userlist.FirstOrDefault(user => string.Equals(user.UserName, username, 
+            // Funktion för att hitta användarnamn i lista
+            var user = _userlist.FirstOrDefault(u => string.Equals(u.UserName, username,
                 StringComparison.OrdinalIgnoreCase));
-            if (user == null)
-            {
-                // OM användaruppgifter INTE finns i listan
+
+            if (user == null) // OM användaruppgifter INTE finns i listan
+            {   
                 MessageBox.Show("Användarnamnet finns inte");
-                return false;
             }
-            if (user.Password != password)
+            else if (user.Password != password) // OM lösenordet ÄR FEL 
             {
                 MessageBox.Show("Fel lösenord");
-                return false;
             }
-            // ANNARS  - användaruppgifter finns i listan OCH lösenordet matchar
-            // tilldelar user till CurrentUser
+            // ANNARS dvs användaruppgifter finns i listan OCH lösenordet är rätt: 
+            // Tilldelar user till CurrentUser
             CurrentUser = user;
-
-            // stänger MainWindow
-            var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-            mainWindow?.Close();
-            //foreach (Window window in Application.Current.Windows)
-            //{
-            //    if (window is MainWindow)
-            //    {
-            //        window.Close();
-            //        break;
-            //    }
-            // ...och visar receptvyn
-            // Instansierar och visar receptvyn
+            // Stänger fönster med hjälpmetod ovan
+            CloseWindow<MainWindow>();
+            // Öppnar receptlistan
             var recipeList = new RecipeListWindow();
             recipeList.ShowDialog();
-            // och hälsar viewmodel att login är successful!
-            return true;
+            // Meddelar framgång
+            return (true, "Du har loggats in.");
         }
         // METOD för utloggning
         public void Logout()
         {
             CurrentUser = null;
-            // Instansierar inloggnignsvyn
+            // Stänger receptfönster och öppnar inloggningsfönstret igen
+            CloseWindow<RecipeListWindow>();
             var mainWindow = new MainWindow();
-            // stänger Receptvyn
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window is RecipeListWindow)
-                {
-                    window.Close();
-                    break;
-                }
-                // ...och visar den
-                mainWindow.ShowDialog();
-            }
+            mainWindow.ShowDialog();
         }
-
         // METOD för att öppna registreringsfönster
         public void OpenRegisterWindow()
         {
-            // Instansierar registreringsfönster
+            // Anropar fönsterstängare
+            CloseWindow<MainWindow>();
             var registerWindow = new RegisterWindow();
-            // Visar registreringsfönster
             registerWindow.ShowDialog();
         }
 
         // METOD för att registrera ny användare
-        public (bool success, string message) Register(string username, string email, string newPassword, string repeatPassword, string country)
+        public (bool success, string message) Register(string username, string password, string country)
         {
             bool registrationSuccess = false;
-            string messageRegistration = registrationSuccess ? "Registrering lyckades. Dina uppgifter är sparade." : "";
+            string messageRegistration = registrationSuccess ? "Registrering lyckades." : "Registrering misslyckades.";
 
-            // Implementerar korta IF-satser för kontroll
-
-            // Kontrollera att alla fält är ifyllda 
-            if (!string.IsNullOrWhiteSpace(username) || !string.IsNullOrWhiteSpace(email) || !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(repeatPassword))
-                return (false, "Alla fält måste fyllas i.");
-
-            // Kontroll om användare (användaruppgifter) redan finns i lista över användare
-            if (_userlist.Any(user => user.UserName.Equals(username, StringComparison.OrdinalIgnoreCase) ||
-            user.Email.Equals(email, StringComparison.OrdinalIgnoreCase)))
-                return (false, "Användarnamnet eller epostadressen är redan registrerad");
-
-            // Validera användarnamn 
-            if (username.Length > 3 && username.Length < 9) 
+            // Kontroller för registrering
+            if (IsUsernameTaken(username))
+                return (false, "Användarnamnet är redan registrerat");
+            if (!IsValidUsername(username))
                 return (false, "Användarnamnet är ogiltigt");
-
-            // Validera lösenord
-            string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
-            if (newPassword.Length > 4 && newPassword.Length < 9 && newPassword.Any(char.IsUpper) && newPassword.Any(char.IsLower)
-                    && newPassword.Any(char.IsDigit) && newPassword.Contains(specialCharacters))
-                return (false, "Lösenordet är ogiltig");
-
-            // Validera upprepat lösenord
-            if (newPassword != repeatPassword)
-                return (false, "Lösenorden matchar inte varandra.");
-
-            // Validera e-postadress 
-            if (email.Contains("@") && email.IndexOf('.') > email.IndexOf('@'))
-                return (false, "E-postadressen är ogiltig");
-
+            if (!IsValidPassword(password))
+                return (false, "Lösenordet är ogiltigt");
             // Kontrollera att land valts
             if (string.IsNullOrWhiteSpace(country))
                 return (false, "Välj det land du bor i.");
             else
             {
-                // Skapar ett nytt användarobjekt
-                var user = new User { UserName = username, Password = newPassword, PasswordRepeat = repeatPassword, Email = email, Country = country };
-                // Skapar en egenskap för land
-                var setCountry = user.GetType();
-                var CountryProperty = setCountry.GetProperty("Countries", BindingFlags.Public | BindingFlags.Instance);
-                // Lägg till i lista över användare
+                // Skapar ny användare och tilldelar värden
+                var user = new User { UserName = username, Password = password, Country = country };
                 _userlist.Add(user);
-                // Instansierar inloggnignsvyn
+
+                // Stänger detta fönster och öppnar inloggningsfönstret igen
+                CloseWindow<RegisterWindow>();
                 var mainWindow = new MainWindow();
-                // stänger denna vyn
-                foreach (Window window in Application.Current.Windows)
-                {
-                    if (window is RegisterWindow)
-                    {
-                        window.Close();
-                        break;
-                    }
-                    // ...och visar den
-                    mainWindow.ShowDialog();
-                }
-                // Meddela framgång
+                mainWindow.ShowDialog();
                 return (true, messageRegistration);
             }
         }
-
-        // METOD för att återställa glömt lösenord
-        public bool ResetPassword(string username, string reply)
+        // METOD för att uppdatera befintlig användare
+        public (bool success, string message) Update(string username, string newPassword, string repeatNewPassword, string newCountry)
         {
-            // Går genom lista
-            foreach (var user in _userlist)
+            if (CurrentUser == null)
             {
-                // Kollar  matchningar
-                if (!string.Equals(user.UserName, username, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
-                else
-                {
-                    MessageBox.Show($"Vilka är alfabetets tre första bokstäver?");
-                }
+                return (false, "Ingen användare är inloggad.");
             }
-            if (reply != "abc")
-            {
-                    return false;
-            }
-            else if (reply == "abc")
-            {
-                // Instansierar userdetails-fönster
-                UserDetailsWindow userDetailsWindow = new UserDetailsWindow();
-                // Visar userdetails-fönster
-                userDetailsWindow.ShowDialog();
-                // stäng Main (denna window är troligen MainWindow)
-                foreach (Window window in Application.Current.Windows)
-                {
-                    if (window is MainWindow)
-                    {
-                        window.Close();
-                        break;
-                    }
-                }
-                // ...och visar den
-                userDetailsWindow.ShowDialog();
-            }
-            return true;
-        }
-        public (bool success, string message) UserNameUpdate(User updated)
-        {
-            bool updateSuccess = false; 
-            string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
-
-            // Korta IF-satser för kontroll
-            // Alla fält är ifyllda? 
-            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.Email) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
-                return (false, "Alla fält måste fyllas i.");
-
-            // Användaruppgift ledig?
-            if (_userlist.Any(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase)))
-                return (false, "Användarnamnet är upptaget");
-
-            // Uppfyller kraven? 
-            if (updated.UserName.Length > 3 && updated.UserName.Length < 9)
+            bool updateSuccess = false;
+            string messageUpdate = updateSuccess ? "Uppgifter har uppdaterats." : "Uppdatering misslyckades.";
+            // Kontroller för uppdatering
+            if (IsUsernameTaken(username))
+                return (false, "Användarnamnet eller epostadressen är redan registrerad");
+            if (!IsValidUsername(username))
                 return (false, "Användarnamnet är ogiltigt");
-            else
-            {
-                // Grundantagande: updated user != user
-                // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
-                var userIndex = _userlist.FindIndex(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
-                if (userIndex >= 0)
-                {
-                    _userlist[userIndex] = updated;
-                }
-            }
-            // Meddela framgång
-            return (true, messageUpdate);
-        }
-        public (bool success, string message) EmailUpdate(User updated)
-        {
-            bool updateSuccess = false;
-            string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
-            var email = updated.Email;
-
-            // Korta IF-satser för kontroll
-            // Fält ifyllda? 
-            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.Email) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
-                return (false, "Alla fält måste fyllas i.");
-
-            // Användaruppgift ledig?
-            if (_userlist.Any(user => user.Email.Equals(updated.Email, StringComparison.OrdinalIgnoreCase)))
-                return (false, "Epostadressen är redan registrerad");
-
-            // Uppfyller kraven? 
-            // Validera e-postadress 
-            if (email.Contains("@") && email.IndexOf('.') > email.IndexOf('@'))
-                return (false, "E-postadressen är ogiltig");
-
+            if (!IsValidPassword(newPassword))
+                return (false, "Lösenordet är ogiltigt");
+            if (newPassword == repeatNewPassword)
+                return (false, "Lösenorden matchar inte!");
             // Kontrollera att land valts
-            if (!string.IsNullOrWhiteSpace(updated.Country))
+            if (string.IsNullOrWhiteSpace(newCountry))
                 return (false, "Välj det land du bor i.");
-            else
+
+            // Tar bort gammalt användarobjekt
+            var existingUser = _userlist.FirstOrDefault(u => u.UserName.Equals(CurrentUser.UserName, StringComparison.OrdinalIgnoreCase));
+            if (existingUser != null)
             {
-                // Grundantagande: updated user != user
-                // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
-                var userIndex = _userlist.FindIndex(user => user.Email.Equals(updated.Email, StringComparison.OrdinalIgnoreCase));
-                if (userIndex >= 0)
-                {
-                    _userlist[userIndex] = updated;
-                }
+                _userlist.Remove(existingUser);
             }
-            // Meddela framgång
+            // Skapar ny användare och tilldelar uppdaterade värden
+            var user = new User { UserName = username, Password = newPassword, Country = newCountry };
+            _userlist.Add(user);
+
+            // Stänger detta fönster och öppnar receptvyn igen
+            CloseWindow<UserDetailsWindow>();
+            var recipeListWindow = new RecipeListWindow();
+            recipeListWindow.ShowDialog();
+            // Meddelar framgång
             return (true, messageUpdate);
         }
-        public (bool success, string message) PasswordUpdate(User updated)
+        // METODER FÖR VALIDERING AV ANVÄNDARUPPGIFTER - NU UPPDELADE FÖR BÄTTRE ÖVERBLICK
+        // ANVÄNDS BÅDE FÖR REGISTRERING OCH UPPDATERING 
+        private bool IsUsernameTaken(string username)
+        //private bool IsUsernameTaken(string username, string email)
         {
-            bool updateSuccess = false;
-            string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
-
-            // Korta IF-satser för kontroll
-            // Fält ifyllda? 
-            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.Email) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
-                return (false, "Alla fält måste fyllas i.");
-
-            // Validera lösenord
+            return _userlist.Any(user => user.UserName.Equals(username, StringComparison.OrdinalIgnoreCase));
+        }
+        private bool IsValidUsername(string username)
+        {
+            return username.Length >= 4 && username.Length <= 8;
+        }
+        private bool IsValidPassword(string password)
+        {
             string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
-            if (updated.Password.Length > 4 && updated.Password.Length < 9 && updated.Password.Any(char.IsUpper) && updated.Password.Any(char.IsLower)
-                    && updated.Password.Any(char.IsDigit) && updated.Password.Contains(specialCharacters))
-                return (false, "Lösenordet är ogiltig");
-
-            // Validera upprepat lösenord
-            if (updated.Password != updated.PasswordRepeat)
-                return (false, "Lösenorden matchar inte varandra.");
-
-            // Kontrollera att land valts
-            if (!string.IsNullOrWhiteSpace(updated.Country))
-                return (false, "Välj det land du bor i.");
-            else
-            {
-                // Grundantagande: updated user != user
-                // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
-                var userIndex = _userlist.FindIndex(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
-                if (userIndex >= 0)
-                {
-                    _userlist[userIndex] = updated;
-                }
-            }
-            // Meddela framgång
-            return (true, messageUpdate);
+            return password.Length >= 5 && password.Length <= 8 &&
+                   password.Any(char.IsUpper) &&
+                   password.Any(char.IsLower) &&
+                   password.Any(char.IsDigit) &&
+                   password.Any(specialCharacters.Contains);
         }
-        public (bool success, string message) UpdateSelectedCountry(User updated)
-        {
-            bool updateSuccess = false;
-            string messageUpdate = updateSuccess ? "Dina uppgifter har uppdaterats." : "";
-
-            // Implementerar korta IF-satser för kontroll
-            // Kontrollera att alla fält är ifyllda 
-            if (!string.IsNullOrWhiteSpace(updated.UserName) || !string.IsNullOrWhiteSpace(updated.Email) || !string.IsNullOrWhiteSpace(updated.Password) || !string.IsNullOrWhiteSpace(updated.PasswordRepeat))
-                return (false, "Alla fält måste fyllas i.");
-
-            // Kontrollera att land valts
-            if (!string.IsNullOrWhiteSpace(updated.Country))
-                return (false, "Välj det land du bor i.");
-            else
-            {
-                // Grundantagande: updated user != user
-                // ...så om användarnamn hittas i listan så skrivs det över med uppdaterad info
-                var userIndex = _userlist.FindIndex(user => user.UserName.Equals(updated.UserName, StringComparison.OrdinalIgnoreCase));
-                if (userIndex >= 0)
-                {
-                    _userlist[userIndex] = updated;
-                }
-            }
-            // Meddela framgång
-            return (true, messageUpdate);
-        }
-
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? name = null)

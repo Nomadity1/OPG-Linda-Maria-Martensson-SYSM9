@@ -17,14 +17,13 @@ using System.Windows.Media;
 
 namespace CookMaster.ViewModels
 {
-    class UserDetailsViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
+    public class UserDetailsViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _updatedUsername;
         private string _updatedPassword;
         private string _updatedRepeatedPassword;
-        private string _updatedEmail;
         private string _updatedSelectedCountry;
         private string _error;
         private User currentUser;
@@ -34,271 +33,92 @@ namespace CookMaster.ViewModels
         {
             // Tilldelar värde/parameter
             _userManager = userManager;
-            _updatedUsername = string.Empty; // Initierar med tom string
-            _updatedPassword = string.Empty; // Initierar med tom string
-            _updatedRepeatedPassword = string.Empty; // Initierar med tom string
-            _updatedEmail = string.Empty; // Initierar med tom string
-            _updatedSelectedCountry = string.Empty; // Initierar med tom string
-            _error = string.Empty; // Initierar med tom string
+            _updatedUsername = UpdatedUserName; 
+            _updatedPassword = UpdatedPassword;
+            _updatedRepeatedPassword = UpdatedRepeatedPassword;
+            _updatedSelectedCountry = UpdatedSelectedCountry; 
+            _error = Error; 
         }
-
+        // KONSTRUKTOR som OVERLOADAR med aktuell användare
         public UserDetailsViewModel(User currentUser)
         {
             this.currentUser = currentUser;
         }
-
-        public UserDetailsViewModel()
-        {
-        }
-
-        // ANVÄNDA REGISTER som förlaga! 
         // PUBLIKA EGENSKAPER med mera effektiv deklaration 
         public string UpdatedUserName
-        {
-            get => _updatedUsername;
-            set
-            {
-                _updatedUsername = value; OnPropertyChanged();
-                CommandManager.InvalidateRequerySuggested();
-            }
+        { get => _updatedUsername;
+            set { _updatedUsername = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
         }
         public string UpdatedPassword
-        {
-            get => _updatedPassword;
-            set
-            {
-                _updatedPassword = value; OnPropertyChanged();
-                CommandManager.InvalidateRequerySuggested();
-            }
+        { get => _updatedPassword;
+            set { _updatedPassword = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
         }
         public string UpdatedRepeatedPassword
-        {
-            get => _updatedRepeatedPassword;
-            set
-            {
-                _updatedRepeatedPassword = value; OnPropertyChanged();
-                CommandManager.InvalidateRequerySuggested();
-            }
+        { get => _updatedRepeatedPassword;
+            set { _updatedRepeatedPassword = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
         }
-        public string UpdatedEmail
-        {
-            get => _updatedEmail;
-            set
-            {
-                _updatedEmail = value; OnPropertyChanged();
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
-
-        // Koppla till listan över länder i UserManager så att den
-        // kan fungera som "ItemsSource" i View 
         public List<string> Countries => _userManager.Countries;
 
         public string UpdatedSelectedCountry
-        {
-            get => _updatedSelectedCountry;
-            set
-            {
-                _updatedSelectedCountry = value; OnPropertyChanged();
-                CommandManager.InvalidateRequerySuggested();
-            }
+        { get => _updatedSelectedCountry;
+            set { _updatedSelectedCountry = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
         }
         public string Error
-        {
-            get => _error;
+        { get => _error;
             set { _error = value; OnPropertyChanged(); }
         }
 
         // KOMMANDO för att ändra uppgifter via ICommand in RelayCommandManager
-        public RelayCommand UpdateUserNameCommand => new RelayCommand(execute => UpdateUserName(), canExecute => CanUpdateUserName());
+        public RelayCommand SaveUpdatesCommand => 
+            new RelayCommand(execute => SaveUpdates(), canExecute => CanSaveUpdates());
 
         // METOD för att aktivera knapp
-        private bool CanUpdateUserName() =>
-            !string.IsNullOrWhiteSpace(UpdatedUserName);
-
-        // METODER för att ändra användaruppgifter - Kopplat till uppdateringskommando 
-        public void UpdateUserName()
-        {
-            // Grundantagande: updated user details != user details 
-            // Instansierar User och skapar objektet updated
-            var current = _userManager.CurrentUser;
-            var updated = new User
-            {
-                UserName = UpdatedUserName,
-                Password = current?.Password ?? string.Empty,
-                PasswordRepeat = current?.Password ?? string.Empty,
-                Email = current?.Email ?? string.Empty,
-                Country = current?.Country ?? string.Empty
-            };
-
-            // Anropar metod i UserManager
-            var (success, message) = _userManager.UserNameUpdate(updated);
-            // Kollar matchning genom att anropa metod i UserManager
-            // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
-            // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
-            // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
-            // this = Referens till den aktuella instansen av klass som gör anropet
-            // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med evenetet 
-            if (success)
-                UpdateSuccess?.Invoke(this, System.EventArgs.Empty);
-            else
-                Error = message; // Tar meddelanden från UserManager 
-        }
-        // REGISTER-KOMMANDO via ICommand in RelayCommandManager
-        public RelayCommand UpdatePasswordCommand => new RelayCommand(execute => UpdatePassword(), canExecute => CanUpdatePassword());
-
-        // METOD för att aktivera registreringssknapp
-        private bool CanUpdatePassword() =>
-            !string.IsNullOrWhiteSpace(UpdatedPassword)
+        private bool CanSaveUpdates() =>
+            !string.IsNullOrWhiteSpace(UpdatedUserName) 
+            && !string.IsNullOrWhiteSpace(UpdatedPassword)
             && !string.IsNullOrWhiteSpace(UpdatedRepeatedPassword);
 
-        // METODER för att ändra användaruppgifter - Kopplat till uppdateringskommando 
-        public void UpdatePassword()
+        // METOD som hjälper till att stänga fönster om typ anges i respektive metod 
+        private void CloseWindow<T>() where T : Window
         {
-            // Instansierar User och skapar objektet updated
-            var current = _userManager.CurrentUser;
-            var updated = new User
-            {
-                UserName = UpdatedUserName,
-                Password = current?.Password ?? string.Empty,
-                PasswordRepeat = current?.Password ?? string.Empty,
-                Email = current?.Email ?? string.Empty,
-                Country = current?.Country ?? string.Empty
-            };
-
-            // Anropar metod i UserManager
-            var (success, message) = _userManager.PasswordUpdate(updated);
-            // Kollar matchning genom att anropa metod i UserManager
-            // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
-            // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
-            // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
-            // this = Referens till den aktuella instansen av klass som gör anropet
-            // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med evenetet 
-            if (success)
-                UpdateSuccess?.Invoke(this, System.EventArgs.Empty);
-            else
-                Error = message; // Tar meddelanden från UserManager 
-        }
-        // REGISTER-KOMMANDO via ICommand in RelayCommandManager
-        public RelayCommand UpdateEmailCommand => new RelayCommand(execute => UpdateEmail(), canExecute => CanUpdateEmail());
-
-        // METOD för att aktivera registreringssknapp
-        private bool CanUpdateEmail() =>
-            !string.IsNullOrWhiteSpace(UpdatedEmail);
-
-        // METODER för att ändra användaruppgifter - Kopplat till uppdateringskommando 
-        public void UpdateEmail()
-        {
-            // Instansierar User och skapar objektet updated
-            var current = _userManager.CurrentUser;
-            var updated = new User
-            {
-                UserName = UpdatedUserName,
-                Password = current?.Password ?? string.Empty,
-                PasswordRepeat = current?.Password ?? string.Empty,
-                Email = current?.Email ?? string.Empty,
-                Country = current?.Country ?? string.Empty
-            };
-
-            // Anropar metod i UserManager
-            var (success, message) = _userManager.EmailUpdate(updated);
-            // Kollar matchning genom att anropa metod i UserManager
-            // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
-            // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
-            // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
-            // this = Referens till den aktuella instansen av klass som gör anropet
-            // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med evenetet 
-            if (success)
-                UpdateSuccess?.Invoke(this, System.EventArgs.Empty);
-            else
-                Error = message; // Tar meddelanden från UserManager 
+            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
+            win?.Close();
         }
 
-        // REGISTER-KOMMANDO via ICommand in RelayCommandManager
-        public RelayCommand UpdateCountryCommand => new RelayCommand(execute => UpdateCountry(), canExecute => CanUpdateCountry());
-
-        // METOD för att aktivera registreringssknapp
-        private bool CanUpdateCountry() =>
-            !string.IsNullOrWhiteSpace(UpdatedSelectedCountry);
-
         // METODER för att ändra användaruppgifter - Kopplat till uppdateringskommando 
-        public void UpdateCountry()
+        public void SaveUpdates()
         {
-            // Instansierar User och skapar objektet updated
-            var current = _userManager.CurrentUser;
-            var updated = new User
+            if (UpdatedPassword != UpdatedRepeatedPassword)
             {
-                UserName = UpdatedUserName,
-                Password = current?.Password ?? string.Empty,
-                PasswordRepeat = current?.Password ?? string.Empty,
-                Email = current?.Email ?? string.Empty,
-                Country = current?.Country ?? string.Empty
-            };
-
-            // Anropar metod i UserManager
-            var (success, message) = _userManager.PasswordUpdate(updated);
-            // Kollar matchning genom att anropa metod i UserManager
-            // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
-            // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
-            // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
-            // this = Referens till den aktuella instansen av klass som gör anropet
-            // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med evenetet 
-            if (success)
-                UpdateSuccess?.Invoke(this, System.EventArgs.Empty);
-            else
-                Error = message; // Tar meddelanden från UserManager 
-        }
-
-        // SPARA- och AVBRYT-KOMMANDON via ICommand in RelayCommandManager
-        public RelayCommand SaveCommand => new RelayCommand(execute => SaveUserDetails(), canExecute => CanSaveUserDetails());
-
-        public RelayCommand CancelCommand => new RelayCommand(CancelUserDetails);
-
-        // METOD för att aktivera knappar
-        private bool CanSaveUserDetails() => true;
-
-        // METODER för att SPARA, AVBRYTA och STÄNGA FÖNSTER
-        public void SaveUserDetails()
-        {
-            // Alla fält ifyllda?
-            if (string.IsNullOrWhiteSpace(UpdatedUserName) ||
-                string.IsNullOrWhiteSpace(UpdatedPassword) ||
-                string.IsNullOrWhiteSpace(UpdatedRepeatedPassword) ||
-                string.IsNullOrWhiteSpace(UpdatedEmail) ||
-                string.IsNullOrWhiteSpace(UpdatedSelectedCountry))
-            {
-                // Annars:
-                MessageBox.Show("Alla fält måste vara ifyllda!");
+                Error = "Lösenorden matchar inte!";
                 return;
             }
-            // Instansierar och visar receptvyn
-            var recipelistWindow = new RecipeListWindow();
-            recipelistWindow.Show();
-            // Anropar fönsterstängare
-            CloseCurrentWindow();
+            // Anropar metod i UserManager
+            var (success, message) = _userManager.Update(UpdatedUserName, UpdatedPassword, UpdatedRepeatedPassword, UpdatedSelectedCountry);
+            // OM lyckas anropas EVENTET UpdateSuccess som meddelar prenumeranter
+            if (success)
+                UpdateSuccess?.Invoke(this, System.EventArgs.Empty);
+            else
+                Error = message; // Tar meddelanden från UserManager
+            //// Anropar fönsterstängare
+            //CloseWindow<UserDetailsWindow>();
+            //// Öppnar och visar receptvyn
+            //var recipeList = new RecipeListWindow();
+            //recipeList.ShowDialog();
         }
+        public RelayCommand CancelCommand => new RelayCommand(CancelUserDetails);
         public void CancelUserDetails(object parameter) // Ingen inmatning krävs, tar bara emot objekt-parameter från knapp
         {
+            // Anropar fönsterstängare
+            CloseWindow<UserDetailsWindow>();
             // Instansierar och visar receptvyn
             var recipelistWindow = new RecipeListWindow();
             recipelistWindow.Show();
-            // Anropar fönsterstängare
-            CloseCurrentWindow();
         }
-
-        // EN METOD för att stänga fönster
-        private void CloseCurrentWindow()
-        {
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window is UserDetailsWindow)
-                {
-                    window.Close();
-                    break;
-                }
-            }
-        }
-
         // EVENT som userdetails-fönstret "prenumererar" på
         // När ändringar lyckas, körs alla metoder som är kopplade till detta event.
         public event System.EventHandler? UpdateSuccess; // Make event nullable

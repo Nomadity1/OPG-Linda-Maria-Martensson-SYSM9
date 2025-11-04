@@ -1,6 +1,7 @@
 ﻿using CookMaster.Managers;
 using CookMaster.Models;
 using CookMaster.MVVM;
+using CookMaster.Views;
 using Microsoft.Win32;
 using System;
 using System.CodeDom.Compiler;
@@ -10,60 +11,39 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace CookMaster.ViewModels
 {
-    class RegisterViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
+    public class RegisterViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _newUsername;
         private string _newPassword;
-        private string _repeatPassword;
-        private string _email;
-        private string _selectedCountry;
+        private string _newSelectedCountry;
         private string _error;
 
         // PUBLIKA EGENSKAPER med mera effektiv deklaration 
-        public string NewUserName
-        {
-            get => _newUsername;
+        public string NewUserName { get => _newUsername;
             set { _newUsername = value; OnPropertyChanged(); 
                 CommandManager.InvalidateRequerySuggested(); }
         }
-        public string NewPassword
-        {
-            get => _newPassword;
+        public string NewPassword { get => _newPassword;
             set { _newPassword = value; OnPropertyChanged(); 
-                CommandManager.InvalidateRequerySuggested(); }
-        }
-        public string RepeatPassword
-        {
-            get => _repeatPassword;
-            set { _repeatPassword = value; OnPropertyChanged(); 
-                CommandManager.InvalidateRequerySuggested(); }
-        }
-        public string Email
-        {
-            get => _email;
-            set { _email = value; OnPropertyChanged(); 
                 CommandManager.InvalidateRequerySuggested(); }
         }
 
         // Koppla till listan över länder i UserManager så att den ("ItemsSource" i View) 
         public List<string> Countries => _userManager.Countries;
 
-        public string SelectedCountry
-        {
-            get => _selectedCountry;
-            set { _selectedCountry = value; OnPropertyChanged(); 
+        public string NewSelectedCountry
+        { get => _newSelectedCountry; set { _newSelectedCountry = value; OnPropertyChanged(); 
                 CommandManager.InvalidateRequerySuggested(); }
         }
         public string Error
-        {
-            get => _error;
-            set { _error = value; OnPropertyChanged(); }
+        { get => _error; set { _error = value; OnPropertyChanged(); }
         }
 
         // REGISTER-KOMMANDO via ICommand in RelayCommandManager
@@ -72,44 +52,46 @@ namespace CookMaster.ViewModels
         // METOD för att aktivera registreringssknapp
         private bool CanRegister() =>
             !string.IsNullOrWhiteSpace(NewUserName) 
-            && !string.IsNullOrWhiteSpace(Email) 
             && !string.IsNullOrWhiteSpace(NewPassword) 
-            && !string.IsNullOrWhiteSpace(RepeatPassword) 
-            && !string.IsNullOrWhiteSpace(SelectedCountry);
+            && !string.IsNullOrWhiteSpace(NewSelectedCountry);
 
         // KONSTRUKTOR som upprättar samarbete med UserManager 
-        public RegisterViewModel(UserManager userManager)
+        public RegisterViewModel()
         {
+            // Tilldelar värden för samarbete m globala variabler
+            _userManager = (UserManager)Application.Current.Resources["UserManager"];
             // Tilldelar värde/parameter
-            _userManager = userManager;
-            _newUsername = string.Empty; // Initierar med tom string
-            _email = string.Empty; // Initierar med tom string
-            _newPassword = string.Empty; // Initierar med tom string
-            _repeatPassword = string.Empty; // Initierar med tom string
-            _selectedCountry = string.Empty; // Initierar med tom string
-            _error = string.Empty; // Initierar med tom string
+            _newUsername = string.Empty; // Säkrare hantering av data 
+            _newPassword = string.Empty; 
+            _newSelectedCountry = string.Empty;
+            _error = string.Empty;
         }
-
+        // FÖNSTERSTÄNGARE 
+        private void CloseWindow<T>() where T : Window
+        {
+            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
+            win?.Close();
+        }
         // METOD för KOMMANDO
         public void Register()
         {
             // Anropar Registrerings-metod i UserManager
-            var (success, message) = _userManager.Register(NewUserName, Email, NewPassword, RepeatPassword, SelectedCountry); 
+            var (success, message) = _userManager.Register(NewUserName, NewPassword, NewSelectedCountry);
             // Kollar matchning genom att anropa metod i UserManager
-                // OM inloggning lyckas anropas (invoke) EVENTET (definierat längst ner i denna fil) LogInSuccess 
-                // ...som meddelar (Invoke - en metod) alla "prenumeranter", dvs. alla delar i appen som lyssnar på eventet.
-                // ? = "Om OnLoginSuccess inte är null, kalla Invoke(); annars gör inget"
-                // this = Referens till den aktuella instansen av klass som gör anropet
-                // System.EventArgs.Empty = standardargument när inga specifika data behöver skickas med evenetet 
             if (success) 
                 RegisterSuccess?.Invoke(this, System.EventArgs.Empty);
             else
                 Error = message; // Tar meddelanden från UserManager 
+            //// Anropar fönsterstängare
+            //CloseWindow<RegisterWindow>();
+            //// Öppnar inloggningsvyn igen
+            ////var mainVM = new MainViewModel();
+            //var mainWindow = new MainWindow();
+            //mainWindow.Show();
         }
 
         // EVENT som Registrerings-fönstret "prenumererar" på
-        // När registrering lyckas, körs alla metoder som är kopplade till detta event.
-        public event System.EventHandler? RegisterSuccess; // Make event nullable
+        public event System.EventHandler? RegisterSuccess; 
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;

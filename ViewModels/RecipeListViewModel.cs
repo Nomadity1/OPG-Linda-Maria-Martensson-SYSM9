@@ -18,83 +18,143 @@ namespace CookMaster.ViewModels
     public class RecipeListViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
-        //private readonly UserManager _userManager; // Behövs denna? 
-        private readonly RecipeManager _recipeManager;
-        private readonly User _currentUser;
+        private readonly RecipeManager _recipeManager; // Behövs för att kunna hantera recept
+        private readonly UserManager _userManager; // Behövs för att kunna hantera användare
+                                             
         // PUBLIKA EGENSKAPER med effektiv deklaration
-        public ObservableCollection<Recipe> Recipes { get; set; }
-        public Recipe SelectedRecipe { get; set; }
-        public string CurrentUser => _currentUser.UserName;
-
-        // PUBLIK EGENSKAP som använder sig av UserManager- och RecipeManagerklassen (skapar förutsättning för samarbete)
-        public UserManager UserManager { get; }
-        public RecipeManager RecipeManager { get; }
+        public ObservableCollection<Recipe> Recipes { get; set; } // Dynamisk lista för recephantering 
+        public Recipe? SelectedRecipe { get; set; } // För att kunna hålla koll på valt recept i listan
+        public string CurrentUser => _userManager.CurrentUser?.UserName ?? string.Empty; // Visa inloggad användare 
 
         // PUBLIKA METOD-DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
+        public RelayCommand LogOutCommand => new RelayCommand(LogOut);
+        public RelayCommand UserDetailsCommand => new RelayCommand(OpenUserDetails);
         public RelayCommand AddRecipeCommand => new RelayCommand(AddRecipe);
         public RelayCommand RecipeDetailsCommand => new RelayCommand(OpenRecipeDetails);
         public RelayCommand DeleteRecipeCommand => new RelayCommand(DeleteRecipe);
-        public RelayCommand LogOutCommand => new RelayCommand(LogOut);
-        public RelayCommand UserDetailsCommand => new RelayCommand(OpenUserDetails);
         public RelayCommand InfoCommand => new RelayCommand(ShowInfo);
 
-        // KONSTRUKTOR som upprättar samarbete med RecipeManager // Behövs samarbete med UserManager? 
-        public RecipeListViewModel(User user, RecipeManager recipeManager)
+        // KONSTRUKTOR som upprättar samarbete med RecipeManager och UserManager 
+        public RecipeListViewModel()
         {
-            _currentUser = user;
-            //_userManager = new UserManager();
-            _recipeManager = recipeManager;
-            //recipeManager = new RecipeManager();
-            if (user is AdminUser)
+            // Globala managers 
+            _userManager = (UserManager)Application.Current.Resources["UserManager"];
+            _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+            // Prenumererar på eventet i UserManager för att uppdatera CurrentUser när inloggad användare ändras
+            _userManager.PropertyChanged += (s, e) =>             
             {
-                // Admin-användare får se alla recept
+                if (e.PropertyName == nameof(UserManager.CurrentUser))
+                {
+                    OnPropertyChanged(nameof(CurrentUser));
+                    // Uppdaterar receptlistan när inloggad användare ändras
+                    RefreshRecipes();
+                }
+            };
+            // Initial laddning av receptlistan
+            RefreshRecipes();
+        }
+        // METOD som hjälper till att stänga fönster om typ anges i respektive metod 
+        private void CloseWindow<T>() where T : Window
+        {
+            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
+            win?.Close();
+        }
+        // METOD för att uppdatera receptlistan baserat på inloggad användare
+        private void RefreshRecipes()
+        {
+            var user = _userManager.CurrentUser;
+            if (user is AdminUser) // Admin har tillgång till att ändra alla recept
                 Recipes = new ObservableCollection<Recipe>(_recipeManager.GetAllRecipes());
+            else if (user != null) // Alla andra användare har tillgång till att ändra sina recept
+                Recipes = new ObservableCollection<Recipe>(_recipeManager.GetUserRecipes(user.UserName));
+            else
+                Recipes = new ObservableCollection<Recipe>(); // Alla kan se alla recept
+            OnPropertyChanged(nameof(Recipes));
+        }
+        // METODER för KOMMANDON för att LÄGGA TILL RECEPT, ÖPPNA RECEPTDETALJER och STÄNGA FÖNSTER
+        private void LogOut(object parameter)
+        {
+            _userManager.CurrentUser = null;
+            // Anropar fönsterstängare
+            CloseWindow<RecipeListWindow>();
+            // Öppnar inloggningsfönstret igen
+            var mainWindow = new MainWindow();
+            mainWindow.ShowDialog();
+        }
+        private void OpenUserDetails(object parameter)
+        {
+            if (_userManager.CurrentUser == null)
+            {
+                MessageBox.Show("Du måste vara inloggad för att se användardetaljer!");
+                return;
             }
             else
             {
-                // "Vanlig" användare får bara se sina egna recept
-                Recipes = new ObservableCollection<Recipe>(_recipeManager.GetUserRecipes(user.UserName));
+                // Anropar fönsterstängare
+                CloseWindow<RecipeListWindow>();
+                // Instansierar UserDetailsViewModel och visar vyn för aktuella objekt
+                //var userDetailsVM = new UserDetailsViewModel(_userManager.CurrentUser);
+                var userDetailsWindow = new UserDetailsWindow();
+                //userDetailsWindow.DataContext = userDetailsVM;
+                userDetailsWindow.ShowDialog();
             }
         }
-        public RecipeListViewModel()
-        { 
-        }
-
-        // METODER för knappar för att LÄGGA TILL RECEPT, ÖPPNA RECEPTDETALJER och STÄNGA FÖNSTER
+        // Öppna add recipe-vyn 
         public void AddRecipe(object parameter)
         {
-            // Instansierar AddRecipeViewModel och visar vyn för aktuella objekt
-            var addRecipeVM = new AddRecipeViewModel(_recipeManager, _currentUser);
-            var addRecipeWindow = new AddRecipeWindow(addRecipeVM);
-            addRecipeWindow.Show();
-            // Anropar fönsterstängare
-            CloseCurrentWindow();
+            if (_userManager.CurrentUser == null)
+            {
+                MessageBox.Show("Du måste vara inloggad för att lägga till ett recept!");
+                return;
+            }
+            else
+            {
+                // Anropar fönsterstängare
+                CloseWindow<RecipeListWindow>();
+                //var addRecipeVM = new AddRecipeViewModel();
+                var addRecipeWindow = new AddRecipeWindow();
+                addRecipeWindow.ShowDialog();
+                // Efter att fönstret stängts, uppdatera receptlistan
+            }
+            RefreshRecipes();
         }
         public void OpenRecipeDetails(object parameter)
         {
-            // Har ett recept valts?
+            if (_userManager.CurrentUser == null)
+            {
+                MessageBox.Show("Du måste vara inloggad för att se receptdetaljer!");
+                return;
+            }            // Har ett recept valts?
             if (SelectedRecipe == null)
             {
                 MessageBox.Show("Markera ett recept först!");
                 return;
             }
-            // Instansierar RecipeDetailViewModel och visar vyn för aktuella objekt
-            var recipeDetailVM = new RecipeDetailViewModel(SelectedRecipe, _recipeManager, _currentUser);
-            var recipeDetailWindow = new RecipeDetailWindow();
-            recipeDetailWindow.Show();
             // Anropar fönsterstängare
-            CloseCurrentWindow();
+            CloseWindow<RecipeListWindow>();
+            // Instansierar RecipeDetailViewModel och visar vyn för aktuella objekt
+            //var recipeDetailVM = new RecipeDetailViewModel();
+            var recipeDetailWindow = new RecipeDetailWindow();
+            //recipeDetailWindow.DataContext = recipeDetailVM;
+            recipeDetailWindow.ShowDialog();
+            // Anropar metod för att uppdatera receplistan
+            RefreshRecipes();
         }
         private void DeleteRecipe(object parameter)
         {
+            if (_userManager.CurrentUser == null)
+            {
+                MessageBox.Show("Du måste vara inloggad för att ta bort ett recept!");
+                return;
+            }
             // Har ett recept valts?
             if (SelectedRecipe == null)
             {
                 MessageBox.Show("Markera ett recept först!");
                 return;
             }
-            // Kollar behörighet genom att kolla roll (
-            if (_currentUser is AdminUser || SelectedRecipe.Owner == _currentUser.UserName)
+            // Kollar behörighet genom att kolla roll 
+            if (_userManager.CurrentUser is AdminUser || SelectedRecipe.Owner == _userManager.CurrentUser.UserName)
             {
                 _recipeManager.RemoveRecipe(SelectedRecipe);
                 Recipes.Remove(SelectedRecipe);
@@ -103,42 +163,14 @@ namespace CookMaster.ViewModels
             {
                 MessageBox.Show("Du kan bara ta bort dina egna recept!");
             }
-        }
-        private void OpenUserDetails(object parameter)
-        {
-            // Instansierar UserDetailsViewModel och visar vyn för aktuella objekt
-            var userDetailsVM = new UserDetailsViewModel(_currentUser);
-            var window = new Views.UserDetailsWindow();
-            window.Show();
-            CloseCurrentWindow();
-        }
-        private void LogOut(object parameter)
-        {
-            // Instansierar MainWindow och visar inloggningsvyn (= main)
-            var mainWindow = new MainWindow(); 
-            mainWindow.Show();
-            // Anropar fönsterstängare
-            CloseCurrentWindow();
+            // Anropar metod för att uppdatera receplistan
+            RefreshRecipes();
         }
         private void ShowInfo(object parameter)
         {
             // Visar information om applikationen
             MessageBox.Show("CookMaster – En superavancerad app för dina bästa smakupplevelser.");
         }
-
-        // EN METOD för att stänga fönster ( Hade jag kunnat lägga mera centralt kanske? ) 
-        private void CloseCurrentWindow()
-        {
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window is Views.RecipeListWindow)
-                {
-                    window.Close();
-                    break;
-                }
-            }
-        }
-
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? name = null)

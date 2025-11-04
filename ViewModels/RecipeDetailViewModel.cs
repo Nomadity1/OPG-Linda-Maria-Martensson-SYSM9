@@ -4,6 +4,7 @@ using CookMaster.MVVM;
 using CookMaster.Views;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -11,20 +12,24 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.ViewModels
 {
-    class RecipeDetailViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
+    public class RecipeDetailViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
         private readonly Recipe _recipe;
         private readonly RecipeManager _recipeManager;
-        private readonly User _user;
+        private readonly UserManager _userManager;
+
         // PUBLIKA EGENSKAPER med effektiv deklaration
         public string Title { get => _recipe.Title; set { _recipe.Title = value; OnPropertyChanged(); } }
         public string Ingredients { get => _recipe.Ingredients; set { _recipe.Ingredients = value; OnPropertyChanged(); } }
         public string Instructions { get => _recipe.Instructions; set { _recipe.Instructions = value; OnPropertyChanged(); } }
         public string Category { get => _recipe.Category; set { _recipe.Category = value; OnPropertyChanged(); } }
+        public ObservableCollection<Recipe> Recipes { get; set; } // Dynamisk lista för recephantering 
+
         private bool _isReadOnly = true;
         // BOOL som styr textboxarnas redigerbarhet
         public bool IsReadOnly
@@ -32,80 +37,105 @@ namespace CookMaster.ViewModels
             get => _isReadOnly;
             set
             {
-                _isReadOnly = value; OnPropertyChanged(); // Lägga till commandmanager? 
+                _isReadOnly = value; OnPropertyChanged(); 
             }
         }
-
-        // Deklarera KOMMANDON via ICommand in RelayCommandManager
-        public RelayCommand EditCommand { get; }
-        public RelayCommand SaveCommand { get; }
-        public RelayCommand CancelCommand { get; }
-
         // KONSTRUKTOR som upprättar samarbete med RecipeManager och User
-        public RecipeDetailViewModel(Recipe recipe, RecipeManager recipeManager, User user)
-        {
-            _recipe = recipe;
-            _recipeManager = recipeManager;
-            _user = user;
-            EditCommand = new RelayCommand(Edit);
-            SaveCommand = new RelayCommand(Save);
-            CancelCommand = new RelayCommand(Cancel);
-        }
-
-        // KONSTRUKTOR utan parametrar 
         public RecipeDetailViewModel()
         {
+            // Globala managers
+            _userManager = (UserManager)Application.Current.Resources["UserManager"];
+            _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
         }
+        // OVERLOADANDE konstruktorn som tar emot ett RECEPT-objekt
+        public RecipeDetailViewModel(Recipe recipe) 
+        {
+            _recipe = recipe;
+            // Initialiserar den dynamiska listan
+            Recipes = new ObservableCollection<Recipe>(_recipeManager.GetAllRecipes());
+            // Globala managers
+            _userManager = (UserManager)Application.Current.Resources["UserManager"];
+            _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+        }
+
+        // Deklarera och tilldelar KOMMANDON via ICommand in RelayCommandManager
+        public RelayCommand EditCommand => new RelayCommand(Edit);
+        public RelayCommand SaveCommand => new RelayCommand(execute => Save(), canExecute => CanSave());
+        public RelayCommand CancelCommand => new RelayCommand(Cancel);
+
+        // BOOL för att aktivera SPARAKNAPP
+        public bool CanSave() =>
+            !string.IsNullOrWhiteSpace(Title)
+            && !string.IsNullOrWhiteSpace(Ingredients)
+            && !string.IsNullOrWhiteSpace(Instructions)
+            && !string.IsNullOrWhiteSpace(Category);
 
         // METODER för KOMMANDON
         private void Edit(object parameter)
         {
-            if (_user.UserName != _recipe.Owner && !(_user is AdminUser))
+            if (_userManager.CurrentUser == null)
+            {
+                MessageBox.Show("Du måste vara inloggad för att redigera ett recept!");
+                return;
+            }
+            if (_recipe == null)
+            {
+                MessageBox.Show("Du måste välja ett recept för att kunna redigera.");
+                return;
+            }
+            if (_userManager.CurrentUser.UserName != _recipe.Owner && !(_userManager.CurrentUser is AdminUser))
             {
                 MessageBox.Show("Du kan bara redigera dina egna recept.");
                 return;
             }
-            IsReadOnly = false;
+            else
+                IsReadOnly = false;
         }
-        private void Save(object parameter)
+        // FÖNSTERSTÄNGARE
+        private void CloseWindow<T>() where T : Window
         {
-            if (string.IsNullOrWhiteSpace(Title) ||
-                string.IsNullOrWhiteSpace(Ingredients) ||
-                string.IsNullOrWhiteSpace(Instructions) ||
-                string.IsNullOrWhiteSpace(Category))
+            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
+            win?.Close();
+        }
+        // METODER för att SPARA OCH AVBRYTA ÄNDRINGAR
+        private void Save()
+        {
+            // Kontrollera att recept finns
+            if (_recipe == null)
             {
-                MessageBox.Show("Alla fält måste vara ifyllda!");
+                MessageBox.Show("Inget recept valt för att spara.");
                 return;
             }
-            MessageBox.Show("Receptet är sparat!");
-            // Instansierar och visar receptvyn
-            var recipeListVM = new RecipeListViewModel(_user, _recipeManager);
-            var recipeListWindow = new RecipeListWindow(recipeListVM);
-            recipeListWindow.Show();
-            // Anropar fönsterstängare
-            CloseCurrentWindow(); 
+            // Kontrollera att användare är inloggad
+            var currentUser = _userManager.CurrentUser;
+            if (currentUser == null) {
+                MessageBox.Show("Du måste vara inloggad för att spara ett recept!");
+                return;
+            }
+            // Kontrollera ägarskap eller adminrättigheter
+            if (currentUser.UserName != _recipe.Owner && !(currentUser is AdminUser))
+            {
+                MessageBox.Show("Du kan bara spara ändringar på dina egna recept.");
+                return;
+            }
+            // ANNARS Anropas metoden i RecipeManager och tar emot returvärden
+            var (success, message) = _recipeManager.AddRecipe(Title, Ingredients, Instructions, Category, _recipe.Owner);
+            if (success)
+                SaveSuccess?.Invoke(this, System.EventArgs.Empty);
         }
         private void Cancel(object parameter)
         {
+            // Anropar fönsterstängare
+            CloseWindow<RecipeDetailWindow>();
             // Instansierar och visar receptvyn
-            var recipeListVM = new RecipeListViewModel(_user, _recipeManager);
-            var recipeListWindow = new RecipeListWindow(recipeListVM);
+            //var recipeListVM = new RecipeListViewModel();
+            var recipeListWindow = new RecipeListWindow();
             recipeListWindow.Show();
             // Anropar fönsterstängare
-            CloseCurrentWindow();
         }
-        // EN METOD för att stänga fönster
-        private void CloseCurrentWindow()
-        {
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window is RecipeDetailWindow)
-                {
-                    window.Close();
-                    break;
-                }
-            }
-        }
+
+        // EVENT att "prenumerera" på för relevanta fönster 
+        public event System.EventHandler? SaveSuccess; // nullable
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -27,10 +27,9 @@ namespace CookMaster
         public MainWindow()
         {
             InitializeComponent();
-            // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
-            var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            // Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
-            var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+            // Instansierar och upprättar samarbete med UserManager och RecipeManager, från global variabel i app-resurser
+            //var userManager = (UserManager)Application.Current.Resources["UserManager"];
+            //var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
 
             // Instansierar tillhörande ViewModel med objektet mainVM
             var mainVW = new MainViewModel();
@@ -46,8 +45,8 @@ namespace CookMaster
             {
                 DialogResult = true; // Meddelar framgång 
                 this.Close(); // ...och stänger detta fönster
-                var recipeListWindow = new RecipeListWindow();
-                recipeListWindow.Show();
+                var recipeListWindow = new Views.RecipeListWindow(); // Instansierar receptlistvyn
+                recipeListWindow.Show(); // Visar receptlistvyn
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = mainVW;

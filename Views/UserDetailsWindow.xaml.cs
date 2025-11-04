@@ -21,15 +21,12 @@ namespace CookMaster.Views
     /// </summary>
     public partial class UserDetailsWindow : Window
     {
-        private UserDetailsViewModel userDetailsVM;
-
         // UPPGIFTER: Visa befintliga uppgifter, ta emot eventuella ändringar, spara (=uppdatera) användaruppgifter
         public UserDetailsWindow()
         {
             InitializeComponent();
-            // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
+            // Instansierar och upprättar samarbete med User- och RecipeManager från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            // Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
             var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
 
             // Instansierar och upprättar samarbete med tillhörande ViewModel
@@ -37,18 +34,12 @@ namespace CookMaster.Views
             // ...och anger objektet som datakontext
             DataContext = userDetailsVW;
             // Anropar UpdateSuccess-eventet i userDetailsViewModel
-            // ...som tilldelar objektet det utfall som aktiveras 
-            // s = sender (i det här fallet objektet userDetailsVW )
-            // e = eventets data (det som händer i klassen)
-            // += betyder att vi prenumererar på ett event (t ex kopplar en metod till ett event,
-            // som körs varje gång eventet triggas)
-
             userDetailsVW.UpdateSuccess += (s, e) =>
             {
-                this.Close(); // Stänger detta fönster
-                var mainWindow = new MainWindow(); // Instansierar loginfönster
-                mainWindow.Show(); // Visar loginfönster
                 DialogResult = true; // Meddelar framgång 
+                this.Close(); // Stänger detta fönster
+                var recipeListWindow = new RecipeListWindow(); // Instansierar receptlistvyn
+                recipeListWindow.Show(); // Visar receptlistvyn
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = userDetailsVW;
@@ -62,16 +53,6 @@ namespace CookMaster.Views
                 // Egenskapen NewPassword i User Details View Model tilldelas
                 // inmatat värde från userdetails-fönstrets password-box "NewPassWord"
                 userDetailsVW.UpdatedPassword = UpdatedPassWord.Password;
-            }
-        }
-        // Metod för att ta emot upprepatlösenord
-        private void UpdatedRepeatedPassWord_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is UserDetailsViewModel userDetailsVW)
-            {
-                // Egenskapen RepeatedPassword i User Details View Model tilldelas
-                // inmatat värde från registreringsfönstrets password-box "RepeatPassWord"
-                userDetailsVW.UpdatedRepeatedPassword = UpdatedRepeatedPassWord.Password;
             }
         }
     }

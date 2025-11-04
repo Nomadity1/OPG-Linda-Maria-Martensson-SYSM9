@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CookMaster.Views"
+        xmlns:local="clr-namespace:CookMaster.Views" xmlns:viewmodels="clr-namespace:CookMaster.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:UserDetailsViewModel}"
         mc:Ignorable="d"
         Title="UserDetailsWindow" Height="260" Width="500" FontFamily="Maiandra GD" FontSize="12" Background="PaleTurquoise" >
     <!--Fönster för registrering-->
@@ -30,18 +30,14 @@
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Username*" Width="100" />
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Password**" Width="100" />
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Repeat password**" Width="100" />
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="E-mail address" Width="100" />
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Select your country" Width="100" />
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding UpdatedUserName}" Width="100" Height="20" 
                  HorizontalAlignment="Left" />
         <PasswordBox Grid.Row="3" Grid.Column="1" x:Name="UpdatedPassWord" 
                      PasswordChanged="UpdatedPassWord_PasswordChanged"  Width="100" Height="20"  
                      HorizontalAlignment="Left" />
-        <PasswordBox Grid.Row="4" Grid.Column="1" x:Name="UpdatedRepeatedPassWord" 
-                     PasswordChanged="UpdatedRepeatedPassWord_PasswordChanged" Width="100" Height="20"  
+        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding UpdatedRepeatedPassWord}" Width="100" Height="20"  
                      HorizontalAlignment="Left" />
-        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding UpdatedEmail}" Width="100" Height="20" 
-                 HorizontalAlignment="Left" />
         <ComboBox Grid.Row="6" Grid.Column="1" x:Name="CountryComboBox" ItemsSource="{Binding Countries}" 
                   SelectedItem="{Binding UpdatedSelectedCountry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                   Width="100" Height="20"  HorizontalAlignment="Left" />
@@ -52,8 +48,9 @@
         <TextBlock Grid.Row="3" Grid.RowSpan="2" Grid.Column="2" 
                    Text="**) Your password should have minimum 8 characters including 1 special character, 1 digit, 1 upper and 1 lowercase letter.)" 
                    FontSize="10" TextWrapping="Wrap" Width="170" />
+        <!--Knappar-->
         <Button Grid.Row="5" Grid.Column="2" Content="Save" 
-                Command="{Binding SaveCommand}" 
+                Command="{Binding SaveUpdatesCommand}" 
                 FontSize="12" Width="60" Height="22" Margin="20,0" />
         <Button Grid.Row="6" Grid.Column="2" Content="Cancel" 
                 Command="{Binding CancelCommand}" 

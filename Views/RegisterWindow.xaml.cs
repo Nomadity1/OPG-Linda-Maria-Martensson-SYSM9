@@ -32,7 +32,7 @@ namespace CookMaster.Views
             var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
 
             // Instansierar register-ViewModel med objektet registerVM
-            var registerVW = new RegisterViewModel(userManager);
+            var registerVW = new RegisterViewModel();
             // ...och anger objektet som datakontext
             DataContext = registerVW;
             // Anropar RegistrationSuccess-eventet i UserManagerViewModel
@@ -43,10 +43,10 @@ namespace CookMaster.Views
             // som körs varje gång eventet triggas)
             registerVW.RegisterSuccess += (s, e) =>
             {
-                this.Close(); // Stänger registreringsfönstret
+				DialogResult = true; // Meddelar framgång 
+				this.Close(); // Stänger registreringsfönstret
                 var mainWindow = new MainWindow(); // Instansierar loginfönster
                 mainWindow.Show(); // Visar loginfönster
-                DialogResult = true; // Meddelar framgång 
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = registerVW;
@@ -61,15 +61,6 @@ namespace CookMaster.Views
                 // Egenskapen NewPassword i Register View Model tilldelas
                 // inmatat värde från registreringsfönstrets password-box "NewPassWord"
                 registerVW.NewPassword = NewPassWord.Password;
-            }
-        }
-        private void RepeatPassWord_PasswordChanged(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is RegisterViewModel registerVW)
-            {
-                // Egenskapen RepeatPassword i Register View Model tilldelas
-                // inmatat värde från registreringsfönstrets password-box "RepeatPassWord"
-                registerVW.RepeatPassword = RepeatPassWord.Password;
             }
         }
     }

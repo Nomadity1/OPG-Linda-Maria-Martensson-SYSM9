@@ -1,6 +1,7 @@
 ﻿using CookMaster.Managers;
 using CookMaster.Models;
 using CookMaster.MVVM;
+using CookMaster.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +10,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.ViewModels
 {
@@ -16,76 +19,99 @@ namespace CookMaster.ViewModels
     {
         // PRIVATA FÄLT 
         private readonly RecipeManager _recipeManager;
-        private readonly User _user;
-        // PUBLIKA EGENSKAPER med effektiv deklaration
-        public string Title { get; set; }
-        public string Ingredients { get; set; }
-        public string Instructions { get; set; }
-        public string Category { get; set; }
-        // Deklaration av KOMMANDOM via ICommand in RelayCommandManager med effektiv deklaration
-        public RelayCommand SaveCommand { get; }
-        public RelayCommand CancelCommand { get; }
-        
-        // INGA METODER för att aktivera knappar- Alltid aktiva 
+        private readonly UserManager _userManager;
+        private string _title;
+        private string _ingredients;
+        private string _instructions;
+        private string _category;
+        private string _error;
 
-        // KONSTRUKTOR som upprättar samarbete med RecipeManager och User
-        public AddRecipeViewModel(RecipeManager recipeManager, User user)
-        {
-            // Tilldelar värden 
-            _recipeManager = recipeManager;
-            _user = user;
-            // Initierar kommandon
-            SaveCommand = new RelayCommand(SaveRecipe);
-            CancelCommand = new RelayCommand(Cancel);
+        // PUBLIKA EGENSKAPER med mera effektiv deklaration 
+        public string Title { get => _title;
+            set { _title = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
+        }
+        public string Ingredients { get => _ingredients;
+            set { _ingredients = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
+        }
+        public string Instructions { get => _instructions;
+            set { _instructions = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
+        }
+        public string Category { get => _category;
+            set { _category = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
+        }
+        public string Error { get => _error; 
+            set { _error = value; OnPropertyChanged(); }
         }
 
-        // METODER för knappar för att SPARA, AVBRYTA och STÄNGA FÖNSTER
-        public void SaveRecipe(object parameter) 
+        // Deklerar och initierar KOMMANDOM via ICommand in RelayCommandManager med effektiv deklaration
+        public RelayCommand SaveCommand => new RelayCommand(execute => SaveRecipe(), canSaveRecipe => CanSaveRecipe());
+        public RelayCommand CancelCommand => new RelayCommand(Cancel);
+
+        // METOD för att aktivera sparaknapp (cancel alltid aktiv)
+        private bool CanSaveRecipe() =>
+           !string.IsNullOrWhiteSpace(Title)
+           && !string.IsNullOrWhiteSpace(Ingredients)
+           && !string.IsNullOrWhiteSpace(Instructions)
+           && !string.IsNullOrWhiteSpace(Category);
+
+        // KONSTRUKTOR som upprättar samarbete med RecipeManager och User
+        public AddRecipeViewModel()
         {
-            // Alla fält ifyllda? 
-            if (string.IsNullOrWhiteSpace(Title) ||
-                string.IsNullOrWhiteSpace(Ingredients) ||
-                string.IsNullOrWhiteSpace(Instructions) ||
-                string.IsNullOrWhiteSpace(Category))
+            // Tilldelar värden för samarbete m globala variabler
+            _userManager = (UserManager)Application.Current.Resources["UserManager"];
+            _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+            // Tilldelar värde/parameter
+            _title = string.Empty;
+            _ingredients = string.Empty;
+            _instructions = string.Empty;
+            _category = string.Empty; 
+        }
+        // FÖNSTERSTÄNGARE
+        private void CloseWindow<T>() where T : Window
+        {
+            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
+            win?.Close();
+        }
+        // METODER för kommandon att SPARA, AVBRYTA och STÄNGA FÖNSTER
+        public void SaveRecipe() 
+        {
+            // Säkerställer att användaren är inloggad
+            if (_userManager.CurrentUser == null)
             {
-                // Annars: 
-                MessageBox.Show("Alla fält måste vara ifyllda!");
+                MessageBox.Show("Du måste vara inloggad för att lägga till recept!");
                 return;
             }
-            // Skapar recept och lägger till det i RecipeManager, samt meddelar användaren
-            var recipe = new Recipe(Title, Ingredients, Instructions, Category, _user.UserName);
-            _recipeManager.AddRecipe(recipe);
+            // Anropar metod i RecipeManager med owner från UserManager
+            var owner = _userManager.CurrentUser.UserName;
+            var (success, message) = _recipeManager.AddRecipe(Title, Ingredients, Instructions, Category, owner);
+            if (!success) 
+            {
+                Error = message; // Tar meddelande från recipeManager
+            }
+            // ANNARS sparas receptet och användaren meddelas
             MessageBox.Show("Recept sparat!");
-            // Instansierar RecipeListViewModel med aktuella objekt (användaren och recepthanterare)
-            var listVM = new RecipeListViewModel(_user, _recipeManager);
-            // Instansierar och visar listfönstret
-            var listWindow = new Views.RecipeListWindow(listVM);
-            listWindow.Show();
             // Anropar fönsterstängare
-            CloseCurrentWindow();
+            CloseWindow<AddRecipeWindow>();
+            // Öppnar receptlistan igen
+            //var recipeListVM = new RecipeListViewModel();
+            var recipeListWindow = new RecipeListWindow();
+            recipeListWindow.Show();
+            // BEHÖVS DET EN REFRESH LIST HÄR?
+            // RefreshRecipes();
         }
         private void Cancel(object parameter) // Object parameter för RelayCommand 
         {
-            // Instansierar recept VM och VIEW - med aktuell användaren och recepthanterare 
-            var recipelistVM = new RecipeListViewModel(_user, _recipeManager); // måste jag involvera denna med anrop? 
-            var recipelistWindow = new Views.RecipeListWindow(recipelistVM);
-            recipelistWindow.Show();
             // Anropar fönsterstängare
-            CloseCurrentWindow();
+            CloseWindow<AddRecipeWindow>();
+            // Öppnar receptlistan igen
+            //var recipeListVW = new RecipeListViewModel();
+            var recipeListWindow = new RecipeListWindow();
+            recipeListWindow.Show();
         }
-        // EN METOD för att stänga fönster
-        private void CloseCurrentWindow()
-        {
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window is Views.AddRecipeWindow)
-                {
-                    window.Close();
-                    break;
-                }
-            }
-        }
-
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? name = null)
