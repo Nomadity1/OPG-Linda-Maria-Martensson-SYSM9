@@ -15,15 +15,15 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.Managers
 {
-    // MANAGERS hanterar HUR DATA ANVÄNDS och är LÄNKEN mellan MODELS och VIEW MODELS   
-    // UPPGIFTER: KOMMANDON OCH METODER FÖR INLOGGNING, CURRENTUSER, UTLOGGNING, REGISTRERING,
-    // ÄNDRA UPPGIFTER OCH EVT. ÅTERSTÄLLA LÖSENORD 
+    // MANAGERS hanterar HUR DATA ANVÄNDS, innehåller främst METODER och är LÄNKEN mellan MODELS och VIEW MODELS   
+    // UPPGIFTER: INLOGGNING, CURRENTUSER, UTLOGGNING, REGISTRERING, ÄNDRA UPPGIFTER (OCH EVT. ÅTERSTÄLLA LÖSENORD) 
     public class UserManager : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT som använder sig av User-klassen
         private List<User> _userlist; // Lista över alla användare                                       
         private User? _currentUser; // Variabel för aktuell (inloggad) användare
                                     // Frågetecknet anger att variabeln kan ha null-värde 
+                                    
         // PUBLIKA EGENSKAPER 
         public User? CurrentUser // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
         { get { return _currentUser; } 
@@ -34,7 +34,9 @@ namespace CookMaster.Managers
         }
         public List<string> Countries { get; set; } = new List<string> { "Sweden", "Norway", "Denmark", "Finland", 
             "New Zeeland", "Germany", "United Kingdom", "Other" }; // Fördefinierade alternativ för land i registrering 
-        public bool IsAuthenticated => CurrentUser != null; // PUBLIK BOOL för att kunna visa inloggningsstatus
+        
+        // PUBLIK BOOL för att kunna visa inloggningsstatus
+        public bool IsAuthenticated => CurrentUser != null; 
 
         // KONSTRUKTOR instansierar användarlistan med objektet _userlist
         public UserManager()
@@ -67,11 +69,15 @@ namespace CookMaster.Managers
                 Country = "Sweden"
             });
         }
-        // METOD som hjälper till att stänga fönster om typ anges i respektive metod 
-        private void CloseWindow<T>() where T : Window
+
+        // METOD som stänger alla öppna fönster (förutom eventuellt redan öppna RecipeListWindow)
+        private void WindowCloser()
         {
-            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
-            win?.Close();
+            foreach (Window w in Application.Current.Windows.OfType<Window>().ToList())
+            {
+                if (!(w is RecipeListWindow))
+                    w.Close();
+            }
         }
 
         // METOD för att logga in (autentisering)
@@ -82,21 +88,23 @@ namespace CookMaster.Managers
                 StringComparison.OrdinalIgnoreCase));
 
             if (user == null) // OM användaruppgifter INTE finns i listan
-            {   
-                MessageBox.Show("Användarnamnet finns inte");
+            {
+                //MessageBox.Show("Användarnamnet finns inte");
+                return (false, "Användarnamnet finns inte.");
             }
             else if (user.Password != password) // OM lösenordet ÄR FEL 
             {
-                MessageBox.Show("Fel lösenord");
+                //MessageBox.Show("Fel lösenord");
+                return (false, "Fel lösenord.");
             }
             // ANNARS dvs användaruppgifter finns i listan OCH lösenordet är rätt: 
             // Tilldelar user till CurrentUser
             CurrentUser = user;
-            // Stänger fönster med hjälpmetod ovan
-            CloseWindow<MainWindow>();
-            // Öppnar receptlistan
-            var recipeList = new RecipeListWindow();
-            recipeList.ShowDialog();
+            //// Anropar fönsterstängare
+            //WindowCloser(); 
+            // Öppna RecipeListWindow 
+            //var recipeListWindow = new RecipeListWindow();
+            //recipeListWindow.Show();
             // Meddelar framgång
             return (true, "Du har loggats in.");
         }
@@ -104,16 +112,16 @@ namespace CookMaster.Managers
         public void Logout()
         {
             CurrentUser = null;
-            // Stänger receptfönster och öppnar inloggningsfönstret igen
-            CloseWindow<RecipeListWindow>();
+            // Anropar fönsterstängare 
+            WindowCloser();
+            // Instansierar och visar inloggningsfönstret
             var mainWindow = new MainWindow();
             mainWindow.ShowDialog();
         }
         // METOD för att öppna registreringsfönster
         public void OpenRegisterWindow()
         {
-            // Anropar fönsterstängare
-            CloseWindow<MainWindow>();
+            // Instansierar och visar registreringsfönstret
             var registerWindow = new RegisterWindow();
             registerWindow.ShowDialog();
         }
@@ -140,10 +148,11 @@ namespace CookMaster.Managers
                 var user = new User { UserName = username, Password = password, Country = country };
                 _userlist.Add(user);
 
-                // Stänger detta fönster och öppnar inloggningsfönstret igen
-                CloseWindow<RegisterWindow>();
-                var mainWindow = new MainWindow();
-                mainWindow.ShowDialog();
+                //// Anropar fönsterstängare
+                //WindowCloser();
+                //// Insansierar och öppnar inloggningsfönstret igen
+                //var mainWindow = new MainWindow();
+                //mainWindow.Show();
                 return (true, messageRegistration);
             }
         }
@@ -178,11 +187,11 @@ namespace CookMaster.Managers
             // Skapar ny användare och tilldelar uppdaterade värden
             var user = new User { UserName = username, Password = newPassword, Country = newCountry };
             _userlist.Add(user);
-
-            // Stänger detta fönster och öppnar receptvyn igen
-            CloseWindow<UserDetailsWindow>();
-            var recipeListWindow = new RecipeListWindow();
-            recipeListWindow.ShowDialog();
+            // Anropar fönsterstängare
+            WindowCloser();
+            //// Instansierar och visar receptlistan igen
+            //var recipeListWindow = new RecipeListWindow();
+            //recipeListWindow.Show();
             // Meddelar framgång
             return (true, messageUpdate);
         }

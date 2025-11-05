@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace CookMaster.Managers
 {
+
+    // UPPGIFTER är att HANTERA RECEPT (LÄGGA TILL, TA BORT, HÄMTA LISTOR)
     public class RecipeManager : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT för recepthanteraren 
@@ -57,9 +59,9 @@ namespace CookMaster.Managers
             );
             // Lägger till recept som vanlig användare genom att anropa basklassens konstruktorn
             _recipelist.Add(new Recipe(
-                "Gulliga och goda grodlår",
-                "Grodlår, gullighet, olja",
-                "Massera låren ömt",
+                "Gulliga och gröna grodlår",
+                "Grodlår, gullighet, grön färg",
+                "Blanda allt",
                 "Förrätt",
                 "user")
             { Date = DateTime.Now }

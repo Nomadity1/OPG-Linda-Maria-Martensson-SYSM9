@@ -22,6 +22,7 @@ namespace CookMaster.ViewModels
         private readonly Recipe _recipe;
         private readonly RecipeManager _recipeManager;
         private readonly UserManager _userManager;
+        private bool _isReadOnly = true; // styr möjlighet att redigera 
 
         // PUBLIKA EGENSKAPER med effektiv deklaration
         public string Title { get => _recipe.Title; set { _recipe.Title = value; OnPropertyChanged(); } }
@@ -30,8 +31,8 @@ namespace CookMaster.ViewModels
         public string Category { get => _recipe.Category; set { _recipe.Category = value; OnPropertyChanged(); } }
         public ObservableCollection<Recipe> Recipes { get; set; } // Dynamisk lista för recephantering 
 
-        private bool _isReadOnly = true;
-        // BOOL som styr textboxarnas redigerbarhet
+        
+        // PUBLIK BOOL som styr textboxarnas redigerbarhet
         public bool IsReadOnly
         {
             get => _isReadOnly;
@@ -40,37 +41,45 @@ namespace CookMaster.ViewModels
                 _isReadOnly = value; OnPropertyChanged(); 
             }
         }
-        // KONSTRUKTOR som upprättar samarbete med RecipeManager och User
-        public RecipeDetailViewModel()
-        {
-            // Globala managers
-            _userManager = (UserManager)Application.Current.Resources["UserManager"];
-            _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
-        }
-        // OVERLOADANDE konstruktorn som tar emot ett RECEPT-objekt
-        public RecipeDetailViewModel(Recipe recipe) 
-        {
-            _recipe = recipe;
-            // Initialiserar den dynamiska listan
-            Recipes = new ObservableCollection<Recipe>(_recipeManager.GetAllRecipes());
-            // Globala managers
-            _userManager = (UserManager)Application.Current.Resources["UserManager"];
-            _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
-        }
-
-        // Deklarera och tilldelar KOMMANDON via ICommand in RelayCommandManager
+        // PUBLIKA KOMMANDODEFINOITIONER (via ICommand in RelayCommandManager)
         public RelayCommand EditCommand => new RelayCommand(Edit);
         public RelayCommand SaveCommand => new RelayCommand(execute => Save(), canExecute => CanSave());
         public RelayCommand CancelCommand => new RelayCommand(Cancel);
 
-        // BOOL för att aktivera SPARAKNAPP
+        // BOOL för att aktivera SPARA-KNAPP
         public bool CanSave() =>
             !string.IsNullOrWhiteSpace(Title)
             && !string.IsNullOrWhiteSpace(Ingredients)
             && !string.IsNullOrWhiteSpace(Instructions)
             && !string.IsNullOrWhiteSpace(Category);
 
-        // METODER för KOMMANDON
+        // KONSTRUKTO 
+        public RecipeDetailViewModel()
+        {
+            // Globala managers
+            _userManager = (UserManager)Application.Current.Resources["UserManager"];
+            _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+
+            Recipe recipe = new Recipe("Exempelrecept","Ingrediens 1, Ingrediens 2",
+                "Gör så här...",
+                "Kategori",
+                "ExempelAnvändare");
+            _recipe = recipe;
+            // Initierar den dynamiska listan
+            Recipes = new ObservableCollection<Recipe>(_recipeManager.GetAllRecipes());
+        }
+
+        // FÖNSTERSTÄNGARE
+        private void WindowCloser()
+        {
+            foreach (Window w in Application.Current.Windows.OfType<Window>().ToList())
+            {
+                if (!(w is RecipeListWindow))
+                    w.Close();
+            }
+        }
+
+        // METODER för KOMMANDON - REDIGERA, SPARA & AVBRYT
         private void Edit(object parameter)
         {
             if (_userManager.CurrentUser == null)
@@ -90,14 +99,8 @@ namespace CookMaster.ViewModels
             }
             else
                 IsReadOnly = false;
+            // Fönster ska inte stängas
         }
-        // FÖNSTERSTÄNGARE
-        private void CloseWindow<T>() where T : Window
-        {
-            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
-            win?.Close();
-        }
-        // METODER för att SPARA OCH AVBRYTA ÄNDRINGAR
         private void Save()
         {
             // Kontrollera att recept finns
@@ -122,16 +125,12 @@ namespace CookMaster.ViewModels
             var (success, message) = _recipeManager.AddRecipe(Title, Ingredients, Instructions, Category, _recipe.Owner);
             if (success)
                 SaveSuccess?.Invoke(this, System.EventArgs.Empty);
+            // Fönster stängs i *VM.xaml.cs
         }
         private void Cancel(object parameter)
         {
             // Anropar fönsterstängare
-            CloseWindow<RecipeDetailWindow>();
-            // Instansierar och visar receptvyn
-            //var recipeListVM = new RecipeListViewModel();
-            var recipeListWindow = new RecipeListWindow();
-            recipeListWindow.Show();
-            // Anropar fönsterstängare
+            WindowCloser();
         }
 
         // EVENT att "prenumerera" på för relevanta fönster 

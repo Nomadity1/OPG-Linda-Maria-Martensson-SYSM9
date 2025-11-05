@@ -31,6 +31,13 @@ namespace CookMaster.Views
             var addRecipeVM = new AddRecipeViewModel(); 
             // ...och anger objektet som datakontext
             DataContext = addRecipeVM;
+            addRecipeVM.SaveSuccess += (s, e) =>
+            {
+                DialogResult = true; // Meddelar framgång 
+                this.Close(); // ...och stänger detta fönster
+            };
+            // Påminner programmet om vilken datakontexten är
+            DataContext = addRecipeVM;
         }
     }
 }

@@ -38,12 +38,6 @@ namespace CookMaster.ViewModels
         { get => _error; set { _error = value; OnPropertyChanged(); }
         }
 
-        // KONSTRUKTOR som upprättar samarbete med UserManager resp RecipeManager
-        public MainViewModel() 
-        {
-            _userManager = (UserManager)Application.Current.Resources["UserManager"];
-        }
-
         // PUBLIKA METOD-DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
         // FÖR INLOGGNING, REGISTRERING & EVT. LÖSENORDSÅTERSTÄLLNING
         public RelayCommand LogInCommand => new RelayCommand(execute => Login(), canExecute => CanLogin());
@@ -53,7 +47,14 @@ namespace CookMaster.ViewModels
         private bool CanLogin() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password); // Här kontrolleras att inmatning skett
 
-        // METOD - INLOGGNING 
+
+        // KONSTRUKTOR som upprättar samarbete med UserManager resp RecipeManager
+        public MainViewModel()
+        {
+            _userManager = (UserManager)Application.Current.Resources["UserManager"];
+        }
+
+        // METODER FÖR KOMMANDON - INLOGGNING och ÖPPPNA REGISTRERING
         private void Login()
         {
             // Anropar LogIn-metoden i UserManager och tar emot returvärden
@@ -62,22 +63,18 @@ namespace CookMaster.ViewModels
                 LogInSuccess?.Invoke(this, System.EventArgs.Empty);
             else
                 Error = message; // Tar meddelande från userManager
+            //Fönster stängs och öppnas i* VM.xaml.cs
         }
 
         // METOD för kommando att öppna registrering
         public void OpenRegister(object parameter) // Ingen inmatning krävs, tar bara emot objekt-parameter från knapp
         {
-            // Öppnar registreringsvyn
-            RegisterViewModel registerVM = new RegisterViewModel();
-            var registerWindow = new RegisterWindow();
-            registerWindow.ShowDialog();
-            // Anropar fönsterstängare
-            //CloseCurrentWindow();
+            var registerWindow = new RegisterWindow(); // Instansierar registreringsvyn
+            registerWindow.ShowDialog(); // Visar registreringsvyn som dialogruta (kan då komma tillbaka till inloggningsvyn efter reg.)
         }
 
         // EVENT att "prenumerera" på för relevanta fönster 
-        // När begäran lyckas, körs alla metoder som är kopplade till eventet
-        public event System.EventHandler? LogInSuccess; // Make event nullable
+        public event System.EventHandler? LogInSuccess; // Nullable
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 
         public event PropertyChangedEventHandler? PropertyChanged;

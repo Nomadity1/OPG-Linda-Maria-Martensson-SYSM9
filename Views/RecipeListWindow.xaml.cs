@@ -22,14 +22,13 @@ namespace CookMaster.Views
     /// </summary>
     public partial class RecipeListWindow : Window
     {
-        // UPPGIFTER: Visa receptlista, hantera recept (lägg till, redigera, ta bort), sökfunktion, filtreringsfunktion?
         public RecipeListWindow()
         {
             InitializeComponent();
             // Instansierar och upprättar samarbete med UserManager och RecipeManager från global variabel i app-resurser
             var userManager = (UserManager)Application.Current.Resources["UserManager"];
             var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
-            // Instansierar ett VM-objekt för att kunna visa inloggad användare och receptlista
+            //// Instansierar ett VM-objekt för att kunna visa inloggad användare och receptlista
             var recipeListVW = new RecipeListViewModel();
             // Sätter datakontext
             DataContext = recipeListVW;

@@ -28,22 +28,6 @@ namespace CookMaster.ViewModels
         private string _error;
         private User currentUser;
 
-        // KONSTRUKTOR 
-        public UserDetailsViewModel(UserManager userManager)
-        {
-            // Tilldelar värde/parameter
-            _userManager = userManager;
-            _updatedUsername = UpdatedUserName; 
-            _updatedPassword = UpdatedPassword;
-            _updatedRepeatedPassword = UpdatedRepeatedPassword;
-            _updatedSelectedCountry = UpdatedSelectedCountry; 
-            _error = Error; 
-        }
-        // KONSTRUKTOR som OVERLOADAR med aktuell användare
-        public UserDetailsViewModel(User currentUser)
-        {
-            this.currentUser = currentUser;
-        }
         // PUBLIKA EGENSKAPER med mera effektiv deklaration 
         public string UpdatedUserName
         { get => _updatedUsername;
@@ -72,24 +56,47 @@ namespace CookMaster.ViewModels
             set { _error = value; OnPropertyChanged(); }
         }
 
-        // KOMMANDO för att ändra uppgifter via ICommand in RelayCommandManager
-        public RelayCommand SaveUpdatesCommand => 
+        // PUBLIKA KOMMANDON för att ändra uppgifter via ICommand in RelayCommandManager
+        public RelayCommand SaveUpdatesCommand =>
             new RelayCommand(execute => SaveUpdates(), canExecute => CanSaveUpdates());
+        public RelayCommand CancelCommand => new RelayCommand(CancelUserDetails);
 
         // METOD för att aktivera knapp
         private bool CanSaveUpdates() =>
-            !string.IsNullOrWhiteSpace(UpdatedUserName) 
+            !string.IsNullOrWhiteSpace(UpdatedUserName)
             && !string.IsNullOrWhiteSpace(UpdatedPassword)
             && !string.IsNullOrWhiteSpace(UpdatedRepeatedPassword);
 
-        // METOD som hjälper till att stänga fönster om typ anges i respektive metod 
-        private void CloseWindow<T>() where T : Window
+        // KONSTRUKTOR 
+        public UserDetailsViewModel(UserManager userManager)
         {
-            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
-            win?.Close();
+            // Tilldelar värde/parameter
+            _userManager = userManager;
+            _updatedUsername = UpdatedUserName; 
+            _updatedPassword = UpdatedPassword;
+            _updatedRepeatedPassword = UpdatedRepeatedPassword;
+            _updatedSelectedCountry = UpdatedSelectedCountry; 
+            _error = Error;
+        }        
+        
+        // KONSTRUKTOR som OVERLOADAR med aktuell användare
+        public UserDetailsViewModel(User currentUser)
+        {
+            this.currentUser = currentUser;
         }
 
-        // METODER för att ändra användaruppgifter - Kopplat till uppdateringskommando 
+        // FÖNSTERSTÄNGARE 
+        private void WindowCloser()
+        {
+            foreach (Window w in Application.Current.Windows.OfType<Window>().ToList())
+            {
+                if (!(w is RecipeListWindow))
+                    w.Close();
+            }
+        }
+
+        // METODER för att ändra användaruppgifter
+        // SPARA Kopplat till spara-uppdateringar-kommando 
         public void SaveUpdates()
         {
             if (UpdatedPassword != UpdatedRepeatedPassword)
@@ -104,23 +111,16 @@ namespace CookMaster.ViewModels
                 UpdateSuccess?.Invoke(this, System.EventArgs.Empty);
             else
                 Error = message; // Tar meddelanden från UserManager
-            //// Anropar fönsterstängare
-            //CloseWindow<UserDetailsWindow>();
-            //// Öppnar och visar receptvyn
-            //var recipeList = new RecipeListWindow();
-            //recipeList.ShowDialog();
+            // Fönster stängs i *VM.xaml.cs
         }
-        public RelayCommand CancelCommand => new RelayCommand(CancelUserDetails);
+
+        // AVBRYT
         public void CancelUserDetails(object parameter) // Ingen inmatning krävs, tar bara emot objekt-parameter från knapp
         {
             // Anropar fönsterstängare
-            CloseWindow<UserDetailsWindow>();
-            // Instansierar och visar receptvyn
-            var recipelistWindow = new RecipeListWindow();
-            recipelistWindow.Show();
+            WindowCloser();
         }
         // EVENT som userdetails-fönstret "prenumererar" på
-        // När ändringar lyckas, körs alla metoder som är kopplade till detta event.
         public event System.EventHandler? UpdateSuccess; // Make event nullable
 
         // Generellt EVENT och generell METOD för att möjliggöra binding 

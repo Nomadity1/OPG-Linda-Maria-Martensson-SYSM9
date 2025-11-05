@@ -46,13 +46,13 @@ namespace CookMaster.ViewModels
         { get => _error; set { _error = value; OnPropertyChanged(); }
         }
 
-        // REGISTER-KOMMANDO via ICommand in RelayCommandManager
+        // PUBLIKT KOMMANDO via ICommand in RelayCommandManager
         public RelayCommand RegisterCommand => new RelayCommand(execute => Register(), canExecute => CanRegister());
 
         // METOD för att aktivera registreringssknapp
         private bool CanRegister() =>
-            !string.IsNullOrWhiteSpace(NewUserName) 
-            && !string.IsNullOrWhiteSpace(NewPassword) 
+            !string.IsNullOrWhiteSpace(NewUserName)
+            && !string.IsNullOrWhiteSpace(NewPassword)
             && !string.IsNullOrWhiteSpace(NewSelectedCountry);
 
         // KONSTRUKTOR som upprättar samarbete med UserManager 
@@ -66,12 +66,7 @@ namespace CookMaster.ViewModels
             _newSelectedCountry = string.Empty;
             _error = string.Empty;
         }
-        // FÖNSTERSTÄNGARE 
-        private void CloseWindow<T>() where T : Window
-        {
-            var win = Application.Current.Windows.OfType<T>().FirstOrDefault();
-            win?.Close();
-        }
+
         // METOD för KOMMANDO
         public void Register()
         {
@@ -82,12 +77,7 @@ namespace CookMaster.ViewModels
                 RegisterSuccess?.Invoke(this, System.EventArgs.Empty);
             else
                 Error = message; // Tar meddelanden från UserManager 
-            //// Anropar fönsterstängare
-            //CloseWindow<RegisterWindow>();
-            //// Öppnar inloggningsvyn igen
-            ////var mainVM = new MainViewModel();
-            //var mainWindow = new MainWindow();
-            //mainWindow.Show();
+            // Fönster stängs i *VM.xaml.cs
         }
 
         // EVENT som Registrerings-fönstret "prenumererar" på

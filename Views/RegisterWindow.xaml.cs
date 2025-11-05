@@ -21,7 +21,6 @@ namespace CookMaster.Views
     /// </summary>
     public partial class RegisterWindow : Window
     {
-        // UPPGIFTER: Ta emot registreringsuppgifter 
         public RegisterWindow()
         {
             InitializeComponent();
@@ -36,30 +35,21 @@ namespace CookMaster.Views
             // ...och anger objektet som datakontext
             DataContext = registerVW;
             // Anropar RegistrationSuccess-eventet i UserManagerViewModel
-            // ...som tilldelar objektet det utfall som aktiveras 
-            // s = sender (i det här fallet objektet userManagerVM)
-            // e = eventets data (det som händer i klassen)
-            // += betyder att vi prenumererar på ett event (t ex kopplar en metod till ett event,
-            // som körs varje gång eventet triggas)
             registerVW.RegisterSuccess += (s, e) =>
             {
 				DialogResult = true; // Meddelar framgång 
 				this.Close(); // Stänger registreringsfönstret
-                var mainWindow = new MainWindow(); // Instansierar loginfönster
-                mainWindow.Show(); // Visar loginfönster
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = registerVW;
         }
 
-        // METODER för att ta emot lösenord från passwordboxar i registrerings-fönstret
+        // METOD för att ta emot lösenord från passwordbox i registrerings-vyn
         // Övriga inmatningar är bundna direkt via DataContext och behöver inte inläsningsmetoder här
         private void NewPassWord_PasswordChanged(object sender, RoutedEventArgs e)
         {
             if (DataContext is RegisterViewModel registerVW)
             {
-                // Egenskapen NewPassword i Register View Model tilldelas
-                // inmatat värde från registreringsfönstrets password-box "NewPassWord"
                 registerVW.NewPassword = NewPassWord.Password;
             }
         }

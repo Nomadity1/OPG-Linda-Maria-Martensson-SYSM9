@@ -30,13 +30,13 @@
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Username*" Width="100" />
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Password**" Width="100" />
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Select your country" Width="100" />
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NewUserName, UpdateSourceTrigger=PropertyChanged}" Width="100" Height="20" 
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NewUserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" Height="20" 
                  HorizontalAlignment="Left" />
         <PasswordBox Grid.Row="3" Grid.Column="1" x:Name="NewPassWord" 
                      PasswordChanged="NewPassWord_PasswordChanged"  Width="100" Height="20"  
                      HorizontalAlignment="Left" />
         <ComboBox Grid.Row="6" Grid.Column="1" x:Name="CountryComboBox" ItemsSource="{Binding Countries}"  
-                  SelectedItem="{Binding NewSelectedCountry, UpdateSourceTrigger=PropertyChanged}" 
+                  SelectedItem="{Binding NewSelectedCountry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                   Width="100" Height="20"  HorizontalAlignment="Left" />
         <!--Hjälptexter-->
         <TextBlock Grid.Row="2" Grid.Column="2" 

@@ -20,17 +20,9 @@ namespace CookMaster
     /// </summary>
     public partial class MainWindow : Window
     {
-        // UPPGIFTER: Ta emot inloggningsuppgifter, ta emot knapptryckningar (log in, register, forgot password) 
-
-        // PRIVAT FÄLT för instansiering längre ner 
-        //private MainViewModel? _mainViewModel;
         public MainWindow()
         {
             InitializeComponent();
-            // Instansierar och upprättar samarbete med UserManager och RecipeManager, från global variabel i app-resurser
-            //var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            //var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
-
             // Instansierar tillhörande ViewModel med objektet mainVM
             var mainVW = new MainViewModel();
             // ...och anger objektet som datakontext
@@ -43,10 +35,13 @@ namespace CookMaster
             // som körs varje gång eventet triggas)
             mainVW.LogInSuccess += (s, e) =>
             {
-                DialogResult = true; // Meddelar framgång 
+                // Insstansierar recept-vyn
+                var recipeListWindow = new RecipeListWindow();
+                // Gör recipeListWindow till MainWindow så att appen inte blir huvudlös (TIPS FRÅN GITHUB COPILOT)
+                Application.Current.MainWindow = recipeListWindow;
+                // öppnar recept-vyn
+                recipeListWindow.Show();
                 this.Close(); // ...och stänger detta fönster
-                var recipeListWindow = new Views.RecipeListWindow(); // Instansierar receptlistvyn
-                recipeListWindow.Show(); // Visar receptlistvyn
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = mainVW;

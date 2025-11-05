@@ -37,8 +37,6 @@ namespace CookMaster.Views
             {
                 DialogResult = true; // Meddelar framgång 
                 this.Close(); // ...och stänger detta fönster
-                var recipeListWindow = new RecipeListWindow(); // Instansierar receptlistvyn
-                recipeListWindow.Show(); // Visar receptlistvyn
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = recipeDetailVM;

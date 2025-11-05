@@ -21,7 +21,6 @@ namespace CookMaster.Views
     /// </summary>
     public partial class UserDetailsWindow : Window
     {
-        // UPPGIFTER: Visa befintliga uppgifter, ta emot eventuella ändringar, spara (=uppdatera) användaruppgifter
         public UserDetailsWindow()
         {
             InitializeComponent();
@@ -38,8 +37,6 @@ namespace CookMaster.Views
             {
                 DialogResult = true; // Meddelar framgång 
                 this.Close(); // Stänger detta fönster
-                var recipeListWindow = new RecipeListWindow(); // Instansierar receptlistvyn
-                recipeListWindow.Show(); // Visar receptlistvyn
             };
             // Påminner programmet om vilken datakontexten är
             DataContext = userDetailsVW;
@@ -50,8 +47,6 @@ namespace CookMaster.Views
         {
             if (DataContext is UserDetailsViewModel userDetailsVW)
             {
-                // Egenskapen NewPassword i User Details View Model tilldelas
-                // inmatat värde från userdetails-fönstrets password-box "NewPassWord"
                 userDetailsVW.UpdatedPassword = UpdatedPassWord.Password;
             }
         }

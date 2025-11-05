@@ -15,7 +15,8 @@ namespace CookMaster
         {
             base.OnStartup(e);
             // Låt inte programmet stängas automatiskt när MainWindow stängs
-            Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            Application.Current.ShutdownMode = ShutdownMode.OnLastWindowClose; // HAR ÄNDRAT SISTA TERMEN  
+            //Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown; // LÅTER DENNA LIGGA KVAR SOM REFERENS
         }
     }
 }

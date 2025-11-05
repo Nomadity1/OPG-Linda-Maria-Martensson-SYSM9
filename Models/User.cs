@@ -14,6 +14,7 @@ namespace CookMaster.Models
         public required string UserName { get; set; } 
         public required string Password { get; set; }
         public required string Country { get; set; }
+        // OVERLOADANDE KONSTRUKTORER för olika sätt att skapa ett User-objekt
         public User()
         {
         }
