@@ -29,20 +29,21 @@ namespace CookMaster.ViewModels
         public string Ingredients { get => _recipe.Ingredients; set { _recipe.Ingredients = value; OnPropertyChanged(); } }
         public string Instructions { get => _recipe.Instructions; set { _recipe.Instructions = value; OnPropertyChanged(); } }
         public string Category { get => _recipe.Category; set { _recipe.Category = value; OnPropertyChanged(); } }
+        public DateTime Date { get => _recipe.Date; }
+        public string CurrentRecipe => _recipeManager.CurrentRecipe?.Title ?? string.Empty; // Visa aktuellt recept
         public ObservableCollection<Recipe> Recipes { get; set; } // Dynamisk lista för recephantering 
-
         
         // PUBLIK BOOL som styr textboxarnas redigerbarhet
-        public bool IsReadOnly
-        {
-            get => _isReadOnly;
-            set
-            {
-                _isReadOnly = value; OnPropertyChanged(); 
+        public bool IsReadOnly { get => _isReadOnly; set { _isReadOnly = value; 
+                OnPropertyChanged();
+                // Tvingar kommandot att stämma av med CanExecute när Edit ändras
+                CommandManager.InvalidateRequerySuggested();
             }
         }
+
         // PUBLIKA KOMMANDODEFINOITIONER (via ICommand in RelayCommandManager)
-        public RelayCommand EditCommand => new RelayCommand(Edit);
+        public RelayCommand EditCommand => new RelayCommand(Edit, _ => _userManager?.CurrentUser != null);
+        // Kan bara redigera om användare är inloggad
         public RelayCommand SaveCommand => new RelayCommand(execute => Save(), canExecute => CanSave());
         public RelayCommand CancelCommand => new RelayCommand(Cancel);
 
@@ -54,20 +55,29 @@ namespace CookMaster.ViewModels
             && !string.IsNullOrWhiteSpace(Category);
 
         // KONSTRUKTO 
-        public RecipeDetailViewModel()
+        public RecipeDetailViewModel(Recipe recipe)
         {
             // Globala managers
             _userManager = (UserManager)Application.Current.Resources["UserManager"];
             _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
 
-            Recipe recipe = new Recipe("Exempelrecept","Ingrediens 1, Ingrediens 2",
-                "Gör så här...",
-                "Kategori",
-                "ExempelAnvändare");
-            _recipe = recipe;
+            // Tilldelar receptet
+            _recipe = recipe ?? throw new ArgumentNullException(nameof(recipe));
+            // Prenumererar på eventet i RecipeManager för att uppdatera CurrentRecipe när aktuellt recept ändras
+            _recipeManager.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(RecipeManager.CurrentRecipe))
+                {
+                    OnPropertyChanged(nameof(CurrentRecipe));
+                }
+            };
             // Initierar den dynamiska listan
             Recipes = new ObservableCollection<Recipe>(_recipeManager.GetAllRecipes());
         }
+        // Parameterlös konstruktor som hämta aktuellt recept från RecipeManager - TIPS FRÅN GITHUB COPILOT
+        public RecipeDetailViewModel() : this((Application.Current.Resources["RecipeManager"] as RecipeManager)?.CurrentRecipe
+                                               ?? throw new InvalidOperationException("No recipe provided to RecipeDetailViewModel"))
+        { }
 
         // FÖNSTERSTÄNGARE
         private void WindowCloser()
@@ -98,6 +108,7 @@ namespace CookMaster.ViewModels
                 return;
             }
             else
+                // Öppnar för redigering
                 IsReadOnly = false;
             // Fönster ska inte stängas
         }
@@ -121,14 +132,21 @@ namespace CookMaster.ViewModels
                 MessageBox.Show("Du kan bara spara ändringar på dina egna recept.");
                 return;
             }
-            // ANNARS Anropas metoden i RecipeManager och tar emot returvärden
-            var (success, message) = _recipeManager.AddRecipe(Title, Ingredients, Instructions, Category, _recipe.Owner);
+            // ANNARS Anropas metoden i RecipeManager 
+            var (success, message) = _recipeManager.UpdateRecipe(_recipe);
             if (success)
-                SaveSuccess?.Invoke(this, System.EventArgs.Empty);
+                IsReadOnly = true; // Återgår till read-only 
+            SaveSuccess?.Invoke(this, System.EventArgs.Empty);
             // Fönster stängs i *VM.xaml.cs
         }
         private void Cancel(object parameter)
         {
+            // Återställer ev ändringar 
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Ingredients));
+            OnPropertyChanged(nameof(Instructions));
+            OnPropertyChanged(nameof(Category));
+            IsReadOnly = true; // Återgår till read-only
             // Anropar fönsterstängare
             WindowCloser();
         }

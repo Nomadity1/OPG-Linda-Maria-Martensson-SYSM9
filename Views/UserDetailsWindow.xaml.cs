@@ -50,5 +50,13 @@ namespace CookMaster.Views
                 userDetailsVW.UpdatedPassword = UpdatedPassWord.Password;
             }
         }
+
+        private void UpdatedRepeatedPassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UserDetailsViewModel userDetailsVW)
+            {
+                userDetailsVW.UpdatedRepeatedPassword = UpdatedRepeatedPassWord.Password;
+            }
+        }
     }
 }

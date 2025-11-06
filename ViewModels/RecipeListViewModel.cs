@@ -25,7 +25,8 @@ namespace CookMaster.ViewModels
         public ObservableCollection<Recipe> Recipes { get; set; } // Dynamisk lista för recephantering 
         public Recipe? SelectedRecipe { get; set; } // För att kunna hålla koll på valt recept i listan
         public string CurrentUser => _userManager.CurrentUser?.UserName ?? string.Empty; // Visa inloggad användare 
-
+                                                                                         // PUBLIKA EGENSKAPER 
+                                                                                         // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
         // PUBLIKA DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
         public RelayCommand LogOutCommand => new RelayCommand(LogOut);
         public RelayCommand UserDetailsCommand => new RelayCommand(OpenUserDetails);
@@ -139,7 +140,7 @@ namespace CookMaster.ViewModels
                 return;
             }
             // Instansierar och visar receptlist-vyn
-            var recipeDetailWindow = new RecipeDetailWindow();
+            var recipeDetailWindow = new RecipeDetailWindow(SelectedRecipe);
             recipeDetailWindow.ShowDialog();
             // Anropar metod för att uppdatera receplistan
             RefreshRecipes(); // BEHÖVER JAG DENNA NÄR DEN FINNS I KONSTRUKTORN? 

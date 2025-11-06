@@ -63,26 +63,27 @@ namespace CookMaster.ViewModels
 
         // METOD för att aktivera knapp
         private bool CanSaveUpdates() =>
-            !string.IsNullOrWhiteSpace(UpdatedUserName)
-            && !string.IsNullOrWhiteSpace(UpdatedPassword)
-            && !string.IsNullOrWhiteSpace(UpdatedRepeatedPassword);
+            !string.IsNullOrWhiteSpace(UpdatedUserName);
 
         // KONSTRUKTOR 
         public UserDetailsViewModel(UserManager userManager)
         {
-            // Tilldelar värde/parameter
-            _userManager = userManager;
-            _updatedUsername = UpdatedUserName; 
-            _updatedPassword = UpdatedPassword;
-            _updatedRepeatedPassword = UpdatedRepeatedPassword;
-            _updatedSelectedCountry = UpdatedSelectedCountry; 
-            _error = Error;
-        }        
-        
-        // KONSTRUKTOR som OVERLOADAR med aktuell användare
-        public UserDetailsViewModel(User currentUser)
-        {
-            this.currentUser = currentUser;
+            // Upprätta samarbete med UserManager
+            // Kasta undantag om userManager är null
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+
+            // Hämta aktuell användare och initiera visade fält
+            // Om ingen aktuell användare finns, kasta undantag
+            currentUser = _userManager.CurrentUser ?? throw new InvalidOperationException("No current user available.");
+            
+            // Tilldelar värden att visa i textboxar
+            _updatedUsername = currentUser.UserName;
+            _updatedSelectedCountry = currentUser.Country;
+
+            // Lämnar vissa boxar tomma för hägre säkerhet
+            _updatedPassword = string.Empty;
+            _updatedRepeatedPassword = string.Empty;
+            _error = string.Empty;
         }
 
         // FÖNSTERSTÄNGARE 
@@ -99,7 +100,10 @@ namespace CookMaster.ViewModels
         // SPARA Kopplat till spara-uppdateringar-kommando 
         public void SaveUpdates()
         {
-            if (UpdatedPassword != UpdatedRepeatedPassword)
+            // Lokala dummy-variabler för lösenord om det inte ändras (är ju tomma i user details)
+            var passwordToUse = string.IsNullOrEmpty(UpdatedPassword) ? currentUser.Password : UpdatedPassword;
+            var repeatToUse = string.IsNullOrEmpty(UpdatedRepeatedPassword) ? currentUser.Password : UpdatedRepeatedPassword;
+            if (passwordToUse != repeatToUse) // använder lokala variabler istället
             {
                 Error = "Lösenorden matchar inte!";
                 return;
@@ -108,7 +112,10 @@ namespace CookMaster.ViewModels
             var (success, message) = _userManager.Update(UpdatedUserName, UpdatedPassword, UpdatedRepeatedPassword, UpdatedSelectedCountry);
             // OM lyckas anropas EVENTET UpdateSuccess som meddelar prenumeranter
             if (success)
+            {
+                currentUser = _userManager.CurrentUser!; // Uppdaterar currentUser med ny info
                 UpdateSuccess?.Invoke(this, System.EventArgs.Empty);
+            }
             else
                 Error = message; // Tar meddelanden från UserManager
             // Fönster stängs i *VM.xaml.cs

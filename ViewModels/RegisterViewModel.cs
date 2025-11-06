@@ -76,6 +76,9 @@ namespace CookMaster.ViewModels
             if (success) 
                 RegisterSuccess?.Invoke(this, System.EventArgs.Empty);
             else
+            {
+                    
+            }
                 Error = message; // Tar meddelanden från UserManager 
             // Fönster stängs i *VM.xaml.cs
         }

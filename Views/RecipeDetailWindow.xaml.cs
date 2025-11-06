@@ -1,4 +1,5 @@
 ﻿using CookMaster.Managers;
+using CookMaster.Models;
 using CookMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -21,16 +22,16 @@ namespace CookMaster.Views
     /// </summary>
     public partial class RecipeDetailWindow : Window
     {
-        public RecipeDetailWindow()
+        public RecipeDetailWindow(Recipe recipe)
         {
             InitializeComponent();
-            // Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
-            var userManager = (UserManager)Application.Current.Resources["UserManager"];
-            // Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
-            var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+            //// Instansierar och upprättar samarbete med UserManager, från global variabel i app-resurser
+            //var userManager = (UserManager)Application.Current.Resources["UserManager"];
+            //// Instansierar och upprättar samarbete med RecipeManager, från global variabel i app-resurser
+            //var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
 
             // Instansierar och upprättar samarbete med tillhörande ViewModel
-            var recipeDetailVM = new RecipeDetailViewModel();
+            var recipeDetailVM = new RecipeDetailViewModel(recipe);
             // ...och anger objektet som datakontext
             DataContext = recipeDetailVM;
             recipeDetailVM.SaveSuccess += (s, e) =>
@@ -38,8 +39,8 @@ namespace CookMaster.Views
                 DialogResult = true; // Meddelar framgång 
                 this.Close(); // ...och stänger detta fönster
             };
-            // Påminner programmet om vilken datakontexten är
-            DataContext = recipeDetailVM;
+            //// Påminner programmet om vilken datakontexten är
+            //DataContext = recipeDetailVM;
         }
     }
 }

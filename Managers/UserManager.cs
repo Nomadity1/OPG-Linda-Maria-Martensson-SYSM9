@@ -23,11 +23,10 @@ namespace CookMaster.Managers
         private List<User> _userlist; // Lista över alla användare                                       
         private User? _currentUser; // Variabel för aktuell (inloggad) användare
                                     // Frågetecknet anger att variabeln kan ha null-värde 
-                                    
+
         // PUBLIKA EGENSKAPER 
-        public User? CurrentUser // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
-        { get { return _currentUser; } 
-            set { _currentUser = value;
+        // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
+        public User? CurrentUser { get { return _currentUser; } set { _currentUser = value;
                 OnPropertyChanged(nameof(CurrentUser)); // för att visa vem
                 OnPropertyChanged(nameof(IsAuthenticated)); // för att visa status 
             }
@@ -69,6 +68,13 @@ namespace CookMaster.Managers
                 Country = "Sweden"
             });
         }
+        // METOD för att skapa användare 
+        private void CreateUser(string username, string password, string country)
+        {
+            // Skapar ny användare och tilldelar värden
+            var newUser = new User { UserName = username, Password = password, Country = country };
+            _userlist.Add(newUser);
+        }
 
         // METOD som stänger alla öppna fönster (förutom eventuellt redan öppna RecipeListWindow)
         private void WindowCloser()
@@ -100,11 +106,6 @@ namespace CookMaster.Managers
             // ANNARS dvs användaruppgifter finns i listan OCH lösenordet är rätt: 
             // Tilldelar user till CurrentUser
             CurrentUser = user;
-            //// Anropar fönsterstängare
-            //WindowCloser(); 
-            // Öppna RecipeListWindow 
-            //var recipeListWindow = new RecipeListWindow();
-            //recipeListWindow.Show();
             // Meddelar framgång
             return (true, "Du har loggats in.");
         }
@@ -144,15 +145,9 @@ namespace CookMaster.Managers
                 return (false, "Välj det land du bor i.");
             else
             {
-                // Skapar ny användare och tilldelar värden
-                var user = new User { UserName = username, Password = password, Country = country };
-                _userlist.Add(user);
-
-                //// Anropar fönsterstängare
-                //WindowCloser();
-                //// Insansierar och öppnar inloggningsfönstret igen
-                //var mainWindow = new MainWindow();
-                //mainWindow.Show();
+                // Anropar metod för att skapa användare
+                CreateUser(username, password, country);
+                // Meddelar framgång
                 return (true, messageRegistration);
             }
         }
@@ -163,37 +158,41 @@ namespace CookMaster.Managers
             {
                 return (false, "Ingen användare är inloggad.");
             }
-            bool updateSuccess = false;
-            string messageUpdate = updateSuccess ? "Uppgifter har uppdaterats." : "Uppdatering misslyckades.";
-            // Kontroller för uppdatering
-            if (IsUsernameTaken(username))
-                return (false, "Användarnamnet eller epostadressen är redan registrerad");
+            // Kontroller för uppdatering 
+            if (IsUsernameTaken(username) && !string.Equals(username, CurrentUser.UserName, StringComparison.OrdinalIgnoreCase))
+                return (false, "Användarnamnet är redan registrerat"); 
             if (!IsValidUsername(username))
                 return (false, "Användarnamnet är ogiltigt");
             if (!IsValidPassword(newPassword))
                 return (false, "Lösenordet är ogiltigt");
-            if (newPassword == repeatNewPassword)
+            if (newPassword != repeatNewPassword)
                 return (false, "Lösenorden matchar inte!");
-            // Kontrollera att land valts
-            if (string.IsNullOrWhiteSpace(newCountry))
+            // Kontrollera att land valts samt tillåt att det inte ändras
+            if (string.IsNullOrWhiteSpace(newCountry) && !string.Equals(newCountry, CurrentUser.Country, StringComparison.OrdinalIgnoreCase))
                 return (false, "Välj det land du bor i.");
+
+            // Om användaren ändrar lösenord kallas valideringsmetod
+            var isChangingPassword = !string.Equals(newPassword, CurrentUser.Password, StringComparison.Ordinal);
+            if (isChangingPassword && !IsValidPassword(newPassword))
+                return (false, "Lösenordet är ogiltigt");
 
             // Tar bort gammalt användarobjekt
             var existingUser = _userlist.FirstOrDefault(u => u.UserName.Equals(CurrentUser.UserName, StringComparison.OrdinalIgnoreCase));
             if (existingUser != null)
             {
-                _userlist.Remove(existingUser);
+                existingUser.UserName = username;
+                existingUser.Password = newPassword;
+                existingUser.Country = newCountry;
+
+                // Sätt CurrentUser till den uppdaterade instansen
+                CurrentUser = existingUser;
             }
-            // Skapar ny användare och tilldelar uppdaterade värden
-            var user = new User { UserName = username, Password = newPassword, Country = newCountry };
-            _userlist.Add(user);
-            // Anropar fönsterstängare
-            WindowCloser();
-            //// Instansierar och visar receptlistan igen
-            //var recipeListWindow = new RecipeListWindow();
-            //recipeListWindow.Show();
+            //// Anropar metod för att skapa användare
+            //CreateUser(username, newPassword, newCountry);
+            //// Anropar fönsterstängare
+            //WindowCloser();
             // Meddelar framgång
-            return (true, messageUpdate);
+            return (true, "Dina uppgifter har uppdaterats.");
         }
         // METODER FÖR VALIDERING AV ANVÄNDARUPPGIFTER - NU UPPDELADE FÖR BÄTTRE ÖVERBLICK
         // ANVÄNDS BÅDE FÖR REGISTRERING OCH UPPDATERING 
