@@ -31,7 +31,7 @@ namespace CookMaster.ViewModels
                                                                                          // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
 
         // PRIVATA FÄLT OCH PUBLIKA EGENSKAPER, PUBLIKA KOMMANDON OCH METODKOMMANDON FÖR SORTERING 
-        private string _selectedSort = "Date"; 
+        private string _selectedSort = "Title"; 
         public string SelectedSort
         {
             get => _selectedSort;
@@ -43,7 +43,7 @@ namespace CookMaster.ViewModels
                 RefreshRecipes(); // Uppdaterar receptlistan vid ändring av sortering
             }
         }
-        private bool _sortDescending = true; 
+        private bool _sortDescending = true;
         public bool SortDescending
         {
             get => _sortDescending;
@@ -52,15 +52,8 @@ namespace CookMaster.ViewModels
                 if (_sortDescending == value) return;
                 _sortDescending = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(SortOrderLabel));
                 RefreshRecipes(); // Uppdaterar receptlistan vid ändring av sorteringsordning
             }
-        }
-        public string SortOrderLabel => SortDescending ? "Desc" : "Asc";
-        public RelayCommand ToggleSortOrderCommand => new RelayCommand(ToggleSortOrder);
-        private void ToggleSortOrder(object parameter)
-        {
-            SortDescending = !SortDescending;
         }
 
         // PUBLIKA DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
@@ -79,8 +72,8 @@ namespace CookMaster.ViewModels
             _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
 
             // "Default" sortering 
-            _selectedSort = "Date";
-            _sortDescending = true;
+            _selectedSort = "Title";
+            //_sortDescending = true;
 
             // Prenumererar på eventet i UserManager för att uppdatera CurrentUser när inloggad användare ändras
             _userManager.PropertyChanged += (s, e) =>             
@@ -103,8 +96,6 @@ namespace CookMaster.ViewModels
                 if (!(w is RecipeListWindow))
                     w.Close();
             }
-            //var recipeListWindow = new RecipeListWindow();
-            //recipeListWindow.Show();
         }
         // METOD för att uppdatera receptlistan baserat på inloggad användare
         private void RefreshRecipes()
@@ -118,7 +109,7 @@ namespace CookMaster.ViewModels
             else
                 list = Enumerable.Empty<Recipe>(); // Lägger enum som lista om ingen är inloggad
             
-            // Anropar metod för sorterin g  
+            // Anropar metod för sortering  
             list = ApplySort(list);
 
             Recipes = new ObservableCollection<Recipe>(list); // Lägger till sorterad lista i Recipes

@@ -57,7 +57,7 @@ namespace CookMaster.ViewModels
             set { _error = value; OnPropertyChanged(); }
         }
 
-        // PUBLIKA KOMMANDON för att ändra uppgifter via ICommand in RelayCommandManager
+        // PUBLIKA KOMMANDON för att ändra uppgifter via ICommand i RelayCommandManager
         public RelayCommand SaveUpdatesCommand =>
             new RelayCommand(execute => SaveUpdates(), canExecute => CanSaveUpdates());
         public RelayCommand CancelCommand => new RelayCommand(CancelUserDetails);

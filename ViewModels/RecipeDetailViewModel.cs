@@ -39,9 +39,7 @@ namespace CookMaster.ViewModels
         public bool IsReadOnly { get => _isReadOnly; set { _isReadOnly = value; 
                 OnPropertyChanged();
                 // Tvingar kommandot att stämma av med CanExecute när Edit ändras
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
+                CommandManager.InvalidateRequerySuggested(); } }
 
         // PUBLIKA KOMMANDODEFINOITIONER (via ICommand in RelayCommandManager)
         public RelayCommand EditCommand => new RelayCommand(Edit, _ => _userManager?.CurrentUser != null);
