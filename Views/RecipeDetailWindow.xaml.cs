@@ -31,14 +31,14 @@ namespace CookMaster.Views
             //var recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
 
             // Instansierar och upprättar samarbete med tillhörande ViewModel
-            var recipeDetailVM = new RecipeDetailViewModel(recipe);
+                var recipeDetailVM = new RecipeDetailViewModel(recipe);
             // ...och anger objektet som datakontext
-            DataContext = recipeDetailVM;
-            recipeDetailVM.SaveSuccess += (s, e) =>
-            {
+                DataContext = recipeDetailVM;
+                recipeDetailVM.SaveSuccess += (s, e) =>
+                {
                 DialogResult = true; // Meddelar framgång 
                 this.Close(); // ...och stänger detta fönster
-            };
+                };
             //// Påminner programmet om vilken datakontexten är
             //DataContext = recipeDetailVM;
         }

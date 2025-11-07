@@ -16,12 +16,14 @@ using System.Windows.Input;
 
 namespace CookMaster.ViewModels
 {
+    // REGISTRERINGSFÖNSTER - VIEWMODEL
     public class RegisterViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _newUsername;
         private string _newPassword;
+        private string _newRepeatedPassword; 
         private string _newSelectedCountry;
         private string _error;
 
@@ -35,6 +37,11 @@ namespace CookMaster.ViewModels
                 CommandManager.InvalidateRequerySuggested(); }
         }
 
+        public string NewRepeatedPassword {
+            get => _newRepeatedPassword;
+            set { _newRepeatedPassword = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
+        }
         // Koppla till listan över länder i UserManager så att den ("ItemsSource" i View) 
         public List<string> Countries => _userManager.Countries;
 
@@ -53,6 +60,7 @@ namespace CookMaster.ViewModels
         private bool CanRegister() =>
             !string.IsNullOrWhiteSpace(NewUserName)
             && !string.IsNullOrWhiteSpace(NewPassword)
+            && !string.IsNullOrWhiteSpace(NewRepeatedPassword)
             && !string.IsNullOrWhiteSpace(NewSelectedCountry);
 
         // KONSTRUKTOR som upprättar samarbete med UserManager 
@@ -63,6 +71,7 @@ namespace CookMaster.ViewModels
             // Tilldelar värde/parameter
             _newUsername = string.Empty; // Säkrare hantering av data 
             _newPassword = string.Empty; 
+            _newRepeatedPassword = string.Empty;
             _newSelectedCountry = string.Empty;
             _error = string.Empty;
         }
@@ -71,7 +80,7 @@ namespace CookMaster.ViewModels
         public void Register()
         {
             // Anropar Registrerings-metod i UserManager
-            var (success, message) = _userManager.Register(NewUserName, NewPassword, NewSelectedCountry);
+            var (success, message) = _userManager.Register(NewUserName, NewPassword, NewRepeatedPassword, NewSelectedCountry);
             // Kollar matchning genom att anropa metod i UserManager
             if (success) 
                 RegisterSuccess?.Invoke(this, System.EventArgs.Empty);

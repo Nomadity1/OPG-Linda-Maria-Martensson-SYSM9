@@ -8,7 +8,7 @@
         Title="RecipeDetailWindow" Height="450" Width="800" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
     <Grid>
         <StackPanel>
-            <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="34" />
+            <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="28" />
             <TextBlock Text="Recipe Details" FontSize="22" Margin="40,10,40,0"/>
             <TextBlock Text="Title:" Margin="40,0,40,5"/>
             <TextBox Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadOnly}" Margin="40,0,40,5"/>
@@ -18,9 +18,10 @@
             <TextBox Text="{Binding Instructions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadOnly}" Margin="40,0,40,5"/>
             <TextBlock Text="Category:" Margin="40,0,40,5"/>
             <TextBox Text="{Binding Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadOnly}" Margin="40,0,40,5"/>
-            <TextBlock Text="Date:" Margin="40,0,40,5"/>
-            <TextBox Text="{Binding DateTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadOnly}" Margin="40,0,40,5"/>
+            <TextBlock Text="Cooking time:" Margin="40,0,40,5"/>
+            <TextBox Text="{Binding CookingTime}" Margin="40,0,40,5"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Copy" Command="{Binding CopyCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
                 <Button Content="Edit" Command="{Binding EditCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
                 <Button Content="Save" Command="{Binding SaveCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
                 <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="5" FontSize="12" Width="70" Height="26" />

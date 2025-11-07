@@ -16,6 +16,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.ViewModels
 {
+    // RECEPTDETALJER - VIEWMODEL
     public class RecipeDetailViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
@@ -28,6 +29,7 @@ namespace CookMaster.ViewModels
         public string Title { get => _recipe.Title; set { _recipe.Title = value; OnPropertyChanged(); } }
         public string Ingredients { get => _recipe.Ingredients; set { _recipe.Ingredients = value; OnPropertyChanged(); } }
         public string Instructions { get => _recipe.Instructions; set { _recipe.Instructions = value; OnPropertyChanged(); } }
+        public string CookingTime { get => _recipe.CookingTime; set { _recipe.CookingTime = value; OnPropertyChanged(); } }
         public string Category { get => _recipe.Category; set { _recipe.Category = value; OnPropertyChanged(); } }
         public DateTime Date { get => _recipe.Date; }
         public string CurrentRecipe => _recipeManager.CurrentRecipe?.Title ?? string.Empty; // Visa aktuellt recept
@@ -46,6 +48,7 @@ namespace CookMaster.ViewModels
         // Kan bara redigera om användare är inloggad
         public RelayCommand SaveCommand => new RelayCommand(execute => Save(), canExecute => CanSave());
         public RelayCommand CancelCommand => new RelayCommand(Cancel);
+        public RelayCommand CopyCommand => new RelayCommand(Copy);
 
         // BOOL för att aktivera SPARA-KNAPP
         public bool CanSave() =>
@@ -132,6 +135,14 @@ namespace CookMaster.ViewModels
                 MessageBox.Show("Du kan bara spara ändringar på dina egna recept.");
                 return;
             }
+            // KOllar att alla fält är ifyllda
+            if (!string.IsNullOrWhiteSpace(Title) && !string.IsNullOrWhiteSpace(Ingredients)
+                && !string.IsNullOrWhiteSpace(Instructions) && !string.IsNullOrWhiteSpace(CookingTime)
+                && !string.IsNullOrWhiteSpace(Category))
+            {
+                MessageBox.Show("Alla fält måste vara ifyllda.");
+                return;
+            }
             // ANNARS Anropas metoden i RecipeManager 
             var (success, message) = _recipeManager.UpdateRecipe(_recipe);
             if (success)
@@ -145,10 +156,41 @@ namespace CookMaster.ViewModels
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(Ingredients));
             OnPropertyChanged(nameof(Instructions));
+            OnPropertyChanged(nameof(CookingTime));
             OnPropertyChanged(nameof(Category));
             IsReadOnly = true; // Återgår till read-only
             // Anropar fönsterstängare
             WindowCloser();
+        }
+        private void Copy(object parameter)
+        {
+            // Kontrollera att recept valts
+            if (_recipe == null)
+            {
+                MessageBox.Show("Inget recept valt för att kopiera.");
+                return;
+            }
+            // Kontrollera att användare är inloggad
+            if (_userManager.CurrentUser == null)
+            {
+                MessageBox.Show("Du måste vara inloggad för att kopiera ett recept!");
+                return;
+            }
+            // I SÅ FALL ÖPPNAS AddRecipe-vyn 
+            var addRecipeWindow = new AddRecipeWindow();
+            // och ett tillhörande ViewModel skapas
+            var addRecipeVM = new AddRecipeViewModel();
+            // Visar värden rån det valda receptet
+            addRecipeVM.Title = _recipe.Title;
+            addRecipeVM.Ingredients = _recipe.Ingredients;
+            addRecipeVM.Instructions = _recipe.Instructions;
+            addRecipeVM.CookingTime = _recipe.CookingTime;
+            addRecipeVM.Category = _recipe.Category;
+            // Sätter datakontext
+            addRecipeWindow.DataContext = addRecipeVM;
+            // Tilldelar ägarskap till vyn 
+            addRecipeWindow.Owner = Application.Current.MainWindow;
+            addRecipeWindow.ShowDialog();
         }
 
         // EVENT att "prenumerera" på för relevanta fönster 

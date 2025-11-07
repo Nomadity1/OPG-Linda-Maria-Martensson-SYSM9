@@ -17,6 +17,7 @@ using System.Windows.Media;
 
 namespace CookMaster.ViewModels
 {
+    // ANVÄNDARUPPGIFTER - VIEWMODEL
     public class UserDetailsViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 

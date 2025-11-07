@@ -24,33 +24,37 @@
             <ColumnDefinition Width="0.3*"/>
             <ColumnDefinition Width="0.37*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="30" />
+        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="28" />
         <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Content="Please enter your information:" />
         <!--REGISTRERING - BUNDEN TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Username*" Width="100" />
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Password**" Width="100" />
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Repeat password**" Width="100" />
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Select your country" Width="100" />
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NewUserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" Height="20" 
                  HorizontalAlignment="Left" />
         <PasswordBox Grid.Row="3" Grid.Column="1" x:Name="NewPassWord" 
                      PasswordChanged="NewPassWord_PasswordChanged"  Width="100" Height="20"  
                      HorizontalAlignment="Left" />
+        <PasswordBox Grid.Row="4" Grid.Column="1" x:Name="NewRepeatPassWord" 
+                     PasswordChanged="NewRepeatPassWord_PasswordChanged" Width="100" Height="20"  
+                     HorizontalAlignment="Left" />        
         <ComboBox Grid.Row="6" Grid.Column="1" x:Name="CountryComboBox" ItemsSource="{Binding Countries}"  
                   SelectedItem="{Binding NewSelectedCountry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                   Width="100" Height="20"  HorizontalAlignment="Left" />
         <!--Hjälptexter-->
         <TextBlock Grid.Row="2" Grid.Column="2" 
-                   Text="*) Your username should have 4-8 characters.)" FontSize="10" 
-                   TextWrapping="Wrap" Width="170" />
+                   Text="*) Username 4-8 characters." FontSize="10" 
+                   TextWrapping="Wrap" Width="150" HorizontalAlignment="Left" />
         <TextBlock Grid.Row="3" Grid.RowSpan="2" Grid.Column="2" 
-                   Text="**) Your password should have minimum 8 characters including 1 special character, 1 digit, 1 upper and 1 lowercase letter.)" 
-                   FontSize="10" TextWrapping="Wrap" Width="170" />
+                   Text="**) Password minimum 8 characters including 1 special character, 1 digit, 1 upper and 1 lowercase letter.)" 
+                   FontSize="10" TextWrapping="Wrap" Width="150" HorizontalAlignment="Left" />
         <Button Grid.Row="6" Grid.Column="2" Content="Register" 
                 Command="{Binding RegisterCommand}" 
                 FontSize="12" Width="60" Height="22" Margin="20,0" />
         <!--Felmeddelande-->
         <TextBlock Grid.Row="7" Grid.Column="2" 
-                   Text="{Binding Error}" Foreground="Red" Margin="10" TextWrapping="Wrap" 
+                   Text="{Binding Error}" Foreground="Red" Margin="5" TextWrapping="Wrap" 
                    Width="170" />
     </Grid>
 </Window>

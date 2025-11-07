@@ -24,6 +24,8 @@ namespace CookMaster.Managers
         private User? _currentUser; // Variabel för aktuell (inloggad) användare
                                     // Frågetecknet anger att variabeln kan ha null-värde 
 
+        private User? _forgetfulUser; // för fejkad lösenordsförfrågan
+
         // PUBLIKA EGENSKAPER 
         // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
         public User? CurrentUser { get { return _currentUser; } set { _currentUser = value;
@@ -31,6 +33,7 @@ namespace CookMaster.Managers
                 OnPropertyChanged(nameof(IsAuthenticated)); // för att visa status 
             }
         }
+        public User? ForgetfulUser { get; set; }
         public List<string> Countries { get; set; } = new List<string> { "Sweden", "Norway", "Denmark", "Finland", 
             "New Zeeland", "Germany", "United Kingdom", "Other" }; // Fördefinierade alternativ för land i registrering 
         
@@ -128,11 +131,8 @@ namespace CookMaster.Managers
         }
 
         // METOD för att registrera ny användare
-        public (bool success, string message) Register(string username, string password, string country)
+        public (bool success, string message) Register(string username, string password, string repeatPassword, string country)
         {
-            bool registrationSuccess = false;
-            string messageRegistration = registrationSuccess ? "Registrering lyckades." : "Registrering misslyckades.";
-
             // Kontroller för registrering
             if (IsUsernameTaken(username))
                 return (false, "Användarnamnet är redan registrerat");
@@ -141,6 +141,8 @@ namespace CookMaster.Managers
             if (!IsValidPassword(password))
                 return (false, "Lösenordet är ogiltigt");
             // Kontrollera att land valts
+            if (password != repeatPassword)
+                return (false, "Lösenorden matchar inte!");
             if (string.IsNullOrWhiteSpace(country))
                 return (false, "Välj det land du bor i.");
             else
@@ -148,9 +150,42 @@ namespace CookMaster.Managers
                 // Anropar metod för att skapa användare
                 CreateUser(username, password, country);
                 // Meddelar framgång
-                return (true, messageRegistration);
+                return (true, "Registrering lyckades.");
             }
         }
+        // METOD för att återställa lösenord (förenklad version utan e-post)
+        public (bool success, string message) ForgotPassword(string username)
+        {
+            var user = _userlist.FirstOrDefault(u => u.UserName.Equals(username, StringComparison.OrdinalIgnoreCase));
+            if (user == null)
+            {
+                _forgetfulUser = null;
+                return (false, "Användarnamnet finns inte.");
+            }
+
+            _forgetfulUser = user;
+            // return the "question" text; UI decides how to present it
+            return (true, "Vad är de tre första bokstäverna i alfabetet?");
+        }
+        public (bool success, string message) ValidateReply(string answer)
+        {
+            // Kontrollerar att en återställningsbegäran finns
+            if (_forgetfulUser == null)
+                return (false, "Ingen återställningsbegäran hittades. Ange användarnamn först.");
+
+            // Kontrollerar svaret (fejk)
+            if (string.Equals(answer, "abc", StringComparison.OrdinalIgnoreCase))
+            {
+                var password = _forgetfulUser.Password; // hämtar lösenordet för användarobjektet
+                _forgetfulUser = null;
+                return (true, $"Ditt lösenord är: {password}");
+            }
+            // Återställer användare
+            _forgetfulUser = null;
+            // meddelar fel svar
+            return (false, "Fel svar.");
+        }
+
         // METOD för att uppdatera befintlig användare
         public (bool success, string message) Update(string username, string newPassword, string repeatNewPassword, string newCountry)
         {
@@ -160,7 +195,7 @@ namespace CookMaster.Managers
             }
             // Kontroller för uppdatering 
             if (IsUsernameTaken(username) && !string.Equals(username, CurrentUser.UserName, StringComparison.OrdinalIgnoreCase))
-                return (false, "Användarnamnet är redan registrerat"); 
+                return (false, "Användarnamnet är redan registrerat");
             if (!IsValidUsername(username))
                 return (false, "Användarnamnet är ogiltigt");
             if (!IsValidPassword(newPassword))
@@ -187,10 +222,6 @@ namespace CookMaster.Managers
                 // Sätt CurrentUser till den uppdaterade instansen
                 CurrentUser = existingUser;
             }
-            //// Anropar metod för att skapa användare
-            //CreateUser(username, newPassword, newCountry);
-            //// Anropar fönsterstängare
-            //WindowCloser();
             // Meddelar framgång
             return (true, "Dina uppgifter har uppdaterats.");
         }
@@ -208,7 +239,7 @@ namespace CookMaster.Managers
         private bool IsValidPassword(string password)
         {
             string specialCharacters = "!@#$%^&*()-_=+[{]};:’\"|\\,<.>/?";
-            return password.Length >= 5 && password.Length <= 8 &&
+            return password.Length >= 8 &&
                    password.Any(char.IsUpper) &&
                    password.Any(char.IsLower) &&
                    password.Any(char.IsDigit) &&

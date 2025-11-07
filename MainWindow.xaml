@@ -25,7 +25,7 @@
             <ColumnDefinition Width="0.3*"/>
             <ColumnDefinition Width="0.3*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="34" />
+        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="34" Margin="0,1,0,32" Grid.RowSpan="2" />
         <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Content="Find your way to the kitchen:" />
         <!--LOG IN OCH LOG UT - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Username" Margin="5" />
@@ -36,7 +36,15 @@
         <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Error, Mode=OneWay}" Foreground="Red" Width="160" TextWrapping="Wrap" FontSize="12" />
         <!--TILL REGISTRERING - BUNDEN TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Are you new here?" Margin="5" />
-        <TextBlock Grid.Row="4" Grid.Column="1" Text="Sign up =>" HorizontalAlignment="Center" />
+        <TextBlock Grid.Row="4" Grid.Column="1" Text="Sign up =>" VerticalAlignment="Center" HorizontalAlignment="Center" />
         <Button Grid.Row="4" Grid.Column="2" Content="Sign up" Command="{Binding OpenRegisterCommand}" FontSize="12" Width="60" Height="26" />
-     </Grid>
+        <!--ÅTERSTÄLLA LÖSENORD GENOM EMAIL - BUNDNA TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Forgot your password?" Grid.ColumnSpan="2" Width="160" HorizontalAlignment="Left" Margin="5" />
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Enter username:" TextWrapping="Wrap" Width="160" Margin="5" />
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding UsernamePwdReq, UpdateSourceTrigger=PropertyChanged}" Width="140" Height="26" />
+        <Button Grid.Row="6" Grid.Column="2" Content="Send query" Command="{Binding SendQueryCommand}" FontSize="12" Width="90" Height="26" />
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="Answer:" Width="160" Margin="5" />
+        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}" Width="140" Height="26" />
+        <Button Grid.Row="7" Grid.Column="2" Content="Submit reply" Command="{Binding SubmitReplyCommand}" FontSize="12" Width="90" Height="26" />
+    </Grid> 
 </Window>

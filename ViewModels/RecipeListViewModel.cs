@@ -15,6 +15,8 @@ using System.Windows.Input;
 
 namespace CookMaster.ViewModels
 {
+    // EGENTLIGT HUVUDFÖNSTER - VIEWMODEL
+    // UPPGIFTER: visa inloggad användare, visa receptlista, sök- och filtreringsfunktion, knappar
     public class RecipeListViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
@@ -27,6 +29,40 @@ namespace CookMaster.ViewModels
         public string CurrentUser => _userManager.CurrentUser?.UserName ?? string.Empty; // Visa inloggad användare 
                                                                                          // PUBLIKA EGENSKAPER 
                                                                                          // Det är CurrentUser som ska ändras och ange nya tillstånd (nya objekt) i projektet
+
+        // PRIVATA FÄLT OCH PUBLIKA EGENSKAPER, PUBLIKA KOMMANDON OCH METODKOMMANDON FÖR SORTERING 
+        private string _selectedSort = "Date"; 
+        public string SelectedSort
+        {
+            get => _selectedSort;
+            set
+            {
+                if (_selectedSort == value) return;
+                _selectedSort = value;
+                OnPropertyChanged();
+                RefreshRecipes(); // Uppdaterar receptlistan vid ändring av sortering
+            }
+        }
+        private bool _sortDescending = true; 
+        public bool SortDescending
+        {
+            get => _sortDescending;
+            set
+            {
+                if (_sortDescending == value) return;
+                _sortDescending = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SortOrderLabel));
+                RefreshRecipes(); // Uppdaterar receptlistan vid ändring av sorteringsordning
+            }
+        }
+        public string SortOrderLabel => SortDescending ? "Desc" : "Asc";
+        public RelayCommand ToggleSortOrderCommand => new RelayCommand(ToggleSortOrder);
+        private void ToggleSortOrder(object parameter)
+        {
+            SortDescending = !SortDescending;
+        }
+
         // PUBLIKA DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
         public RelayCommand LogOutCommand => new RelayCommand(LogOut);
         public RelayCommand UserDetailsCommand => new RelayCommand(OpenUserDetails);
@@ -41,6 +77,11 @@ namespace CookMaster.ViewModels
             // Globala managers 
             _userManager = (UserManager)Application.Current.Resources["UserManager"];
             _recipeManager = (RecipeManager)Application.Current.Resources["RecipeManager"];
+
+            // "Default" sortering 
+            _selectedSort = "Date";
+            _sortDescending = true;
+
             // Prenumererar på eventet i UserManager för att uppdatera CurrentUser när inloggad användare ändras
             _userManager.PropertyChanged += (s, e) =>             
             {
@@ -68,15 +109,43 @@ namespace CookMaster.ViewModels
         // METOD för att uppdatera receptlistan baserat på inloggad användare
         private void RefreshRecipes()
         {
+            IEnumerable<Recipe> list; // Lägger till enum för sortering
             var user = _userManager.CurrentUser;
             if (user is AdminUser) // Admin har tillgång till att ändra alla recept
-                Recipes = new ObservableCollection<Recipe>(_recipeManager.GetAllRecipes());
+                list = new ObservableCollection<Recipe>(_recipeManager.GetAllRecipes());
             else if (user != null) // Alla andra användare har tillgång till att ändra sina recept
-                Recipes = new ObservableCollection<Recipe>(_recipeManager.GetUserRecipes(user.UserName));
+                list = new ObservableCollection<Recipe>(_recipeManager.GetUserRecipes(user.UserName));
             else
-                Recipes = new ObservableCollection<Recipe>(); // Alla kan se alla recept
+                list = Enumerable.Empty<Recipe>(); // Lägger enum som lista om ingen är inloggad
+            
+            // Anropar metod för sorterin g  
+            list = ApplySort(list);
+
+            Recipes = new ObservableCollection<Recipe>(list); // Lägger till sorterad lista i Recipes
             OnPropertyChanged(nameof(Recipes));
         }
+        // METOD för att tillämpa sortering på en enum-listan
+        private IEnumerable<Recipe> ApplySort(IEnumerable<Recipe> source)
+        {
+            if (source == null) return Enumerable.Empty<Recipe>();
+
+            IOrderedEnumerable<Recipe> ordered;
+            switch (SelectedSort)
+            {
+                case "Title":
+                    ordered = SortDescending ? source.OrderByDescending(r => r.Title) : source.OrderBy(r => r.Title);
+                    break;
+                case "Category":
+                    ordered = SortDescending ? source.OrderByDescending(r => r.Category) : source.OrderBy(r => r.Category);
+                    break;
+                case "Date":
+                default:
+                    ordered = SortDescending ? source.OrderByDescending(r => r.Date) : source.OrderBy(r => r.Date);
+                    break;
+            }
+            return ordered;
+        }
+
         // METODER för KOMMANDON för att LOGGA UT, ÖPPNA ANVÄNDARDETALJER, LÄGGA TILL och RADERA RECEPT
         // samt ÖPPNA RECEPTDETALJER och VISA INFO
         private void LogOut(object parameter)
@@ -121,7 +190,6 @@ namespace CookMaster.ViewModels
             {
                 var addRecipeWindow = new AddRecipeWindow();
                 addRecipeWindow.ShowDialog();
-                // Efter att fönstret stängts, uppdatera receptlistan
             }
             // Anropar metod för att uppdatera receplistan
             RefreshRecipes(); // BEHÖVER JAG DENNA NÄR DEN FINNS I KONSTRUKTORN? 
@@ -139,9 +207,9 @@ namespace CookMaster.ViewModels
                 MessageBox.Show("Markera ett recept först!");
                 return;
             }
-            // Instansierar och visar receptlist-vyn
+                // Instansierar och visar receptlist-vyn
             var recipeDetailWindow = new RecipeDetailWindow(SelectedRecipe);
-            recipeDetailWindow.ShowDialog();
+                recipeDetailWindow.ShowDialog();
             // Anropar metod för att uppdatera receplistan
             RefreshRecipes(); // BEHÖVER JAG DENNA NÄR DEN FINNS I KONSTRUKTORN? 
         }

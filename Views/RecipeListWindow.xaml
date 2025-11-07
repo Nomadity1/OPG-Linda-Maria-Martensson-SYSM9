@@ -7,24 +7,50 @@
         mc:Ignorable="d"
         Title="RecipeListWindow" Height="450" Width="800" FontFamily="Maiandra GD" FontSize="16" Background="PaleTurquoise">
     <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="34" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!--"Header"-->
+            <RowDefinition Height="Auto"/> <!--"Sub-Header"-->
+            <RowDefinition Height="*"/> <!--"Body"-->
+            <RowDefinition Height="Auto"/> <!--"Footer"-->
+        </Grid.RowDefinitions>
+        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="28" />
         <!-- Titel, inloggad tjomme och knappar upptill -->
         <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Right" >
+            <TextBlock Text="Sort: " VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            <ComboBox SelectedValue="{Binding SelectedSort, Mode=TwoWay}" SelectedValuePath="Content" Width="130" Margin="10,0,10,0" Height="26"  VerticalAlignment="Center" HorizontalAlignment="Right">
+                <ComboBoxItem Content="" />
+                <ComboBoxItem Content="Sort by Title" />
+                <ComboBoxItem Content="Sort by Date" />
+                <ComboBoxItem Content="Sort by Category" />
+            </ComboBox>
+            <Button Content="{Binding SortOrderLabel}" Command="{Binding ToggleSortOrderCommand}" Margin="5,0" Width="50" Height="26" VerticalAlignment="Center"/>
             <TextBlock Text="Current user: " VerticalAlignment="Center" />
             <TextBlock Text="{Binding CurrentUser, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Width="100" Height="26" />
             <Button Content="User" Command="{Binding UserDetailsCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
-            <Button Content="Log Out" Command="{Binding LogOutCommand}" FontSize="12" Width="70" Height="26" />
+            <Button Content="Log Out" Command="{Binding LogOutCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
         </StackPanel>
+        <!-- Överskrifter till receptlistan -->
+        <Grid Grid.Row="1" Margin="5" Height="30" VerticalAlignment="Top" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Recept" Grid.Column="0" />
+            <Label Content="Skapat" Grid.Column="1" />
+        </Grid>
         <!-- Receptlista -->
-        <ListBox ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe}"
-                 DisplayMemberPath="Title" Grid.Row="1" Margin="5" Background="PaleTurquoise" />
+        <ListBox ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe}" Grid.Row="2" Margin="5" Background="PaleTurquoise">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <TextBlock Text="{Binding Title}" FontWeight="Bold" Width="300"/>
+                        <TextBlock Text="{Binding DateString}" HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
         <!-- Knappar nertill -->
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center">
             <TextBlock Text="Manage recipes: " VerticalAlignment="Center" Margin="0,0,5,0"/>
             <Button Content="Add" Command="{Binding AddRecipeCommand}" Margin="5" FontSize="12" Width="70" Height="26" />
             <Button Content="Details" Command="{Binding RecipeDetailsCommand}" Margin="5" FontSize="12" Width="70" Height="26" />

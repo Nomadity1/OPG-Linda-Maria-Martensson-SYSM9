@@ -17,38 +17,38 @@ using System.Windows.Input;
 
 namespace CookMaster.ViewModels
 {
-    //HUVUDSAKLIG VIEWMODEL för HUVUDFÖNSTRET (MainWindow)
-    //UPPGIFTER: visa inloggad användare, visa receptlista, sök- och filtreringsfunktion
+    // INLOGGNINGSFÖNSTER - VIEWMODEL
     public class MainViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
         private readonly UserManager _userManager;
         private string _username;
         private string _password;
+        private string _usernamePwdReq; // För fejkad lösenordsåterställning
+        private string _answer; // För fejkad lösenordsåterställning
         private string _error;
 
         // PUBLIKA EGENSKAPER med  effektiv deklaration 
-        public string UserName
-        { get => _username; set { _username = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-        }
-        public string Password
-        { get => _password; set { _password = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-        }
-        public string Error
-        { get => _error; set { _error = value; OnPropertyChanged(); }
-        }
+        public string UserName { get => _username; set { _username = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+        public string Password { get => _password; set { _password = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+        public string UsernamePwdReq { get => _usernamePwdReq; set { _usernamePwdReq = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+        public string Answer { get => _answer; set { _answer = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); } }
+        public string Error { get => _error; set { _error = value; OnPropertyChanged(); } }
 
         // PUBLIKA METOD-DEFINITIONER FÖR KOMMANDON I LAMBDAUTTRYCK (EFFEKTIV FORM) som använder basklass RelayCommand)
         // FÖR INLOGGNING, REGISTRERING & EVT. LÖSENORDSÅTERSTÄLLNING
         public RelayCommand LogInCommand => new RelayCommand(execute => Login(), canExecute => CanLogin());
         public RelayCommand OpenRegisterCommand => new RelayCommand(OpenRegister);
+        public RelayCommand SendQueryCommand => new RelayCommand(execute => SendQuery(), canExecute => CanSendQuery());
+        public RelayCommand SubmitReplyCommand => new RelayCommand(execute => SubmitReply(), canExecute => CanSubmitReply());
 
         // METODER för att aktivera knappar ( i de fall när jag vill att de är inaktiva tills uppgifter fyllts i )
         private bool CanLogin() =>
             !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password); // Här kontrolleras att inmatning skett
+        private bool CanSendQuery() => !string.IsNullOrWhiteSpace(UsernamePwdReq);
+        private bool CanSubmitReply() => !string.IsNullOrWhiteSpace(Answer);
 
-
-        // KONSTRUKTOR som upprättar samarbete med UserManager resp RecipeManager
+        // KONSTRUKTOR som upprättar samarbete med UserManager 
         public MainViewModel()
         {
             _userManager = (UserManager)Application.Current.Resources["UserManager"];
@@ -66,6 +66,37 @@ namespace CookMaster.ViewModels
             //Fönster stängs och öppnas i* VM.xaml.cs
         }
 
+        // Metod för att skicka säkerhetsfråga
+        public void SendQuery()
+        {
+            // Kollar att användarnamn är ifyllt
+            if (string.IsNullOrWhiteSpace(UsernamePwdReq))
+            {
+                MessageBox.Show("Användarnamn måste fyllas i.");
+                return;
+            }
+            // Anropar metod i UserManager och tar emot returvärden
+            var (success, message) = _userManager.ForgotPassword(UsernamePwdReq);
+            if (success)
+                MessageBox.Show(message); // Meddelande frpn usermanager
+            else
+                Error = message; // meddelande från usermanager
+        }
+        public void SubmitReply()
+        {
+            // Kollar att svar på säkerhetsfråga är ifyllt
+            if (string.IsNullOrWhiteSpace(Answer))
+            {
+                MessageBox.Show("Svar på säkerhetsfråga måste fyllas i.");
+                return;
+            }
+            // Anropar metod i UserManager och tar emot returvärden
+            var (success, message) = _userManager.ValidateReply(Answer);
+            if (success)
+                MessageBox.Show(message); // meddelande från usermanager
+            else
+                Error = message; // meddelande från usermanager
+        }
         // METOD för kommando att öppna registrering
         public void OpenRegister(object parameter) // Ingen inmatning krävs, tar bara emot objekt-parameter från knapp
         {

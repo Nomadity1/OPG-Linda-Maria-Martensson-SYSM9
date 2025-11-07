@@ -15,6 +15,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CookMaster.ViewModels
 {
+    // LÄGG TILL RECEPT - VIEWMODEL
     public class AddRecipeViewModel : INotifyPropertyChanged // Implementerar interface för att möjliggöra "data binding"
     {
         // PRIVATA FÄLT 
@@ -23,6 +24,7 @@ namespace CookMaster.ViewModels
         private string _title;
         private string _ingredients;
         private string _instructions;
+        public string _cookingTime;
         private string _category;
         private string _error;
 
@@ -37,6 +39,10 @@ namespace CookMaster.ViewModels
         }
         public string Instructions { get => _instructions;
             set { _instructions = value; OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested(); }
+        }
+        public string CookingTime { get => _cookingTime;
+            set { _cookingTime = value; OnPropertyChanged();
                 CommandManager.InvalidateRequerySuggested(); }
         }
         public string Category { get => _category;
@@ -56,6 +62,7 @@ namespace CookMaster.ViewModels
            !string.IsNullOrWhiteSpace(Title)
            && !string.IsNullOrWhiteSpace(Ingredients)
            && !string.IsNullOrWhiteSpace(Instructions)
+           && !string.IsNullOrWhiteSpace(CookingTime)
            && !string.IsNullOrWhiteSpace(Category);
 
         // KONSTRUKTOR som upprättar samarbete med RecipeManager och User
@@ -68,6 +75,7 @@ namespace CookMaster.ViewModels
             _title = string.Empty;
             _ingredients = string.Empty;
             _instructions = string.Empty;
+            _cookingTime = string.Empty;
             _category = string.Empty; 
             _error = string.Empty;
         }
@@ -96,9 +104,17 @@ namespace CookMaster.ViewModels
                 MessageBox.Show("Titeln är upptagen.");
                 return;
             }
+            // KOllar att alla fält är ifyllda
+            if (!string.IsNullOrWhiteSpace(Title) && !string.IsNullOrWhiteSpace(Ingredients)
+                && !string.IsNullOrWhiteSpace(Instructions) && !string.IsNullOrWhiteSpace(CookingTime)
+                && !string.IsNullOrWhiteSpace(Category))
+            {
+                MessageBox.Show("Alla fält måste vara ifyllda.");
+                return;
+            }
             // Anropar metod i RecipeManager med owner från UserManager
             var owner = _userManager.CurrentUser.UserName;
-            var (success, message) = _recipeManager.AddRecipe(Title, Ingredients, Instructions, Category, owner);
+            var (success, message) = _recipeManager.AddRecipe(Title, Ingredients, Instructions, CookingTime, Category, owner);
             if (!success) 
             {
                 SaveSuccess?.Invoke(this, System.EventArgs.Empty);
@@ -108,7 +124,6 @@ namespace CookMaster.ViewModels
             MessageBox.Show("Recept sparat!");
             // Anropar fönsterstängare
             WindowCloser();
-
         }
         private void Cancel(object parameter) // Object parameter för RelayCommand 
         {

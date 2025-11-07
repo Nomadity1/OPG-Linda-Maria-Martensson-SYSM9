@@ -53,5 +53,13 @@ namespace CookMaster.Views
                 registerVW.NewPassword = NewPassWord.Password;
             }
         }
+
+        private void NewRepeatPassWord_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is RegisterViewModel registerVW)
+            {
+                registerVW.NewRepeatedPassword = NewRepeatPassWord.Password;
+            }
+        }
     }
 }

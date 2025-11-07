@@ -19,7 +19,6 @@ namespace CookMaster.Managers
         // PUBLIKA EGENSKAPER för recepthanteraren med specifika listor beroende på användare
         public List<Recipe> GetAllRecipes() => _recipelist;
         public List<Recipe> GetUserRecipes(string username) => _recipelist.Where(recipes => recipes.Owner == username).ToList();
-        public Recipe? Recipe { get => _currentRecipe; set { _currentRecipe = value; OnPropertyChanged(); } }
 
         // Det är CurrentRecipe som ska ändras och ange nya tillstånd (nya objekt) i projektet
         public Recipe? CurrentRecipe { get { return _currentRecipe; }
@@ -50,6 +49,7 @@ namespace CookMaster.Managers
                 "Smaklösa Saras soppa",
                 "Soppa på burk",
                 "Öppna och värm",
+                "1 h",
                 "Soppa",
                 "admin")
             { Date = DateTime.Now }
@@ -59,6 +59,7 @@ namespace CookMaster.Managers
                 "Kalas-Kalles kolakakor",
                 "Smör, socker, sirap, mjöl",
                 "Blanda, forma, grädda",
+                "30 min", 
                 "Fika",
                 "user")
             { Date = DateTime.Now }
@@ -68,6 +69,7 @@ namespace CookMaster.Managers
                 "Gulliga och gröna grodlår",
                 "Grodlår, gullighet, grön färg",
                 "Blanda allt",
+                "10 min",
                 "Förrätt",
                 "user")
             { Date = DateTime.Now }
@@ -75,10 +77,10 @@ namespace CookMaster.Managers
         }
 
         // METODER för recepthanteraren (LÄGG TILL/SKAPA, ÄNDRA, TA BORT)
-        public (bool success, string message) AddRecipe(string title, string ingredients, string instructions, string category, string owner)
+        public (bool success, string message) AddRecipe(string title, string ingredients, string instructions, string cookingTime, string category, string owner)
         {
             // Skapar nytt receptobjekt och lägger till i listan
-            var recipe = new Recipe(title, ingredients, instructions, category, owner) {Date = DateTime.Now };
+            var recipe = new Recipe(title, ingredients, instructions, cookingTime, category, owner) {Date = DateTime.Now };
             _recipelist.Add(recipe);
             return (true, "Receptet har sparats.");
         }
@@ -96,12 +98,14 @@ namespace CookMaster.Managers
                 existing.Title = recipe.Title;
                 existing.Ingredients = recipe.Ingredients;
                 existing.Instructions = recipe.Instructions;
+                existing.CookingTime = recipe.CookingTime;
                 existing.Category = recipe.Category;
                 existing.Date = DateTime.Now;
 
                 // Meddelar till bindningarna att ändringar gjorts
                 OnPropertyChanged(nameof(GetAllRecipes));
                 OnPropertyChanged(nameof(Recipe));
+                OnPropertyChanged(nameof(CurrentRecipe)); 
                 return (true, "Receptet har uppdaterats.");
             }
             // Alternativplan "FALL BACK" om recept inte hittas mha titeln - TIPS FRÅN GITHUB COPILOT
@@ -111,10 +115,12 @@ namespace CookMaster.Managers
                 fallback.Title = recipe.Title;
                 fallback.Ingredients = recipe.Ingredients;
                 fallback.Instructions = recipe.Instructions;
+                fallback.CookingTime = recipe.CookingTime;
                 fallback.Category = recipe.Category;
                 fallback.Date = DateTime.Now;
                 OnPropertyChanged(nameof(GetAllRecipes));
                 OnPropertyChanged(nameof(Recipe));
+                OnPropertyChanged(nameof(CurrentRecipe));
                 return (true, "Receptet har uppdaterats (fallback match).");
             }
             return (false, "Kunde inte hitta receptet att uppdatera.");

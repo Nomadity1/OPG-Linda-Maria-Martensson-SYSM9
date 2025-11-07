@@ -24,7 +24,7 @@
             <ColumnDefinition Width="0.3*"/>
             <ColumnDefinition Width="0.37*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="30" />
+        <Label Grid.Column="0" Grid.ColumnSpan="3" Content="Cook Master" FontSize="28" />
         <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Content="Change your user details:" />
         <!--ÄNDRA UPPGIFTER - BUNDEN TILL KOMMANDON DIREKT VIA DATAKONTEXT-->
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Username*" Width="100" />
